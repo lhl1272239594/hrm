@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.MenuDictDao">
+    <select id="get" resultType="MenuDict">
+        SELECT
+        *
+        FROM menu_dict a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="MenuDict">
+        SELECT
+        *
+        FROM menu_dict a
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findByName" resultType="MenuDict">
+        SELECT
+        *
+        FROM menu_dict a
+        WHERE
+            a.del_flag = '0'
+            AND a.menu_name like '%'||#{q}||'%'
+            AND a.href is not null
+    </select>
+
+    <select id="findByPersonId" resultType="MenuDict">
+        select M.menu_name,M.href,n.menu_id as id from menu_dict M, (SELECT
+           D.id as serviceId,
+           D.menu_id,
+           E.menu_name,
+           E.href
+        FROM   ORG_SELF_SERVICE_LIST A,
+           STAFF_VS_ROLE         B,
+           ORG_STAFF             C,
+           ORG_ROLE_VS_SERVICE   D,
+           menu_dict E
+           ,org_role F
+        WHERE A.ORG_ID = C.ORG_ID
+           AND B.STAFF_ID = C.ID
+           AND D.SERVICE_ID = A.ID
+           AND B.ROLE_ID = D.ROLE_ID
+           and E.id =D.menu_id
+           and E.href is not null
+           and D.ROLE_ID=F.id
+           and D.Menu_Operate='1'
+           AND E.del_flag='0'
+           AND C.PERSION_ID = #{personId}
+           AND a.org_id = #{orgId}
+        group by
+        D.id,
+           D.menu_id,
+           E.menu_name,
+           E.href ) N
+           where M.id=N.menu_id(+)
+           AND M.del_flag='0'
+           and n.menu_id is null
+           and M.href is not null
+        order by menu_name
+    </select>
+
+
+    <select id="findAllList" resultType="MenuDict">
+        SELECT
+        *
+        FROM menu_dict a   WHERE a.del_flag = '0' order by a.pid,a.sort
+    </select>
+
+    <insert id="insert">
+        INSERT INTO menu_dict(
+        id,
+        menu_name,
+        href,
+        icon,
+        sort,
+        target,
+        pid,
+        menu_level,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{menuName},
+        #{href},
+        #{icon},
+        #{sort},
+        #{target},
+        #{pid},
+        #{menuLevel},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <insert id="insertReturnObject"  >
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE" >
+            select sys_guid() as id from dual
+        </selectKey>
+        INSERT INTO menu_dict(
+        id,
+        menu_name,
+        href,
+        icon,
+        sort,
+        target,
+        pid,
+        menu_level,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{menuName},
+        #{href},
+        #{icon},
+        #{sort},
+        #{target},
+        #{pid},
+        #{menuLevel},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE menu_dict SET
+        menu_name = #{menuName},
+        href = #{href},
+        icon = #{icon},
+        sort = #{sort},
+        target = #{target},
+        pid = #{pid},
+        menu_level = #{menuLevel},
+        remarks = #{remarks},
+        update_by = #{updateBy},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateReturnObject" keyProperty="id" >
+        UPDATE menu_dict SET
+        menu_name = #{menuName},
+        href = #{href},
+        icon = #{icon},
+        sort = #{sort},
+        target = #{target},
+        pid = #{pid},
+        menu_level = #{menuLevel},
+        remarks = #{remarks},
+        update_by = #{updateBy},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+		UPDATE menu_dict SET
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+</mapper>

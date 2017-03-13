@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.DeptStandardDao">
+	<!--查询模板分类-->
+	<select id="getMouldType" resultType="Mould">
+		select id as id,
+		pname as pname
+		from evaluation_mould t
+		where t.mould_type = '1'
+		order by CREATE_DATE desc
+	</select>
+	<!--查询模板名称-->
+	<select id="getMouldName" resultType="Mould">
+		select id as id,
+			name as name
+			from evaluation_mould t
+			where t.mould_type = '2'
+			and t.pid=#{id}
+			order by CREATE_DATE desc
+	</select>
+	<!--查询标准-->
+	<select id="findListByid" resultType="StandardVo">
+		select
+		a.DEPT_ID as depId,
+		a.EVALUATION_PROJECT_CODE   as pcode,
+		EVALUATION_STANDARD_NAME    as name,
+		a.EVALUATION_STANDARD_CODE  as id,
+		(select EVALUATION_PROJECT_NAME from EVALUATION_PROJECT t
+		where t.ID=a.EVALUATION_PROJECT_CODE
+		) as pname,
+		a.EVALUATION_PROJECT_SCODE   as scode,
+		(select EVALUATION_PROJECT_NAME from EVALUATION_PROJECT p
+		where p.ID=a.EVALUATION_PROJECT_SCODE
+		) as sname,
+		a.SCORE                     as score,
+		a.KPI     					as kpi,
+		a.CREATE_DATE               as createDate,
+		a.CREATE_BY                 as createBy,
+		a.CREATE_ORG                as orgId
+		from EVALUATION_DEPT_STANDARD a
+		where  a.DEPT_ID=#{id}
+		order by a.EVALUATION_PROJECT_CODE,a.EVALUATION_PROJECT_SCODE
+	</select>
+    <!--根据科室查询标准-->
+    <select id="standardByProject" resultType="StandardVo">
+        select a.ID                 as id,
+        (select p.parent_id from evaluation_project p
+        where p.id=a.EVALUATION_PROJECT_CODE) as pcode,
+        a.EVALUATION_PROJECT_CODE   as scode,
+        (select EVALUATION_PROJECT_NAME from evaluation_project b
+        where b.id=((select p.parent_id from evaluation_project p
+        where p.id=a.EVALUATION_PROJECT_CODE))) as pname,
+        a.EVALUATION_STANDARD_NAME  as name,
+        (select EVALUATION_PROJECT_NAME from EVALUATION_PROJECT t
+        where t.create_org = #{orgId}
+        and t.ID=a.EVALUATION_PROJECT_CODE
+        ) as sname,
+        a.SCORE                     as score,
+        a.KPI     					as kpi,
+        a.CREATE_DATE               as createDate,
+        a.CREATE_BY                 as createBy,
+        a.STATE                     as state,
+        a.DEL_FLAG                  as delFlag,
+        a.CREATE_ORG                as orgId,
+        a.CREATE_DEPT               as depId,
+        a.CREATE_ROLE				as roleId
+        from EVALUATION_STANDARD a
+        where a.create_org = #{orgId}  and del_flag='0'
+        and a.state='1'
+        and a.EVALUATION_PROJECT_CODE=#{pcode}
+        and a.id in (select t.standard_id from STANDARD_PERSON t
+        where  t.CREATE_ORG=#{orgId})
+        and a.id not in (select t.evaluation_standard_code from EVALUATION_DEPT_STANDARD t where t.DEPT_ID=#{templetId})
+        order by a.CREATE_DATE desc
+    </select>
+	<insert id="importMould" parameterType="String">
+		insert into EVALUATION_DEPT_STANDARD
+		select
+		sys_guid(),
+		#{deptId},
+		evaluation_standard_code,
+		(select EVALUATION_STANDARD_NAME
+		from EVALUATION_STANDARD s
+		where  s.id = t.evaluation_standard_code),
+		(select score
+		from EVALUATION_STANDARD s
+		where  s.id = t.evaluation_standard_code),
+		create_by,
+		create_date,
+		sort,
+		(select create_org
+		from EVALUATION_STANDARD s
+		where  s.id = t.evaluation_standard_code),
+		evaluation_project_code,
+		evaluation_project_scode,
+		(select kpi
+		from EVALUATION_STANDARD s
+		where  s.id = t.evaluation_standard_code)
+		from EVALUATION_MODEL_STANDARD t
+		where t.evaluation_model_id = #{id}
+	</insert>
+	<!--保存考评标准-->
+	<insert id="saveStandard" parameterType="StandardVo">
+		INSERT INTO EVALUATION_DEPT_STANDARD(
+		ID,
+		DEPT_ID,
+		EVALUATION_STANDARD_CODE,
+		EVALUATION_STANDARD_NAME,
+		EVALUATION_PROJECT_SCODE,
+		EVALUATION_PROJECT_CODE,
+		SCORE,
+		CREATE_BY,
+		CREATE_DATE,
+		KPI,
+		CREATE_ORG
+		) VALUES (
+		sys_guid(),
+		#{StandardVo.templetId},
+		#{StandardVo.code},
+		#{StandardVo.name},
+		#{StandardVo.scode},
+		(select p.parent_id from evaluation_project p where p.id=#{StandardVo.scode}),
+		#{StandardVo.score},
+		#{StandardVo.createBy},
+		sysdate,
+		#{StandardVo.kpi},
+		#{StandardVo.orgId}
+		)
+	</insert>
+	<update id="editStandard" parameterType="String" >
+		UPDATE EVALUATION_DEPT_STANDARD SET
+		EVALUATION_STANDARD_NAME=#{StandardVo.name},
+		SCORE=#{StandardVo.score},
+		KPI=#{StandardVo.kpi}
+		WHERE   EVALUATION_STANDARD_CODE=#{StandardVo.id} and DEPT_ID=#{StandardVo.depId}
+	</update>
+    <delete id="delStandard" parameterType="String">
+        delete EVALUATION_DEPT_STANDARD t
+        where
+        t.DEPT_ID=#{deptId}
+        <if test="id!=null and id !=''">
+            and t.EVALUATION_STANDARD_CODE=#{id}
+        </if>
+    </delete>
+</mapper>

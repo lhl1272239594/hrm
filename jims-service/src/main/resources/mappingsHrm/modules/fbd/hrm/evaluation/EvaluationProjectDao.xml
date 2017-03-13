@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.EvaluationProjectDao">
+	<!--查询一级项目-->
+	<select id="firstLevelList" resultType="ProjectVo">
+		select a.id as id,
+		a.parent_id as parentId,
+		a.evaluation_project_name as name,
+		(select  to_char(nvl(sum(s.score),0),'fm9999999990.0') from evaluation_standard s
+		where s.evaluation_project_code in
+		(select p.id from EVALUATION_PROJECT p where p.parent_id=a.id)) as score,
+		a.evaluation_method_id as methodId,
+		a.create_date as createDate,
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.state as state,
+		a.del_flag as delFlag,
+		a.create_org as orgId,
+		a.dept_id as depId,
+		(select d.dept_name from DEPT_DICT d where d.id=a.dept_id) as depName
+		from EVALUATION_PROJECT a
+		where a.create_org = #{orgId} and a.type='1' and del_flag='0'
+
+		<if test="methodId != null and methodId != ''">
+			and a.evaluation_method_id=#{methodId}
+		</if>
+		<if test="name != null and name != ''">
+			and a.name  LIKE CONCAT(CONCAT('%', #{name}),'%')
+		</if>
+		order by create_date desc
+	</select>
+	<!--查询二级项目-->
+	<select id="secondLevelList" resultType="ProjectVo">
+		select a.id as id,
+		a.parent_id as parentId,
+		a.evaluation_project_name as name,
+		(select to_char(sum(nvl(s.score,0)),'fm9999999990.0') from evaluation_standard s where s.evaluation_project_code=a.id) as score,
+		a.evaluation_method_id as methodId,
+		a.create_date as createDate,
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.state as state,
+		a.del_flag as delFlag,
+		a.create_org as orgId,
+		a.dept_id as depId,
+		(select d.dept_name from DEPT_DICT d where d.id=a.dept_id) as depName
+		from EVALUATION_PROJECT a
+		where a.create_org = #{orgId} and a.type='2' and del_flag='0'
+		and a.parent_id=#{parentId}
+		order by create_date  desc
+	</select>
+
+	<!--查询项目名称是否重复-->
+	<select id="getName" resultType="Integer">
+		select count(*)
+		from EVALUATION_PROJECT p
+		where p.create_org = #{orgId} and p.del_flag='0'
+		<if test="lx== 1">
+			and p.evaluation_project_name =#{name}
+			and p.type = '1'
+		</if>
+		<if test="lx== 2">
+			and p.evaluation_project_name =#{name}
+			and p.parent_id =#{parentId}
+			and p.type = '2'
+		</if>
+		<if test="id!=null and id !=''">
+			and p.id!=#{id}
+		</if>
+	</select>
+	<!--查询考评类型名称是否重复-->
+	<select id="getTypeName" resultType="Integer">
+		select count(*)
+		from EVALUATION_TYPE t
+		where t.create_org =#{orgId}
+		and t.del_flag='0'
+		and t.type_name =#{typeName}
+		<if test="id!=null and id !=''">
+			and t.id!=#{id}
+		</if>
+	</select>
+	<!--获取一级项目-->
+	<select id="getProject" resultType="ProjectVo">
+		select id as id from EVALUATION_PROJECT t where t.parent_id=#{id}
+	</select>
+	<!--查看考评类型是否被占用-->
+	<select id="checkProIsUsed" resultType="Integer">
+		select count(*) from evaluation_standard s
+		where s.evaluation_project_code=#{id} and s.del_flag='0'
+	</select>
+	<!--查看考评类型分类是否存在-->
+	<select id="getTypeIsExist" resultType="Integer">
+		select count(*) from EVALUATION_TYPE t
+		where t.type=#{type} and t.del_flag='0' and t.id!=#{id}
+	</select>
+	<!--查看考评类型是否被占用-->
+	<select id="checkTypeIsUsed" resultType="Integer">
+		select count(*) from evaluation_model m
+		where m.evaluation_type_id=#{id} and m.del_flag='0'
+	</select>
+	<select id="evaluationType" resultType="EvaluationType">
+		select
+		a.id AS id,
+		a.TYPE_NAME AS typeName,
+		a.CREATE_ORG AS orgId,
+		a.STATE AS state,
+		a.type as type,
+		a.DEL_FLAG AS delFlag,
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.CREATE_DATE AS "createDate",
+		(select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+		a.UPDATE_DATE AS updateDate
+		FROM EVALUATION_TYPE a
+		where
+			a.DEL_FLAG ='0'
+			and a.CREATE_ORG=#{orgId}
+
+		ORDER BY a.CREATE_DATE DESC
+	</select>
+	<insert id="insertProject" parameterType="ProjectVo">
+		INSERT INTO EVALUATION_PROJECT(
+		ID,
+		PARENT_ID,
+		EVALUATION_PROJECT_NAME,
+		SCORE,
+		EVALUATION_METHOD_ID,
+		CREATE_BY,
+		CREATE_DATE,
+		STATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		TYPE,
+		DEL_FLAG,
+		DEPT_ID
+		) VALUES (
+		#{ProjectVo.id},
+		#{ProjectVo.parentId},
+		#{ProjectVo.name},
+		#{ProjectVo.score},
+		#{ProjectVo.methodId},
+		#{ProjectVo.createBy},
+		sysdate,
+		'1',
+		#{ProjectVo.orgId},
+		#{ProjectVo.createDept},
+		#{ProjectVo.lx},
+		'0',
+		#{ProjectVo.depId}
+		)
+	</insert>
+	<insert id="insertType" parameterType="EvaluationType">
+		INSERT INTO EVALUATION_TYPE(
+		ID,
+		TYPE_NAME,
+		STATE,
+		TYPE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{id},
+		#{typeName},
+		'1',
+		'3',
+		#{createBy},
+		sysdate,
+		#{orgId},
+		#{createDept},
+		'0'
+		)
+	</insert>
+	<update id="updateProject" parameterType="ProjectVo" >
+		UPDATE EVALUATION_PROJECT SET
+		EVALUATION_PROJECT_NAME=#{name},
+		EVALUATION_METHOD_ID=#{methodId},
+		DEPT_ID=#{depId}
+		WHERE   ID=#{id}
+	</update>
+	<update id="updateType" parameterType="EvaluationType" >
+		UPDATE EVALUATION_TYPE SET
+		TYPE_NAME=#{typeName},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE   ID=#{id}
+	</update>
+	<update id="typeStatus" parameterType="EvaluationType" >
+		UPDATE EVALUATION_TYPE SET
+		STATE = #{state},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE ID = #{id}
+	</update>
+	<update id="type" parameterType="EvaluationType" >
+		UPDATE EVALUATION_TYPE SET
+			type=#{type},
+			UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE   ID=#{id}
+	</update>
+	<update id="delType" parameterType="EvaluationType" >
+		UPDATE EVALUATION_TYPE SET
+			DEL_FLAG='1',
+			UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE   ID=#{id}
+	</update>
+	<update id="delProject" parameterType="ProjectVo" >
+		UPDATE EVALUATION_PROJECT SET
+			DEL_FLAG='1'
+		WHERE   ID=#{id}
+	</update>
+	<update id="delAllProject" parameterType="ProjectVo" >
+		UPDATE EVALUATION_PROJECT SET
+		DEL_FLAG='1'
+		WHERE PARENT_ID=#{id} or ID=#{id}
+		 and CREATE_ORG=#{orgId}
+	</update>
+	<update id="editProject" parameterType="ProjectVo" >
+		UPDATE EVALUATION_PROJECT SET
+		<if test="type=='ok'">
+			STATE='1'
+		</if>
+		<if test="type=='no'">
+			STATE='0'
+		</if>
+		WHERE 1=1
+
+		<if test="type=='ok'">
+				and ID=#{id}
+		</if>
+		<if test="type=='no'">
+				and ID=#{id}
+		</if>
+	</update>
+	<update id="editAllProject" parameterType="ProjectVo" >
+		UPDATE EVALUATION_PROJECT SET
+		<if test="type=='ok'">
+			STATE='1'
+		</if>
+		<if test="type=='no'">
+			STATE='0'
+		</if>
+		WHERE 1=1
+
+		<if test="type=='ok'">
+			and PARENT_ID=#{id}
+		</if>
+		<if test="type=='no'">
+			and PARENT_ID=#{id}
+		</if>
+	</update>
+</mapper>

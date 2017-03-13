@@ -1,0 +1,133 @@
+body
+{
+	margin:0;
+	padding:0;
+	font-size:14px;
+	background:url(../images/login/bodybg.jpg);
+}
+img
+{
+	border:none;
+}
+ul
+{
+	margin:0px;
+	padding:0px;
+	list-style:none;
+}
+.fd-left
+{
+	float:left;
+}
+.fd-right
+{
+	float:right;
+}
+
+.paddb-10
+{
+	padding-bottom:10px;
+}
+.login-wrap
+{
+	position:absolute;
+	top:50%;
+	left:50%;
+	
+}
+.login-inp
+{
+	width:355px;
+	height:308px;
+	background:url(../images/login/bg.png) no-repeat;
+	margin-left:-190px;
+	margin-top:-240px;
+	padding-top:145px;
+	padding-left:37px;
+	padding-right:30px;
+
+}
+.login-inp ul li
+{
+	margin-bottom:15px;
+}
+.reg-inp ul li
+{
+	margin-bottom:10px;
+}
+.login-inp ul li:first-child
+{
+	color:#f00;
+}
+.inptext
+{
+	border:1px solid #ccc;
+	background:#fff;
+	box-shadow:1px 5px 5px #eee inset;
+	border-radius:5px;	
+	height:32px;	
+	padding-left:10px;
+}
+.l-inptext
+{
+	width:335px;
+}
+.s-inptext
+{
+	width:230px;
+}
+.lr-btn
+{
+	
+	width:355px;
+	height:47px;
+	border:none;
+	cursor:pointer;
+}
+.login-btn
+{
+	background:url(../images/login/login-btn.png) no-repeat;
+}
+/**注册页面**/
+.reg-inp
+{
+	background:url(../images/login/reg-bg.png) no-repeat;
+	width:838px;
+	height:454px;
+	margin-left:-420px;
+	margin-top:-240px;
+	padding-top:90px;
+	padding-left:30px;
+
+}
+.regl-text
+{
+	width:420px;
+	
+}
+.regl-text ul li
+{
+	position:relative;
+}
+.regl-text ul li span
+{
+	position:absolute;
+	top:0;
+	right:80px;
+	line-height:40px;
+}
+
+.reg-btn
+{
+	background:url(../images/login/reg-btn.png) no-repeat;
+}
+.regl-server
+{
+	line-height:25px;
+	color:#8f8f8f;
+}
+.regl-server a
+{
+	color:#00a2ff;
+}
+/**注册页面结束**/

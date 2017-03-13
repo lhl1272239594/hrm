@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.FrequencyRecordDao">
+
+    <select id="findHeadList" resultType="FrequencyRecord">
+        select BB.freRecordHeadId,
+        BB.personName,
+        BB.freRuleDes,
+        BB.startDate,
+        BB.endDate,
+        BB.sumDays,
+        BB.createBy,
+        BB.createDate,
+        BB.createDept,
+        BB.createDeptname
+        from(select AA.freRecordHeadId as freRecordHeadId,
+        wmsys.wm_concat(AA.personName) as personName,
+        AA.freRuleDes as freRuleDes,
+        AA.startDate as startDate,
+        AA.endDate as endDate,
+        AA.sumDays as sumDays,
+        AA.createBy as createBy,
+        min(AA.createDate) as createDate,
+        AA.createDept as createDept,
+        AA.createDeptname AS createDeptname
+        from (select t.frequency_id as freRecordHeadId,
+        t.user_id as "userId",
+        (select NAME
+        from PERSION_INFO A
+        where A.ID = t.user_id
+        and rownum = 1) AS personName,
+        fr.frequency_rule_description as freRuleDes,
+        to_char(min(t.frequency_date), 'YYYY-MM-DD') as startDate,
+        to_char(max(t.frequency_date), 'YYYY-MM-DD') as endDate,
+        count(frequency_date) as sumDays,
+        t.create_dept as createDept,
+        (select DEPT_NAME
+        from DEPT_DICT a
+        where a.ID = t.create_dept
+        and rownum = 1) AS createDeptname,
+        (select NAME
+        from PERSION_INFO a
+        where a.ID = t.CREATE_BY
+        and rownum = 1) AS createBy,
+        to_timestamp(to_char(t.CREATE_DATE, 'yyyy-mm-dd'),'yyyy-mm-dd hh24:mi:ss:ff') AS createDate
+        from frequency_record t, frequency_rule fr
+        where t.del_flag = '0'
+        and fr.del_flag = '0'
+        and t.create_org = #{orgId}
+        and t.frequency_rule_id = fr.frequency_rule_id
+        and t.create_org = fr.create_org
+
+        <if test="userId != null and userId != ''">
+            and t.user_id in (select t.id from PERSION_INFO t where t.name LIKE CONCAT(CONCAT('%',
+            #{userId}),'%'))
+        </if>
+
+        <if test="freTimeMonth != null and freTimeMonth != ''">
+            and to_char(t.frequency_date,'YYYY-MM')=#{freTimeMonth}
+        </if>
+        group by t.frequency_id,
+        t.user_id,
+        t.create_by,
+        to_timestamp(to_char(t.CREATE_DATE, 'yyyy-mm-dd'),'yyyy-mm-dd hh24:mi:ss:ff'),
+        t.create_dept,
+        t.frequency_rule_id,
+        fr.frequency_rule_description order by to_char(min(t.CREATE_DATE), 'yyyy-MM-dd') desc) AA
+        where 1 = 1 group by AA.freRecordHeadId,AA.freRuleDes,AA.startDate,AA.endDate,AA.sumDays,AA.createBy,AA.createDept,AA.createDeptname)BB order by  BB.createDate desc,BB.startDate desc
+
+
+    </select>
+   <!-- and extract(month from t.frequency_date) =
+    extract(month from sysdate) 只看当月的排班
+    -->
+    <select id="findAllList" resultType="FrequencyRecord">
+        select
+        t.user_id as userId,
+        (select NAME
+        from PERSION_INFO A
+        where A.ID = t.user_id
+        and rownum = 1) AS personName,
+        t.dept_id as deptId,
+        t.frequency_rule_id as freRuleId,
+        fr.frequency_rule_description as freRuleDes,
+        to_char(min(t.frequency_date),'YYYY-MM-DD') as startDate,
+        to_char(max(t.frequency_date),'YYYY-MM-DD') as endDate,
+        count(frequency_date) as sumDays,
+        t.create_by as create_by,
+        t.create_date as create_date
+        from FREQUENCY_RECORD t,frequency_rule fr
+        where t.del_flag = '0'
+        and fr.del_flag = '0'
+        and t.create_org=#{orgId}
+        and t.frequency_rule_id=fr.frequency_rule_id
+        and t.FREQUENCY_ID = #{freRecordHeadId}
+        <if test="userId != null and userId != ''">
+            and t.user_id in (select t.id from PERSION_INFO t where t.name LIKE CONCAT(CONCAT('%',
+            #{userId}),'%'))
+        </if>
+        group by
+        t.user_id,
+        t.dept_id,
+        t.create_by,
+        t.create_date,
+        to_char(t.create_date,'YYYY-MM'),
+        t.frequency_rule_id,
+        fr.frequency_rule_description
+        order by t.create_date desc
+    </select>
+    <select id="findAllDetailList" resultType="FrequencyRecord">
+        select fr.user_id as "userId",
+        fr.dept_id as "deptId",
+        ( to_char(fr.frequency_date,'YYYY-MM-DD') || '-' || fr.week) as "freDate",
+        fr.frequency_item_id as "freItemId",
+        fr.frequency_item_order as "freItemOrder",
+        fr.frequency_rule_id as "freRuleId",
+        frule.frequency_rule_description as "freRuleDes",
+        fi.FREQUENCY_ITEM_DESCRIPTION as "freItemDes",
+        fr.FREQUENCY_RECORD_ID as "freRecordId",
+        fr.create_by as "create_by",
+        fr.create_date as "create_date"
+        from FREQUENCY_RECORD fr, FREQUENCY_ITEM fi,FREQUENCY_RULE frule
+        where fr.del_flag = '0'
+        and fi.del_flag = '0'
+        and frule.del_flag = '0'
+        and fr.create_org=#{orgId}
+        and fr.frequency_item_id = fi.frequency_item_id
+        and fr.frequency_rule_id=frule.frequency_rule_id
+        and fr.user_id = #{userId} and fr.frequency_id = #{freRecordHeadId}
+        <if test="time != null and time != ''">
+            and to_char(fr.frequency_date,'MM')=#{time}
+        </if>
+        order by fr.user_id,fr.frequency_date
+    </select>
+    <select id="findDetailList" resultType="FrequencyRecord">
+
+        select fr.user_id as "userId",
+        fr.dept_id as "deptId",
+        ( to_char(fr.frequency_date,'YYYY-MM-DD') || '-' || fr.week) as "freDate",
+        fr.frequency_item_id as "freItemId",
+        fr.frequency_item_order as "freItemOrder",
+        fr.frequency_rule_id as "freRuleId",
+        frule.frequency_rule_description as "freRuleDes",
+        fi.FREQUENCY_ITEM_DESCRIPTION as "freItemDes",
+        fr.FREQUENCY_RECORD_ID as "freRecordId",
+        fr.create_by as "create_by",
+        fr.create_date as "create_date"
+        from FREQUENCY_RECORD fr, FREQUENCY_ITEM fi,FREQUENCY_RULE frule
+        where fr.del_flag = '0'
+        and fi.del_flag = '0'
+        and frule.del_flag = '0'
+        and fr.create_org=#{orgId}
+        and fr.frequency_item_id = fi.frequency_item_id
+        and fr.frequency_rule_id=frule.frequency_rule_id
+        <if test="userId != null and userId != ''">
+            and fr.user_id in (select t.id from PERSION_INFO t where t.name LIKE CONCAT(CONCAT('%',
+            #{userId}),'%'))
+        </if>
+        <if test="freTimeMonth != null and freTimeMonth != ''">
+            and to_char(fr.frequency_date,'YYYY-MM')=#{freTimeMonth}
+        </if>
+        <if test="freTimeDay != null and freTimeDay != ''">
+            and to_char(fr.frequency_date,'YYYY-MM-DD')=#{freTimeDay}
+        </if>
+
+        order by fr.user_id,fr.frequency_date
+    </select>
+    <select id="callProcedures">
+
+		CALL FREQUENCY_RECORD_1(
+		#{startDate},#{endDate},#{freRuleId},#{freFirstItemOrder},#{userId},#{deptId},#{orgId},#{createBy},#{createDept},#{freRecordHeadId})
+
+		</select>
+    <update id="updatePrimary">
+        UPDATE FREQUENCY_RECORD SET
+        FREQUENCY_ITEM_ID =(select frd.frequency_item_id from FREQUENCY_RULE fr ,FREQUENCY_RULE_DATA frd
+             where fr.frequency_rule_id=frd.frequency_rule_id
+             and frd.frequency_item_order=#{freItemOrder}
+             and fr.del_flag='0'
+             and frd.del_flag='0'
+             and fr.frequency_rule_id=#{freRuleId}),
+        FREQUENCY_ITEM_ORDER = #{freItemOrder},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate,
+        CREATE_ORG = #{orgId}
+        WHERE FREQUENCY_RECORD_ID = #{freRecordId}
+    </update>
+
+    <update id="delPrimary" parameterType="String">
+       UPDATE FREQUENCY_RECORD fr SET
+        fr.DEL_FLAG = '1'
+        WHERE fr.user_id=#{userId}
+        and fr.frequency_date between to_date(#{startDate}, 'yyyy-mm-dd') and to_date(#{endDate}, 'yyyy-mm-dd')
+    </update>
+
+    <update id="del_head" parameterType="String" >
+        UPDATE FREQUENCY_RECORD SET
+        DEL_FLAG = '1'
+        WHERE FREQUENCY_ID = #{freRecordHeadId}
+    </update>
+
+</mapper>

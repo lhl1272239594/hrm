@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.DrugTypeDictDao">
+
+    <sql id="drugTypeDictColumns">
+        a.id AS "id",
+        a.type_name AS "typeName",
+        a.type_code AS "typeCode"
+    </sql>
+
+    <sql id="drugTypeDictJoins">
+    </sql>
+
+    <select id="get" resultType="DrugTypeDict">
+        SELECT
+        *
+        FROM drug_type_dict
+    </select>
+
+    <select id="findList" resultType="DrugTypeDict">
+        SELECT
+        *
+        FROM drug_type_dict
+    </select>
+
+    <select id="findAllList" resultType="DrugTypeDict">
+        SELECT
+        *
+        FROM drug_type_dict
+    </select>
+
+    <insert id="insert">
+        INSERT INTO drug_type_dict(
+        id,
+        type_name,
+        type_code
+        ) VALUES (
+        #{id},
+        #{typeName},
+        #{typeCode}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE drug_type_dict SET
+        type_name = #{typeName},
+        type_code = #{typeCode}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        DELETE FROM drug_type_dict
+        WHERE id = #{id}
+    </update>
+
+</mapper>

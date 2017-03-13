@@ -1,0 +1,211 @@
+/**展开收缩-病案首页**/
+.showstyle
+{
+	position:relative;
+	padding-left:5px;
+	line-height:30px;
+	border:1px solid #eee;
+	background: #ffffff; /* Old browsers */
+	/* IE9 SVG, needs conditional override of 'filter' to 'none' */
+	background: -moz-linear-gradient(top,  #ffffff 0%, #eeeeee 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffffff 0%,#eeeeee 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffffff 0%,#eeeeee 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffffff 0%,#eeeeee 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffffff 0%,#eeeeee 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eeeeee',GradientType=0 ); /* IE6-8 */
+}
+.showstyle a
+{
+	padding-left:20px;
+	display:block;
+}
+#showtext,#showtext1,#showtext2,#showtext3 ,#showtext4,#showtext5,#showtext6
+{
+	cursor:pointer;
+	background:url(../images/showicon.png) no-repeat 0 center;
+	padding-left:15px;
+}
+#contentid,#contentid1,#contentid2 ,#contentid3,#contentid4,#contentid5,#contentid6
+{
+	margin-top: 5px;
+	margin-bottom: 5px;
+
+}
+.none
+{
+	display: block;
+}
+.baset-topbtn
+{
+	position:absolute;
+	top:-1px;
+	right:10px;
+}
+.babtn
+{
+	padding:0 7px;
+	line-height:23px;
+	color:#fff;
+}
+.babtn-save
+{
+	border:1px solid #f3c200;
+	background: #ffc600; /* Old browsers */
+	/* IE9 SVG, needs conditional override of 'filter' to 'none' */
+	background: -moz-linear-gradient(top,  #ffc600 0%, #ff9c00 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffc600), color-stop(100%,#ff9c00)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #ffc600 0%,#ff9c00 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #ffc600 0%,#ff9c00 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #ffc600 0%,#ff9c00 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  #ffc600 0%,#ff9c00 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffc600', endColorstr='#ff9c00',GradientType=0 ); /* IE6-8 */
+}
+span.inpborder
+{
+	width:100%;
+	display:inline-block;
+}
+
+/**展开收缩-病案首页结束**/
+.padding20-top{
+	padding-top: 20px;
+}
+.inpborder{
+	border-bottom:1px solid #333;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	box-shadow:none;
+	border-radius:0px;
+	margin-top:5px;
+}
+.page-allinfo
+{
+	border:none;
+	width:98%;
+	margin:0 auto 10px auto;
+
+}
+.page-allinfo-line
+{
+	padding:0;
+	height:40px;
+}
+.page-allinfo-line > span
+{
+	padding:5px 10px;
+	display:inline-block;
+	height:40px;
+	line-height:40px;
+}
+.page-allinfo-line > span.no-border
+{
+	border:none;
+}
+.ba-ind-tile
+{
+	position:relative;
+	top:-22px;
+	font-size:22px;
+	margin:0px;
+	padding:0px;
+	text-align:center;
+}
+input[].inpborder,span.inpborder
+{
+	border-bottom:1px solid #333;
+	border-top:none;
+	border-left:none;
+	border-right:none;
+	box-shadow:none;
+	border-radius:0px;
+	margin-top:5px;
+
+}
+span.inpborder
+{
+	width:100%;
+	display:inline-block;
+}
+.baind-tab tr td.tablast-td
+{
+	border-top:1px solid #333;
+	height:80px;
+}
+.baind-tab
+{
+	padding:0 5px;
+}
+.baind-tab tr td
+{
+	height:40px;
+}
+.baind-tab tr td:nth-child(2n+1)
+{
+
+	text-align:right;
+}
+.baind-tab-mon tr td:first-child,.tys-tabstyle tr td.tl-padd
+{
+	text-align:left;
+	padding-left:10px;
+}
+.botwid
+{
+	width:80%;
+	margin:0 auto;
+}
+.sel-num
+{
+	border:1px solid #333;
+	padding:2px 7px;
+}
+.tys-tabstyle tr td.borr-none
+{
+	border-right:none;
+}
+.width_14
+{
+	width:180px;
+}
+.width_12
+{
+	width:150px;
+}
+.width_7
+{
+	width:120px;
+}
+.width_5
+{
+	width:90px;
+}
+.width_4
+{
+	width:80px;
+}
+.width_3
+{
+	width:70px;
+}
+.width_2
+{
+	width:60px;
+}
+.width_lasttd
+{
+	width:10px;
+}
+.width_30
+{
+	width:30%;
+}
+.text-right
+{
+	text-align:right;
+}
+.text-left
+{
+	text-align:left;
+}

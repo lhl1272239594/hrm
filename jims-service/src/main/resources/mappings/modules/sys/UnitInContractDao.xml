@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.UnitInContractDao">
+
+
+    <sql id="unitInContractColumns">
+        a.id AS "id",
+        a.unit_name AS "unitName",
+        a.input_code AS "inputCode",
+        a.address AS "address",
+        a.unit_type AS "unitType",
+        a.subordinate_to AS "subordinateTo",
+        a.distance_to_hospital AS "distanceToHospital",
+        a.regular_num AS "regularNum",
+        a.temp_num AS "tempNum",
+        a.retired_num AS "retiredNum",
+        a.input_code_wb AS "inputCodeWb",
+        a.org_id AS "orgId"
+    </sql>
+
+    <sql id="unitInContractJoins">
+    </sql>
+
+    <select id="get" resultType="UnitInContract">
+        SELECT
+        <include refid="unitInContractColumns"/>
+        FROM unit_in_contract a
+        <include refid="unitInContractJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="UnitInContract">
+        SELECT
+        <include refid="unitInContractColumns"/>
+        FROM unit_in_contract a
+        <include refid="unitInContractJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="UnitInContract">
+        SELECT
+        <include refid="unitInContractColumns"/>
+        FROM unit_in_contract a
+        <include refid="unitInContractJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO unit_in_contract(
+        id,
+        unit_name,
+        input_code,
+        address,
+        unit_type,
+        subordinate_to,
+        distance_to_hospital,
+        regular_num,
+        temp_num,
+        retired_num,
+        input_code_wb,
+        org_id
+        ) VALUES (
+        #{id},
+        #{unitName},
+        #{inputCode},
+        #{address},
+        #{unitType},
+        #{subordinateTo},
+        #{distanceToHospital},
+        #{regularNum},
+        #{tempNum},
+        #{retiredNum},
+        #{inputCodeWb},
+        #{orgId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE unit_in_contract SET
+        unit_name = #{unitName},
+        input_code = #{inputCode},
+        address = #{address},
+        unit_type = #{unitType},
+        subordinate_to = #{subordinateTo},
+        distance_to_hospital = #{distanceToHospital},
+        regular_num = #{regularNum},
+        temp_num = #{tempNum},
+        retired_num = #{retiredNum},
+        input_code_wb = #{inputCodeWb},
+        org_id =#{orgId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE
+        FROM unit_in_contract
+        WHERE id = #{id}
+    </delete>
+
+
+
+    <select id="findAllLists" resultType="com.jims.sys.entity.UnitInContract">
+        SELECT
+        <include refid="unitInContractColumns"/>
+        FROM unit_in_contract a
+        WHERE a.org_id = #{0}
+    </select>
+
+    <select id="getInputCode" resultType="com.jims.sys.entity.UnitInContract">
+        SELECT
+        <include refid="unitInContractColumns"/>
+        FROM unit_in_contract a
+        WHERE  a.org_id = #{0} and a.input_code LIKE CONCAT(CONCAT('%', #{1}), '%')
+    </select>
+
+
+</mapper>

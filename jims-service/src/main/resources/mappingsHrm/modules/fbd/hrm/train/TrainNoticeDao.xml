@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.train.dao.TrainNoticeDao">
+
+    <select id="findList" resultType="TrainNotice">
+        select
+        tn.TRAIN_NOTICE_ID as "trainNoticeId",
+        tn.TRAIN_NOTICE_NAME as "name",
+        tn.state as "state",
+        tn.train_plan_id as "trainPlanId",
+        tp.train_plan_tittle as "trainPlanTittle",
+        tn.train_place as "trainPlace",
+        tn.train_teacher as "trainTeacher",
+        tp.train_plan_content as "trainPlanContent",
+        tp.train_plan_type as "trainPlanType",
+        to_char(tn.start_date, 'YYYY-MM-DD HH:mm') as "startDate",
+        to_char(tn.end_date, 'YYYY-MM-DD HH:mm') as "endDate",
+        to_char(tn.start_date, 'YYYY-MM-DD HH:mm')||' 到 '|| to_char(tn.end_date, 'YYYY-MM-DD HH:mm') as "trainDate",
+        tn.create_by as "createBy",
+        tn.create_date as "createDate"
+        from train_notice tn,train_plan tp
+        where tn.del_flag = '0'
+        and tn.train_plan_id=tp.train_plan_id
+        and tp.CREATE_ORG=#{orgId}
+        <if test="trainPlanTittle != null and trainPlanTittle != ''">
+        and tp.train_plan_tittle LIKE CONCAT(CONCAT('%', #{trainPlanTittle}),'%')
+        </if>
+        <if test="trainPlanType != null and trainPlanType != ''">
+        and tp.train_plan_type =#{trainPlanType}
+        </if>
+        <if test="state != null and state != ''">
+        and tn.state =#{state}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and
+            (to_char(tn.start_date,'yyyy-MM')=#{startDate} or
+            to_char(tn.end_date,'yyyy-MM')=#{startDate})
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and tn.CREATE_DEPT in ( ${deptId} )
+        </if>
+        order by tn.create_date desc
+
+    </select>
+    <select id="mytrain" resultType="TrainNotice">
+        select
+        tn.TRAIN_NOTICE_ID as "trainNoticeId",
+        tn.TRAIN_NOTICE_NAME as "name",
+        tn.state as "state",
+        tn.train_plan_id as "trainPlanId",
+        tp.train_plan_tittle as "trainPlanTittle",
+        tn.train_place as "trainPlace",
+        tn.train_teacher as "trainTeacher",
+        tp.train_plan_content as "trainPlanContent",
+        tp.train_plan_type as "trainPlanType",
+        to_char(tn.start_date, 'YYYY-MM-DD HH:mm') as "startDate",
+        to_char(tn.end_date, 'YYYY-MM-DD HH:mm') as "endDate",
+        to_char(tn.start_date, 'YYYY-MM-DD HH:mm')||' 到 '|| to_char(tn.end_date, 'YYYY-MM-DD HH:mm') as "trainDate",
+        tn.create_by as "createBy",
+        tn.create_date as "createDate"
+        from train_notice tn,train_plan tp
+        where tn.del_flag = '0'
+        and tn.train_plan_id=tp.train_plan_id
+        and tp.CREATE_ORG=#{orgId}
+        and tn.state ='1'
+        <if test="trainPlanTittle != null and trainPlanTittle != ''">
+            and tp.train_plan_tittle LIKE CONCAT(CONCAT('%', #{trainPlanTittle}),'%')
+        </if>
+        <if test="trainPlanType != null and trainPlanType != ''">
+            and tp.train_plan_type =#{trainPlanType}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and
+            (to_char(tn.start_date,'yyyy-MM')=#{startDate} or
+            to_char(tn.end_date,'yyyy-MM')=#{startDate})
+        </if>
+        <if test="userId != null and userId != ''">
+            and #{userId} in (select p.user_id from train_notice_to_person p
+            where p.train_notice_id=tn.train_notice_id)
+        </if>
+        order by tn.create_date desc
+
+    </select>
+    <select id="findNoticeToPerson" resultType="TrainNotice">
+    select
+    tntp.user_id as "userId",
+    tntp.dept_id as "deptId",
+    tntp.org_id as "orgId"
+    from TRAIN_NOTICE_TO_PERSON tntp
+    where tntp.del_flag = '0'
+    and tntp.train_notice_id=#{trainNoticeId}
+    </select>
+    <!--查询名称是否重复-->
+    <select id="checkName" resultType="Integer">
+        select count(*)
+        from TRAIN_NOTICE t
+        where t.create_org=#{orgId}
+        and t.del_flag='0'
+        <if test="name!=null and name !=''">
+            and t.train_notice_name=#{name}
+        </if>
+        <if test="id!='999'">
+            and t.train_notice_id!=#{id}
+        </if>
+    </select>
+    <insert id="insertPrimary">
+        INSERT INTO TRAIN_NOTICE(
+        TRAIN_NOTICE_ID,
+        TRAIN_NOTICE_NAME,
+        TRAIN_PLAN_ID,
+        TRAIN_PLACE,
+        START_DATE,
+        END_DATE,
+        STATE,
+        train_teacher,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG
+        ) VALUES (
+        #{trainNoticeId},
+        #{name},
+        #{trainPlanId},
+        #{trainPlace},
+        to_date(#{startDate},'YYYY-MM-DD HH24:mi:ss'),
+        to_date(#{endDate},'YYYY-MM-DD HH24:mi:ss'),
+        '0',
+        #{trainTeacher},
+        #{createBy},
+        sysdate,
+        #{orgId},
+        #{createDept},
+        '0'
+        )
+    </insert>
+    <insert id="insertForeign">
+        INSERT INTO TRAIN_NOTICE_TO_PERSON(
+        TRAIN_NTICE_TO_PERSON_ID,
+        TRAIN_NOTICE_ID,
+        USER_ID,
+        DEPT_ID,
+        ORG_ID,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        DEL_FLAG
+        ) VALUES (
+        #{trainNoticeToPersonId},
+        #{trainNoticeId},
+        #{userId},
+        #{deptId},
+        #{orgId},
+        #{createBy},
+        sysdate,
+        #{orgId},
+        '0'
+        )
+    </insert>
+    <update id="updatePrimary">
+        UPDATE TRAIN_NOTICE SET
+        TRAIN_PLAN_ID = #{trainPlanId},
+        TRAIN_NOTICE_NAME = #{name},
+        TRAIN_PLACE = #{trainPlace},
+        train_teacher=#{trainTeacher},
+        START_DATE = to_date(#{startDate},'YYYY-MM-DD HH24:mi:ss'),
+        END_DATE = to_date(#{endDate},'YYYY-MM-DD HH24:mi:ss'),
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE TRAIN_NOTICE_ID = #{trainNoticeId}
+    </update>
+
+    <update id="delPrimary" >
+        UPDATE TRAIN_NOTICE SET
+        del_flag = '1'
+        WHERE TRAIN_NOTICE_ID = #{ids}
+    </update>
+    <update id="dataPublish" >
+        UPDATE TRAIN_NOTICE SET
+        state = '1'
+        WHERE TRAIN_NOTICE_ID = #{id}
+    </update>
+    <update id="delForeign" >
+        UPDATE TRAIN_NOTICE_TO_PERSON SET
+        del_flag = '1'
+        <if test="trainNoticeId != null and trainNoticeId != ''">
+            WHERE TRAIN_NOTICE_ID = #{trainNoticeId}
+        </if>
+        <if test="ids != null and ids != ''">
+            WHERE TRAIN_NTICE_TO_PERSON_ID = #{ids}
+        </if>
+
+    </update>
+</mapper>

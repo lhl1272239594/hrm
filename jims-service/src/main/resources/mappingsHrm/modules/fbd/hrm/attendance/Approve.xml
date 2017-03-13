@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.ApproveDao">
+
+    <select id="findList" resultType="Approve">
+        select
+        t.att_fun_id as "attFunId",
+        t.data_id    as "dataId",
+        t.approve_status as "approveStatus",
+        t.approve_person_id as "approvePersonId",
+        t.user_id as "userId",
+        t.APPROVE_DATE as "approveDate",
+        t.dept_id as "deptId",
+        t.create_by as "createBy",
+        t.create_date as "createDate",
+        t.update_date as "updateDate"
+        from (
+        select
+        tw.trip_work_id data_id,
+        '4' att_fun_id,
+        tw.approve_status,
+        tw.approve_person_id,
+        tw.user_id,
+        tw.dept_id,
+        tw.create_org,
+        tw.create_date,
+        tw.create_by,
+        tw.APPROVE_DATE,
+        tw.update_date
+        from trip_work tw
+        where tw.del_flag='0'
+        union
+        select
+        ad.adjust_day_id data_id,
+        '3' att_fun_id,
+        ad.approve_status,
+        ad.approve_person_id,
+        ad.user_id,
+        ad.dept_id,
+        ad.create_org,
+        ad.create_date,
+        ad.create_by,
+        ad.APPROVE_DATE,
+        ad.update_date
+        from adjust_day ad
+         where ad.del_flag='0'
+        union
+        select
+        ot.over_time_id data_id,
+        '2' att_fun_id,
+        ot.approve_status,
+        ot.approve_person_id,
+        ot.user_id,
+        ot.dept_id,
+        ot.create_org,
+        ot.create_date,
+        ot.create_by,
+        ot.APPROVE_DATE,
+        ot.update_date
+        from over_time ot
+        where ot.del_flag='0'
+        union
+        select
+        ow.off_work_id data_id,
+        '1' att_fun_id,
+        ow.approve_status,
+        ow.approve_person_id,
+        ow.user_id,
+        ow.dept_id,
+        ow.create_org,
+        ow.create_date,
+        ow.create_by,
+        ow.APPROVE_DATE,
+        ow.update_date
+        from off_work ow
+        where ow.del_flag='0') t
+        where  t.create_org=#{orgId}
+        <if test="approveStatus == ''">
+            and t.approve_status='1'
+        </if>
+        <if test="userId != null and userId != ''">
+            and t.user_id in (select a.id from PERSION_INFO a where a.name LIKE CONCAT(CONCAT('%', #{userId}),'%'))
+        </if>
+        <if test="approveStatus != null and approveStatus != ''">
+            and t.approve_status=#{approveStatus}
+        </if>
+        <if test="attFunId != null and attFunId != ''">
+            and t.att_fun_id=#{attFunId}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and t.dept_id in ( ${deptId} )
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and
+            to_char(t.update_date,'yyyy-MM')=#{startDate}
+        </if>
+        order by t.UPDATE_DATE desc
+    </select>
+
+
+    <update id="approve">
+        <if test="attFunId ==1">
+            UPDATE OFF_WORK SET
+            APPROVE_STATUS = #{flag},
+            APPROVE_PERSON_ID = #{approvePersonId},
+            APPROVE_DATE=sysdate,
+            UPDATE_BY = #{updateBy},
+            UPDATE_DATE = sysdate
+            WHERE OFF_WORK_ID = #{dataId}
+        </if>
+        <if test="attFunId ==2 ">
+            UPDATE OVER_TIME SET
+            APPROVE_STATUS = #{flag},
+            APPROVE_PERSON_ID = #{approvePersonId},
+            APPROVE_DATE=sysdate,
+            UPDATE_BY = #{updateBy},
+            UPDATE_DATE = sysdate
+            WHERE OVER_TIME_ID = #{dataId}
+        </if>
+        <if test="attFunId == 3">
+            UPDATE ADJUST_DAY SET
+            APPROVE_STATUS = #{flag},
+            APPROVE_PERSON_ID = #{approvePersonId},
+            APPROVE_DATE=sysdate,
+            UPDATE_BY = #{updateBy},
+            UPDATE_DATE = sysdate
+            WHERE ADJUST_DAY_ID = #{dataId}
+        </if>
+        <if test="attFunId ==4">
+            UPDATE TRIP_WORK SET
+            APPROVE_STATUS = #{flag},
+            APPROVE_PERSON_ID = #{approvePersonId},
+            APPROVE_DATE=sysdate,
+            UPDATE_BY = #{updateBy},
+            UPDATE_DATE = sysdate
+            WHERE TRIP_WORK_ID = #{dataId}
+        </if>
+
+    </update>
+
+</mapper>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.notice.dao.NoticeDao">
+
+
+    <!--公告查询-->
+    <select id="noticeList" resultType="Notice">
+       select
+        a.NOTICE_ID AS noticeId,
+        a.NOTICE_TITLE AS name,
+        a.RECEIVE_PERSON AS man,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.NOTICE_CONTENT AS content,
+        a.STATE AS state,
+        a.CREATE_ORG AS orgId,
+        a.DEL_FLAG AS delFlag,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate,
+        (select NAME from PERSION_INFO t where t.ID=a.PUBLISH_BY and rownum=1) AS publishBy,
+        a.PUBLISH_DATE AS publishDate
+        FROM NOTICE_HISTORY a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="name != null and name != ''">
+            and a.NOTICE_TITLE like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="state != null and state != '' ">
+            and a.STATE = #{state}
+        </if>
+        <if test="start != null and start != '' ">
+            and a.PUBLISH_DATE >= to_date(#{start},'yyyy-mm-dd')
+        </if>
+        <if test="end != null and end != '' ">
+            and to_date(#{end},'yyyy-mm-dd') >= a.PUBLISH_DATE
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.CREATE_DEPT in ( ${deptIds} )
+        </if>
+            ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--我的公告查询-->
+    <select id="mynoticeList" resultType="Notice">
+        select
+        a.NOTICE_ID AS noticeId,
+        a.NOTICE_TITLE AS name,
+        a.RECEIVE_PERSON AS man,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.NOTICE_CONTENT AS content,
+        a.STATE AS state,
+        a.CREATE_ORG AS orgId,
+        a.DEL_FLAG AS delFlag,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate,
+        (select NAME from PERSION_INFO t where t.ID=a.PUBLISH_BY and rownum=1) AS publishBy,
+        a.PUBLISH_DATE AS publishDate
+        FROM NOTICE_HISTORY a,NOTICE_TO_PERSON b
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="name != null and name != ''">
+            and a.NOTICE_TITLE like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        and a.state = '1' and a.notice_id = b.notice_id and b.person_id = #{personId}
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <!--批量删除-->
+    <update id="deleteNotice" parameterType="Notice">
+        UPDATE NOTICE_HISTORY t
+        SET t.DEL_FLAG = '1'
+        WHERE t.NOTICE_ID = #{Notice.noticeId}
+    </update>
+
+    <!--发布公告-->
+    <update id="publish_notice" parameterType="Notice">
+        UPDATE NOTICE_HISTORY t
+        SET t.state = '1',
+        t.publish_by = #{userName},
+        t.publish_date = sysdate
+        WHERE t.NOTICE_ID = #{Notice.noticeId}
+    </update>
+    <!--新增-->
+    <insert id="insertNotice">
+        INSERT INTO NOTICE_HISTORY(
+        NOTICE_ID,
+        NOTICE_TITLE,
+        RECEIVE_PERSON,
+        NOTICE_CONTENT,
+        STATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        #{Notice.noticeId},
+        #{Notice.name},
+        #{Notice.man},
+        #{Notice.content},
+        '0',
+        #{Notice.orgId},
+        #{Notice.createDept},
+        #{Notice.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateNotice">
+        UPDATE NOTICE_HISTORY SET
+        NOTICE_TITLE=#{Notice.name},
+        RECEIVE_PERSON=#{Notice.man},
+        NOTICE_CONTENT=#{Notice.content},
+        UPDATE_BY = #{Notice.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE NOTICE_ID = #{Notice.noticeId}
+    </update>
+    <!--插入接收人-->
+    <insert id="insertPerson" parameterType="PersonVo">
+        INSERT INTO NOTICE_TO_PERSON(
+        ID,
+        NOTICE_ID,
+        PERSON_ID,
+        CREATE_ORG,
+        DEPT_ID
+        ) VALUES (
+        #{PersonVo.id},
+        #{PersonVo.dataId},
+        #{PersonVo.userId},
+        #{PersonVo.orgId},
+        #{PersonVo.depId}
+        )
+    </insert>
+    <!--删除接收人-->
+    <delete id="deletePerson">
+        DELETE from NOTICE_TO_PERSON
+        WHERE NOTICE_ID = #{Notice.noticeId}
+    </delete>
+    <!--查看接收人-->
+    <select id="getPersonById" resultType="PersonVo">
+        select PERSON_ID as userId,
+        CREATE_ORG as orgId,
+        DEPT_ID as depId
+        from NOTICE_TO_PERSON s
+        where s.NOTICE_ID = #{id}
+    </select>
+</mapper>

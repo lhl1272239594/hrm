@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.InitProcessDao">
+    <sql id="drugBuyPlanColumns">
+        a.id AS "id",
+        a.orgId AS "orgId",
+        a.init_flag AS "initFlag",
+        a.init_sort AS "initSort",
+        a.menu_id AS "menuId",
+        a.menu_name AS "menuName",
+        a.href AS "href",
+        a.icon AS "icon"
+    </sql>
+
+    <sql id="initProcessJoins">
+    </sql>
+
+    <select id="findByOrgId" resultType="InitProcess">
+        SELECT
+		*
+		FROM init_process a
+		WHERE a.org_id = #{orgId}
+		ORDER BY a.init_sort
+    </select>
+    <select id="findInitProcessByOrgId" resultType="InitProcess">
+        select distinct c.* from init_process c ,service_vs_menu a,org_service_list b
+        where c.org_id is null and a.service_id = b.service_id and a.menu_id=c.menu_id
+        and b.org_id=#{orgId}
+		ORDER BY c.init_sort
+    </select>
+
+    <select id="findMenuList" resultType="InitProcess">
+        select
+            a.menu_id,
+            a.menu_name,
+            a.href,
+            a.id,
+            a.init_sort
+        from
+            init_process a
+        where
+            a.org_id is null
+        ORDER BY
+            a.init_sort
+    </select>
+    <select id="get" resultType="InitProcess">
+        SELECT
+		*
+		FROM init_process a
+		WHERE a.id = #{id}
+    </select>
+    <update id="update">
+        update init_process
+        SET id= #{id}
+        <if test="initFlag!=null and initFlag!=''">
+            ,init_flag= #{initFlag}
+        </if>
+        <if test="initSort!=null and initSort!=''">
+            ,init_Sort= #{initSort}
+        </if>
+        <if test="menuId!=null and menuId!=''">
+            ,menu_id= #{menuId}
+        </if>
+        <if test="menuName!=null and menuName!=''">
+            ,menu_Name= #{menuName}
+        </if>
+        <if test="href!=null and href!=''">
+            ,href= #{href}
+        </if>
+        <if test="icon!=null and icon!=''">
+            ,icon= #{icon}
+        </if>
+        where id = #{id}
+    </update>
+    <insert id="insert">
+        INSERT INTO init_process(
+          id,
+          org_id,
+          init_flag,
+          init_sort,
+          menu_id,
+          menu_name,
+          href,
+          icon
+        ) VALUES (
+          sys_guid(),
+          #{orgId},
+          #{initFlag},
+          #{initSort},
+          #{menuId},
+          #{menuName},
+          #{href},
+          #{icon}
+        )
+    </insert>
+
+    <delete id="delete">
+      delete  init_process
+      WHERE id=#{0}
+    </delete>
+
+</mapper>

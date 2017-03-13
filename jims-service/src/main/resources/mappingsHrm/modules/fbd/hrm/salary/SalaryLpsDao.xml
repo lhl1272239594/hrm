@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryLpsDao">
+
+
+    <!--查询工资级别项目金额列表-->
+
+    <select id="lpsList" resultType="SalaryLps">
+       select
+        a.LPSID AS lpsId,
+        a.MONEY AS money,
+        a.COEFFICIENT AS multiple,
+        (select t.level_name from salary_level t where t.level_id = a.level_id and rownum =1)AS levelName,
+        a.PROJECT_ID AS projectId,
+        a.LEVEL_ID AS levelId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_LEVEL_PROJECT_SUM a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{salaryLps.orgId}
+        </where>
+        <if test="salaryLps.levelId != null and salaryLps.levelId != '' and salaryLps.levelId!='请选择'">
+            and a.LEVEL_ID like CONCAT('%',CONCAT(#{salaryLps.levelId},'%'))
+        </if>
+        <if test="salaryLps.projectId != null and salaryLps.projectId != '' and salaryLps.projectId!='请选择'">
+            and a.PROJECT_ID like CONCAT('%',CONCAT(#{salaryLps.projectId},'%'))
+        </if>
+            ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_LEVEL_PROJECT_SUM t
+        SET t.ENABLE_FLAG = '1',
+        t.UPDATE_DATE = sysdate
+        WHERE t.LPSID = #{lpsId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_LEVEL_PROJECT_SUM t
+        SET t.ENABLE_FLAG = '0',
+        t.UPDATE_DATE = sysdate
+        WHERE t.LPSID = #{lpsId}
+    </update>
+    <!--删除关系数据-->
+    <update id="delete">
+        UPDATE SALARY_LEVEL_PROJECT_SUM t
+        SET t.DEL_FLAG = '1'
+        WHERE t.LPSID = #{id}
+    </update>
+    <!--判断关系数据是否已存在-->
+    <select id="findLpssame" resultType="SalaryLps">
+        SELECT count(*) num
+        FROM SALARY_LEVEL_PROJECT_SUM t
+        WHERE t.CREATE_ORG=#{orgId}
+        and t.PROJECT_ID=#{projectId}
+        and t.LEVEL_ID=#{levelId}
+
+        and t.DEL_FLAG IS NULL
+    </select>
+    <!--新增工资级别项目金额关系-->
+    <insert id="insert">
+        INSERT INTO SALARY_LEVEL_PROJECT_SUM(
+        LPSID,
+        LEVEL_ID,
+        PROJECT_ID,
+        MONEY,
+        COEFFICIENT,
+        ENABLE_FLAG,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG
+        ) VALUES (
+        sys_guid(),
+        #{levelId},
+        #{projectId},
+        #{money},
+        #{multiple},
+         '1',
+        #{createBy},
+        sysdate,
+        #{orgId}
+        )
+    </insert>
+    <!--更新工资级别项目金额关系-->
+    <update id="update">
+        UPDATE SALARY_LEVEL_PROJECT_SUM SET
+        LEVEL_ID=#{levelId},
+        PROJECT_ID=#{projectId},
+        MONEY = #{money},
+        COEFFICIENT = #{multiple},
+
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE LPSID = #{lpsId}
+    </update>
+
+</mapper>

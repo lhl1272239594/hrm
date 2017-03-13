@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.InputSettingMasterDao">
+    
+	<sql id="inputSettingMasterColumns">
+		a.id AS "id",
+		a.dict_name AS "dictName",
+		a.dict_type AS "dictType",
+		a.org_id AS "orgId"
+
+	</sql>
+	
+	<sql id="inputSettingMasterJoins">
+	</sql>
+    
+	<select id="get" resultType="InputSettingMaster">
+		SELECT 
+			<include refid="inputSettingMasterColumns"/>
+		FROM input_setting_master a
+		<include refid="inputSettingMasterJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+
+	<select id="findList" resultType="InputSettingMaster">
+		SELECT 
+			<include refid="inputSettingMasterColumns"/>
+		FROM input_setting_master a
+		<include refid="inputSettingMasterJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+    <select id="findAllListByOrgId" resultType="InputSettingMaster">
+        SELECT * FROM input_setting_master  WHERE del_flag = '0' and org_id=#{orgId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO input_setting_master(
+			id,
+			dict_name,
+			dict_type,
+			org_id,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{dictName},
+			#{dictType},
+			#{orgId},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE input_setting_master SET
+			dict_name = #{dictName},
+			dict_type = #{dictType},
+			org_id = #{orgId},
+			remarks = #{remarks},
+			update_by = #{updateBy},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+	<delete id="delete">
+	  DELETE  FROM  input_setting_master WHERE id=#{id}
+	</delete>
+
+
+</mapper>

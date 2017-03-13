@@ -1,0 +1,185 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>云his工作平台</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="../sys/js/index.js"></script>
+</head>
+<script>
+    function addTabs(id,name,url,lia){
+            $(lia).parent().parent().find("li a").removeClass();
+            $(lia).addClass("active")
+            if(!$("#tabs-header").tabs('exists',name)){
+                $('#tabs-header').tabs('add',{
+                    id:id,
+                    title: name,
+                    selected: true,
+                    href:url,
+                    closable:true
+                });
+            }else $('#tabs-header').tabs('select',name);
+    }
+    $(function(){
+        //添加Tabs
+
+        $(".tabs-header").bind('contextmenu',function(e){
+            e.preventDefault();
+            $('#rcmenu').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        });
+        // 刷新当前标签页
+        $("#refresh").bind("click",function(){
+            var currTab = $('#tabs-header').tabs('getSelected'); //获得当前tab
+            var url = $(currTab.panel('options').content).attr('src');
+            currTab.panel('refresh', url);
+        });
+
+        //关闭当前标签页
+        $("#closecur").bind("click",function(){
+            var tab = $('#tabs-header').tabs('getSelected');
+            var index = $('#tabs-header').tabs('getTabIndex',tab);
+            $('#tabs-header').tabs('close',index);
+        });
+        //关闭所有标签页
+        $("#closeall").bind("click",function(){
+            var tablist = $('#tabs-header').tabs('tabs');
+            for(var i=tablist.length-1;i>=0;i--){
+                $('#tabs-header').tabs('close',i);
+            }
+        });
+        //关闭非当前标签页（先关闭右侧，再关闭左侧）
+        $("#closeother").bind("click",function(){
+            var tablist = $('#tabs-header').tabs('tabs');
+            var tab = $('#tabs-header').tabs('getSelected');
+            var index = $('#tabs-header').tabs('getTabIndex',tab);
+            for(var i=tablist.length-1;i>index;i--){
+                $('#tabs-header').tabs('close',i);
+            }
+            var num = index-1;
+            for(var i=num;i>=0;i--){
+                $('#tabs-header').tabs('close',0);
+            }
+        });
+        //关闭当前标签页右侧标签页
+        $("#closeright").bind("click",function(){
+            var tablist = $('#tabs-header').tabs('tabs');
+            var tab = $('#tabs-header').tabs('getSelected');
+            var index = $('#tabs-header').tabs('getTabIndex',tab);
+            for(var i=tablist.length-1;i>index;i--){
+                $('#tabs-header').tabs('close',i);
+            }
+        });
+        //关闭当前标签页左侧标签页
+        $("#closeleft").bind("click",function(){
+            var tab = $('#tabs-header').tabs('getSelected');
+            var index = $('#tabs-header').tabs('getTabIndex',tab);
+            var num = index-1;
+            for(var i=0;i<=num;i++){
+                $('#tabs-header').tabs('close',0);
+            }
+        });
+
+    });
+</script>
+<body class="easyui-layout">
+<div data-options="region:'west',split:true" style="width:150px;overflow:hidden">
+    <ul class="cus-list">
+        <li>
+            <a onclick="addTabs('1','医院信息','/modules/sys/companyRecord.html',this)" class="active">
+                <span class="cus-lbor"></span>
+                <span class="cus-name">医院信息</span>
+            </a>
+        </li>
+        <li>
+            <a onclick="addTabs('2','科室信息维护','/modules/sys/com.html',this)" class="active">
+                <span class="cus-lbor"></span>
+                <span class="cus-name">科室信息</span>
+            </a>
+        </li>
+
+
+    </ul>
+
+</div>
+<div data-options="region:'east',split:true,collapsed:true,title:'右'" style="width:100px;padding:10px;">右部分</div>
+<div data-options="region:'center'">
+    <div class="easyui-tabs"  id="tabs-header" style="width:100%;height:95%">
+
+    </div>
+        <div class="bot-menu">
+            <div class="bot-out">
+                <ul>
+                <!--    <li><a class="active" onclick="addTabs('1','病人信息','/modules/sys/records.html',this)"><span>病人信息</span></a></li>-->
+                    <!--<li><a onclick="addTabs('4','病历首页','/modules/sys/CompanyRecords.html',this)"><span>病案首页</span></a></li>
+                    <li><a  onclick="addTabs('2','病历文书','/modules/sys/CompanyRecords.html',this)"><span>病历文书</span></a></li>
+                    <li><a ><span>病程记录</span></a></li>
+                    &lt;!&ndash;<li><a onclick="addTabs('3','检查申请','/modules/clinic/inspect.html',this)"><span>检查申请</span></a></li>&ndash;&gt;
+                    <li><a onclick="addTabs('3','检查申请','/modules/sys/company.html',this)"><span>检查申请</span></a></li>
+                    <li><a ><span>检验申请</span></a></li>
+                  &lt;!&ndash;  <li><a onclick="addTabs('7','处方','/modules/clinic/prescription/prescriptionList.html',this)"><span>处方</span></a></li>&ndash;&gt;
+                    <li><a onclick="addTabs('7','处方','/modules/sys/CompanyRecords.html',this)"><span>处方</span></a></li>
+                    <li><a ><span>医嘱</span></a></li>
+                    <li><a ><span>手术申请</span></a></li>
+                    <li><a ><span>用血申请</span></a></li>
+                    <li><a ><span>会诊申请</span></a></li>
+                    <li><a ><span>出院通知</span></a></li>
+                    <li><a ><span>出院记录</span></a></li>&ndash;&gt;-->
+                </ul>
+            </div>
+        </div>
+    <div id="rcmenu" class="easyui-menu">
+        <div data-options="iconCls:'icon-mini-refresh'" id="refresh">
+            刷新
+        </div>
+        <div data-options="iconCls:'icon-cancel'" id="closecur">
+            关闭
+        </div>
+        <div id="closeall">
+            关闭全部
+        </div>
+        <div id="closeother">
+            关闭其他
+        </div>
+        <div class="menu-sep"></div>
+        <div id="closeright">
+            关闭右侧标签页
+        </div>
+        <div id="closeleft">
+            关闭左侧标签页
+        </div>
+    </div>
+</div>
+
+
+
+<div class="component">
+    <button class="cn-button" id="cn-button">张三</button>
+    <div class="cn-wrapper" id="cn-wrapper">
+        <ul>
+            <li onclick="addTabs('1','病人信息','/modules/clinic/medicalRecordsIndex.html',this)" ><a class="active"><span>病人信息</span></a></li>
+            <li><a ><span>病案首页</span></a></li>
+            <li onclick="addTabs('2','病历文书','/modules/clinic/medicalRecordsDocument.html',this)"><a><span>病历文书</span></a></li>
+            <li><a ><span>病程记录</span></a></li>
+            <li onclick="addTabs('3','检查申请','/modules/clinic/inspect.html',this)"><a><span>检查申请</span></a></li>
+            <li><a ><span>检验申请</span></a></li>
+            <li><a ><span>处方</span></a></li>
+            <li><a ><span>医嘱</span></a></li>
+            <li><a ><span>手术申请</span></a></li>
+            <li><a ><span>用血申请</span></a></li>
+            <li><a ><span>会诊申请</span></a></li>
+            <li><a ><span>出院通知</span></a></li>
+            <li><a ><span>出院记录</span></a></li>
+
+        </ul>
+    </div>
+    <!-- End of Nav Structure -->
+</div>
+<script src="/static/circularNav/js/polyfills.js"></script>
+<script src="/static/circularNav/js/demo2.js"></script>
+<script src="/static/circularNav/js/modernizr-2.6.2.min.js"></script>
+</body>
+</html>                                                                                                                                                                                                                                                                                                                  

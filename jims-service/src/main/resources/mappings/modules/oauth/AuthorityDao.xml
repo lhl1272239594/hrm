@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.oauth.dao.AuthorityDao">
+    
+	<sql id="authorityColumns">
+		a.app_key AS "appKey",
+		a.user_id AS "userId"
+	</sql>
+	
+	<sql id="authorityJoins">
+	</sql>
+    
+	<select id="findAppKey" resultType="Authority">
+		SELECT 
+			a.app_key AS "appKey",
+		a.user_id AS "userId"
+		FROM authority a
+		WHERE a.app_key = #{appKey}
+	</select>
+
+	<select id="findUnique" resultType="Authority">
+        SELECT
+        a.app_key AS "appKey",a.user_id AS "userId"
+        FROM authority a
+        WHERE a.app_key = #{0} AND a.user_id = #{1}
+    </select>
+
+	<select id="findList" resultType="Authority">
+		SELECT 
+			<include refid="authorityColumns"/>
+		FROM authority a
+		<include refid="authorityJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="Authority">
+		SELECT 
+			<include refid="authorityColumns"/>
+		FROM authority a
+		<include refid="authorityJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO authority(
+			app_key,
+			user_id
+		) VALUES (
+			#{appKey},
+			#{userId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE authority SET 	
+			user_id = #{userId}
+		WHERE app_key = #{appKey}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM authority
+		WHERE app_key = #{appKey} AND  user_id = #{userId}
+	</update>
+	
+</mapper>

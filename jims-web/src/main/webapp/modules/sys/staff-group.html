@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>用户分组维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+
+</head>
+<body class="easyui-layout">
+<style type="text/css" rel="stylesheet">
+    .fitem label {
+        width: 60px;
+    }
+</style>
+<div id="group" data-options="region:'west'" style="padding:1px;background:#eee;width: 300px;">
+    <table id="groupClass" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="classft" style="margin:5px;">
+    <a  id="addClassBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a  id="saveClassBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a  id="removeClassBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+<div id="dict" data-options="region:'center',fit:true" style="padding:1px;background:#eee;">
+    <table id="groupDict" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="ft" style="margin:5px;">
+    <a  id="addDictBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a  id="saveDictBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a  id="removeDictBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/modules/sys/js/staff-group.js"></script>
+<!--<script type="text/javascript" src="/static/js/head.js"></script>-->
+
+
+</body>
+</html>

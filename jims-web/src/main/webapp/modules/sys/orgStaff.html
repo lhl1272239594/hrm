@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>组织机构人员维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" href="/static/uploadify/uploadify.css" type="text/css"/>
+
+</head>
+<body class="easyui-layout">
+<style type="text/css" rel="stylesheet">
+    .fitem label {
+        width: 60px;
+    }
+</style>
+<!--科室信息  start-->
+<div id=examClass" data-options="region:'west'" style="padding:1px;background:#eee;width: 200px;">
+    <table id="staff" class="easyui-datagrid">
+
+    </table>
+</div>
+
+<!--科室信息  end-->
+
+
+<!--组织机构人员维护  start-->
+<div id="examSubclass" data-options="region:'center',fit:true" style="padding:1px;background:#eee;">
+    <table id="staffGrid" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="ft" style="margin:5px;">
+    <a id="addBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">人员变动</a>
+    <a id="editBtn" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">修改人员</a>
+    <a id="removeBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除人员</a>
+    <a id="exportXls" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">导出</a>
+    <a id="exportStaffXlsTemplate" class="easyui-linkbutton" data-options="iconCls:'icon-save'">下载导入模板</a>
+    <a id="importStaffXls" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">导入工作人员</a>
+<style>
+    .own-span {
+        position: absolute;
+        top: 0;
+        right: 5px;
+    }
+    .fitem {float: left;margin-bottom: 5px;}
+    .fitem label{ width: 300px;}
+</style>
+
+    <!--<a  id="inBtn" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">导入</a>-->
+
+</div>
+<!--组织机构人员维护  end-->
+
+<!--添加组织机构人员模态  start-->
+<div id="addStaff" style="height: 355px;width:640px;" data-options="footer:'#addStaffFt'">
+    <!--<div style="padding-top:10px;" class="fitem" id="hiddenDiv">
+        <label  for="selectCardNo"> 请输入身份证号：      </label>
+        <input class="easyui-validatebox" id="selectCardNo" type="text" style="width: 320px"/>
+        <a  id="select" class="easyui-linkbutton" icon="icon-search">检索</a>
+        &lt;!&ndash;<a  id="saveStaff" class="easyui-linkbutton" icon="icon-ok">添加</a>&ndash;&gt;
+    </div>
+-->
+    <form id="staffForm" data-options="fit:true" style="padding:10px 0 0 0;">
+        <input type="hidden" id="id"/>
+        <input type="hidden" id="staffId"/>
+
+        <div class="fitem">
+            <label for="cardNo">身份证号：
+                <input class="easyui-validatebox" id="cardNo" type="text" style="width:200px" placeholder="*请输入身份证号"/>
+                <span class="own-span" id="res-cardNo" ></span></label>
+        </div>
+        <div class="fitem">
+            <label >所属科室：
+            <select class="easyui-combobox" id="deptName" style="width:200px;">
+
+            </select></label>
+        </div>
+        <div class="fitem">
+            <label for="name">姓名：
+                <input class="easyui-validatebox" id="name" style="width:200px" type="text" maxlength="10"/>
+                <span class="own-span" id="res-name"></span></label>
+        </div>
+        <div class="fitem">
+            <label for="nickName">昵称：
+                <input class="easyui-validatebox" id="nickName" style="width:200px" type="text" maxlength="12"/>
+                <span class="own-span" id="res-nickName"></span></label>
+        </div>
+        <div class="fitem">
+            <label for="sex">性别：
+                <input class="easyui-combobox" style="width:200px;" id="sex" editable="false"/></label>
+        </div>
+        <div class="fitem">
+            <label for="nation">民族：
+                <select class="easyui-combogrid" id="nation" style="width:200px;">
+
+                </select></label>
+        </div>
+        <div class="fitem">
+            <label for="phoneNum">联系电话：
+            <input class="easyui-validatebox" id="phoneNum" style="width:200px" type="text"/>
+            <span class="own-span" id="res-phoneNum"></span></label>
+        </div>
+        <div class="fitem">
+            <label for="email">邮箱：
+            <input class="easyui-validatebox" id="email" style="width:200px" type="text"/>
+            <span class="own-span" id="res-email"></span></label>
+        </div>
+        <div class="fitem">
+            <label for="role">职务：
+                <input class="easyui-combobox" id="role" type="text" style="width:200px;"/></label>
+        </div>
+        <div class="fitem">
+            <label for="title">职称：
+                <input class="easyui-combogrid" id="title" style="width:200px" type="text"/>
+                <span id="res-title"></span></label>
+        </div>
+        <div class="fitem" id="hiddenDiv0">
+            <label for="password">密码：
+            <input class="easyui-validatebox" id="password" style="width:200px" type="password"/>
+            <span class="own-span" id="res-password" style="right: 25px;"></span></label>
+        </div>
+        <div class="fitem" id="hiddenDiv1">
+            <label for="confirm-password">确认密码：
+            <input class="easyui-validatebox" id="confirm-password" style="width:200px" type="password"/>
+            <span class="own-span" id="res-confirm-password" style="right: 25px;"></span></label>
+        </div>
+
+    </form>
+</div>
+
+<!--<div style="padding:5px;text-align:right;" id="addFile">
+    <a  id="savBtn" class="easyui-linkbutton" icon="icon-ok">确定</a>
+    <a  id="canBtn" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+</div>-->
+<div style="padding:5px;text-align:right;" id="addStaffFt">
+    <a id="saveBtn" class="easyui-linkbutton" icon="icon-ok">确定</a>
+    <a id="cancelBtn" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+</div>
+<!--添加组织机构人员模态  end-->
+
+<!--导入excel-->
+<div id="importForm">
+    <input type="file" id="file_upload" name="file_upload"/>
+</div>
+
+<div style="padding:5px;text-align:right;" id="addImport">
+    <a id="importBtn" class="easyui-linkbutton" icon="icon-ok">上传</a>
+    <a id="exitBen" class="easyui-linkbutton" icon="icon-cancel" href="javascript:$('#importForm').window('close');">取消</a>
+</div>
+
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/static/uploadify/jquery.uploadify.js"></script>
+<script type="text/javascript" src="/modules/sys/js/orgStaff.js"></script>
+<script type="text/javascript" src="/static/js/head.js"></script>
+</body>
+</html>

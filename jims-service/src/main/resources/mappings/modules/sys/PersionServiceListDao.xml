@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.PersionServiceListDao">
+
+    <sql id="persionServiceListColumns">
+		a.id AS "id",
+		a.persion_id AS "persionId",
+		a.service_id AS "serviceId",
+		a.flag AS "flag",
+		a.service_start_date AS "serviceStartDate",
+		a.service_end_date AS "serviceEndDate",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy.id",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+
+    <sql id="persionServiceListJoins">
+    </sql>
+
+
+    <select id="get" resultType="PersionServiceList">
+        SELECT
+        *
+        FROM persion_service_list a
+		WHERE 1=1
+			<if test="id!=null and id!=''">
+				and a.id = #{id}
+			</if>
+			<if test="persionId!=null and persionId!=''">
+				and a.persion_id = #{persionId}
+			</if>
+			<if test="serviceId!=null and serviceId!=''">
+				and a.service_id = #{serviceId}
+			</if>
+    </select>
+    <select id="findListByFlag" resultType="SysService">
+        select se.* from sys_service se,persion_service_list pp
+        where pp.persion_id=#{persionId}
+        and pp.service_id=se.id
+	</select>
+
+    <select id="findServiceByPersionId" resultType="PersionServiceList">
+        SELECT
+        *
+        FROM persion_service_list a
+
+        WHERE a.persion_id = #{persionId} and a.flag='0'
+    </select>
+
+    <select id="findListByPersionId" resultType="PersionServiceList">
+		SELECT a.id,a.persion_id,a.service_id,to_char(a.service_start_date,'yyyy-mm-dd') startDate,to_char(a.service_end_date,'yyyy-mm-dd') endDate,
+		c.service_name serviceName,c.service_image serviceImage,c.service_description serviceDescription
+		FROM persion_service_list a,sys_service c
+		WHERE a.del_flag = '0' and a.service_id=c.id
+		<if test="persionId != null and persionId != ''">
+			and a.persion_id=#{persionId}
+			<if test="state != null and state != ''">
+				and a.service_id in ( select b.id from sys_service b where b.del_flag = '0'
+				<if test="serviceClass != null and serviceClass != '3'">
+					and (b.service_class = #{serviceClass} or b.service_class = '2')
+				</if>
+				<if test="serviceClass == '3'">
+					and b.service_class = '3'
+				</if>
+				<if test="serviceType != null and serviceType != ''">
+					and b.service_type = #{serviceType}
+				</if> )
+			</if>
+			<if test="state != null and state == ''">
+				and a.service_id not in ( select b.id from sys_service b where b.del_flag = '0'
+				<if test="serviceClass != null and serviceClass != '3'">
+					and (b.service_class = #{serviceClass} or b.service_class = '2')
+				</if>
+				<if test="serviceClass == '3'">
+					and b.service_class = '3'
+				</if>
+				<if test="serviceType != null and serviceType != ''">
+					and b.service_type = #{serviceType}
+				</if> )
+			</if>
+
+		</if>
+		order by a.update_date desc
+    </select>
+
+    <insert id="insert">
+		INSERT INTO persion_service_list(
+			id,
+			persion_id,
+			service_id,
+			flag,
+			service_start_date,
+			service_end_date,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{persionId},
+			#{serviceId},
+			#{flag},
+			#{serviceStartDate},
+			#{serviceEndDate},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE persion_service_list SET
+			persion_id = #{persionId},
+			service_id = #{serviceId},
+			flag = #{flag},
+			service_start_date = #{serviceStartDate},
+			service_end_date = #{serviceEndDate},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE persion_service_list SET
+			del_flag ='1'
+		WHERE id = #{id}
+	</update>
+
+</mapper>

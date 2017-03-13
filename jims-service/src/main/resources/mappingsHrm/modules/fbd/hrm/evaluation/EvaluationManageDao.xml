@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.EvaluationManageDao">
+    <!--查询评分列表-->
+    <select id="planList" resultType="EvaluationPlan">
+        select * from (select t.evaluation_plan_id as id,
+        t.evaluation_plan_name as name,
+        t.evaluation_model_id as templetId,
+        t.evaluation_type_id as typeId,
+        (select (select count(*) from evaluation_socre s
+        where s.state =2
+        and s.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and s.grade_by is not null and t.type ='3')+
+        (select count(*) from EVALUATION_SOCRE_RESULT r
+        where r.state =2
+        and r.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and r.grade_by is not null and t.type ='3') from dual) as submit,
+        (select (select count(*) from evaluation_socre z
+        where z.state in (0,1,2)
+        and z.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and z.grade_by is not null and t.type ='3')+
+        (select count(*) from EVALUATION_SOCRE_RESULT x
+        where x.state in (0,1,2)
+        and x.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and x.grade_by is not null and t.type ='3') from dual) as unsubmit,
+        (select a.type_name
+        from evaluation_type a
+        where a.id = t.evaluation_type_id) as typeName,
+        t.self as self,
+        (select a.evaluation_start_type from EVALUATION_MODEL a
+        where a.evaluation_model_id=t.evaluation_model_id) as startType,
+        t.evaluation_plan_state_time as startDate,
+        t.evaluation_plan_end_time as endDate,
+        t.state as state,
+        t.create_org as orgId,
+        (select a.type from EVALUATION_TYPE a where a.id=t.evaluation_type_id) as type,
+        t.obj as obj,
+        t.CREATE_DEPT as createDept,
+        t.CREATE_DATE as createDate
+        from EVALUATION_PLAN t
+        where t.type ='3'
+        and t.del_flag='0'
+        union all
+        select t.evaluation_plan_id as id,
+        t.evaluation_plan_name as name,
+        t.evaluation_model_id as templetId,
+        t.evaluation_type_id as typeId,
+        (select (select count(*) from evaluation_socre s
+        where s.state =2
+        and s.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and s.obj!='4')+
+        (select count(*) from EVALUATION_SOCRE_RESULT r
+        where r.state =2
+        and r.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and r.obj!='4') from dual) as submit,
+        (select (select count(*) from evaluation_socre z
+        where z.state in (0,1,2)
+        and z.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and z.obj!='4')+
+        (select count(*) from EVALUATION_SOCRE_RESULT x
+        where x.state in (0,1,2)
+        and x.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and x.obj!='4') from dual) as unsubmit,
+        (select a.type_name
+        from evaluation_type a
+        where a.id = t.evaluation_type_id) as typeName,
+        t.self as self,
+        (select a.evaluation_start_type from EVALUATION_MODEL a
+        where a.evaluation_model_id=t.evaluation_model_id) as startType,
+        t.evaluation_plan_state_time as startDate,
+        t.evaluation_plan_end_time as endDate,
+        t.state as state,
+        t.create_org as orgId,
+        (select a.type from EVALUATION_TYPE a where a.id=t.evaluation_type_id) as type,
+        t.obj as obj,
+        t.CREATE_DEPT as createDept,
+        t.CREATE_DATE as createDate
+        from EVALUATION_PLAN t
+        where t.type in (1,2)
+        and t.del_flag='0'
+        )
+        where orgId = #{orgId}
+        <if test="name != null and name != ''">
+            and name like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="typeId != null and typeId != ''">
+            and typeId=#{typeId}
+        </if>
+        <if test="state=='3'.toString()">
+            and state='3'
+        </if>
+        <if test="state=='4'.toString()">
+            and state='4'
+        </if>
+        <if test="state=='2'.toString()">
+            and state='2'
+        </if>
+        <if test="state=='1'.toString()">
+            and state='1'
+        </if>
+        <if test="state=='0'.toString()">
+            and state='0'
+        </if>
+        <if test="createDept != null and createDept != ''">
+            and createDept in ( ${createDept} )
+        </if>
+        order by createDate desc
+
+    </select>
+
+    <!--考评成绩查询-->
+    <select id="resultList" resultType="EvaluationPlan">
+        select * from (select t.evaluation_plan_id as id,
+        t.evaluation_plan_name as name,
+        t.evaluation_model_id as templetId,
+        t.evaluation_type_id as typeId,
+        (select (select count(*) from evaluation_socre s
+        where s.state =2
+        and s.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and s.grade_by is not null and t.type ='3')+
+        (select count(*) from EVALUATION_SOCRE_RESULT r
+        where r.state =2
+        and r.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and r.grade_by is not null and t.type ='3') from dual) as submit,
+        (select (select count(*) from evaluation_socre z
+        where z.state in (0,1,2)
+        and z.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and z.grade_by is not null and t.type ='3')+
+        (select count(*) from EVALUATION_SOCRE_RESULT x
+        where x.state in (0,1,2)
+        and x.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and x.grade_by is not null and t.type ='3') from dual) as unsubmit,
+        (select a.type_name
+        from evaluation_type a
+        where a.id = t.evaluation_type_id) as typeName,
+        t.self as self,
+        (select a.evaluation_start_type from EVALUATION_MODEL a
+        where a.evaluation_model_id=t.evaluation_model_id) as startType,
+        t.evaluation_plan_state_time as startDate,
+        t.evaluation_plan_end_time as endDate,
+        t.state as state,
+        t.create_org as orgId,
+        (select a.type from EVALUATION_TYPE a where a.id=t.evaluation_type_id) as type,
+        t.obj as obj,
+        t.CREATE_DEPT as createDept,
+        t.CREATE_DATE as createDate
+        from EVALUATION_PLAN t
+        where t.type ='3'
+        and t.del_flag='0'
+        union all
+        select t.evaluation_plan_id as id,
+        t.evaluation_plan_name as name,
+        t.evaluation_model_id as templetId,
+        t.evaluation_type_id as typeId,
+        (select (select count(*) from evaluation_socre s
+        where s.state =2
+        and s.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and s.obj!='4')+
+        (select count(*) from EVALUATION_SOCRE_RESULT r
+        where r.state =2
+        and r.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and r.obj!='4') from dual) as submit,
+        (select (select count(*) from evaluation_socre z
+        where z.state in (0,1,2)
+        and z.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and z.obj!='4')+
+        (select count(*) from EVALUATION_SOCRE_RESULT x
+        where x.state in (0,1,2)
+        and x.EVALUATION_PLAN_ID=t.evaluation_plan_id
+        and t.type in (1,2) and x.obj!='4') from dual) as unsubmit,
+        (select a.type_name
+        from evaluation_type a
+        where a.id = t.evaluation_type_id) as typeName,
+        t.self as self,
+        (select a.evaluation_start_type from EVALUATION_MODEL a
+        where a.evaluation_model_id=t.evaluation_model_id) as startType,
+        t.evaluation_plan_state_time as startDate,
+        t.evaluation_plan_end_time as endDate,
+        t.state as state,
+        t.create_org as orgId,
+        (select a.type from EVALUATION_TYPE a where a.id=t.evaluation_type_id) as type,
+        t.obj as obj,
+        t.CREATE_DEPT as createDept,
+        t.CREATE_DATE as createDate
+        from EVALUATION_PLAN t
+        where t.type in (1,2)
+        and t.del_flag='0'
+        )
+        where orgId = #{orgId}
+        and state='4'
+        <if test="name != null and name != ''">
+            and name like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="typeId != null and typeId != ''">
+            and typeId=#{typeId}
+        </if>
+        <if test="createDept != null and createDept != ''">
+            and (select f.dept_id from Org_Staff f where
+            f.persion_id=(select r.user_id from EVALUATION_SOCRE_RESULT r
+            where r.evaluation_plan_id=evaluation_plan_id and r.obj in ('1','2'))) in ( ${deptId} )
+        </if>
+        order by createDate desc
+
+    </select>
+    <!--根据obj查询考评主表-->
+    <select id="getScoreByObj" resultType="EvaluationScoreVo">
+        select s.socre_t_id          as id,
+               s.evaluation_plan_id  as planId,
+               s.evaluation_model_id as templetId,
+               s.user_id             as userId,
+               s.submit_date         as submitDate,
+               s.score               as score,
+               s.state               as state,
+               s.create_org          as orgId,
+               s.self                as self,
+               s.obj                 as obj,
+               s.dept_id             as deptId,
+               s.grade_by as gradeBy,
+               (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+               (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+          from evaluation_socre s
+         where s.evaluation_plan_id =#{planId}
+
+         and s.obj=#{obj}
+    </select>
+
+    <!--查询汇总成绩-->
+    <select id="getScore" resultType="EvaluationScoreVo">
+        select s.socre_t_id          as id,
+        s.evaluation_plan_id  as planId,
+        (select p.evaluation_plan_name from evaluation_plan p
+        where p.evaluation_plan_id=s.evaluation_plan_id) as planName,
+        s.evaluation_type_id  as typeId,
+        (select a.type_name from evaluation_type a
+        where a.id=s.evaluation_type_id) as typeName,
+        s.evaluation_model_id as templetId,
+        s.user_id             as userId,
+        s.submit_date         as submitDate,
+        nvl(s.score,0)        as score,
+        s.state               as state,
+        s.create_org          as orgId,
+        s.self                as self,
+        s.obj                 as obj,
+        s.dept_id             as deptId,
+        s.TOTAL_SCORE         as totalScore,
+        s.grade_by as gradeBy,
+        (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+        (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+        from evaluation_socre s
+        where s.evaluation_plan_id =#{planId}
+        and s.obj=#{obj}
+        or ((select p.type from evaluation_plan p where p.evaluation_plan_id=#{planId})=2 and obj=4
+        and s.evaluation_plan_id =#{planId})
+    </select>
+    <!--按权限获取成绩头表-->
+    <select id="getResultScore" resultType="EvaluationScoreVo">
+        select s.socre_t_id as id,
+        s.evaluation_plan_id as planId,
+        (select p.evaluation_plan_name from evaluation_plan p
+        where p.evaluation_plan_id=s.evaluation_plan_id) as planName,
+        s.evaluation_type_id as typeId,
+        (select a.type_name from evaluation_type a
+        where a.id=s.evaluation_type_id) as typeName,
+        s.evaluation_model_id as templetId,
+        s.user_id as userId,
+        s.submit_date as submitDate,
+        nvl(s.score,0) as score,
+        s.state as state,
+        s.create_org as orgId,
+        s.self as self,
+        s.obj as obj,
+        s.dept_id as deptId,
+        s.TOTAL_SCORE as totalScore,
+        s.grade_by as gradeBy,
+        (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+        (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+        from evaluation_socre_result s
+        where s.evaluation_plan_id =#{planId}
+        and s.obj=#{obj}
+        <if test="deptIds != null and deptIds != ''">
+            and (select f.dept_id from Org_Staff f where
+            f.persion_id=s.user_id and ) in ( ${deptIds} )
+        </if>
+
+
+    </select>
+
+    <!--getDeptScore-->
+    <select id="getDeptScore" resultType="EvaluationScoreVo">
+        select s.socre_t_id          as id,
+        s.evaluation_plan_id  as planId,
+        s.evaluation_model_id as templetId,
+        s.user_id             as userId,
+        s.submit_date         as submitDate,
+        s.score               as score,
+        s.state               as state,
+        s.create_org          as orgId,
+        s.self                as self,
+        s.obj                 as obj,
+        s.dept_id             as deptId,
+        s.grade_by as gradeBy,
+        (select z.name from PERSION_INFO z where z.id=s.grade_by) as gradeByName,
+        (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+        (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+        from ${tableName} s
+        where s.evaluation_plan_id=#{planId}
+        and s.dept_id=#{id}
+        and ((s.grade_by is not null and (select p.type from evaluation_plan p where p.evaluation_plan_id=s.evaluation_plan_id)='3')
+        or ((select p.type from evaluation_plan p where p.evaluation_plan_id=#{planId}) in ('1','2')))
+        and s.obj!='4'
+    </select>
+    <!--查询考评人员评分人员主表-->
+    <select id="getUserScore" resultType="EvaluationScoreVo">
+        select s.socre_t_id          as id,
+        s.evaluation_plan_id  as planId,
+        s.evaluation_model_id as templetId,
+        s.user_id             as userId,
+        s.submit_date         as submitDate,
+        s.score               as score,
+        s.state               as state,
+        s.create_org          as orgId,
+        s.self                as self,
+        s.obj                 as obj,
+        s.dept_id             as deptId,
+        s.grade_by as gradeBy,
+        (select z.name from PERSION_INFO z where z.id=s.grade_by) as gradeByName,
+        (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+        (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+        from ${tableName} s
+        where s.evaluation_plan_id=#{planId}
+        and s.obj!='4'
+        and s.user_id=#{id} and ((s.grade_by is not null and (select p.type from evaluation_plan p where p.evaluation_plan_id=#{planId})='3')
+        or ((select p.type from evaluation_plan p where p.evaluation_plan_id=#{planId}) in ('1','2')))
+    </select>
+    <!--查询发布成绩-->
+    <select id="getScoreResult" resultType="EvaluationScoreVo">
+       select s.socre_t_id          as id,
+        s.evaluation_plan_id  as planId,
+        (select p.evaluation_plan_name from evaluation_plan p
+        where p.evaluation_plan_id=s.evaluation_plan_id) as planName,
+        s.evaluation_type_id  as typeId,
+        (select a.type_name from evaluation_type a
+        where a.id=s.evaluation_type_id) as typeName,
+        s.evaluation_model_id as templetId,
+        s.user_id             as userId,
+        s.submit_date         as submitDate,
+        nvl(s.score,0)        as score,
+        s.state               as state,
+        s.create_org          as orgId,
+        s.self                as self,
+        s.obj                 as obj,
+        s.dept_id             as deptId,
+        s.TOTAL_SCORE         as totalScore,
+        s.grade_by as gradeBy,
+        (select t.name from PERSION_INFO t where t.id=s.user_id) as userName,
+        (select d.dept_name from DEPT_DICT d where d.id=s.dept_id) as deptName
+        from evaluation_socre_result s
+        where s.evaluation_plan_id =#{planId}
+        and s.obj=#{obj}
+    </select>
+    <!--获取考评标准-->
+    <select id="getDetail" resultType="EvaluationScoreDetailVo">
+        select a.SCORE_H_ID  as id,
+        a.SOCRE_T_ID  as tid,
+        a.EVALUATION_STANDARD_NAME  as name,
+        a.EVALUATION_STANDARD_CODE  as code,
+        a.EVALUATION_PROJECT_NAME   as pname,
+        a.EVALUATION_PROJECT_CODE   as pcode,
+        a.EVALUATION_PROJECT_SNAME  as sname,
+        a.EVALUATION_PROJECT_SCODE  as scode,
+        a.SCORE                     as score,
+        a.KPI     					as kpi,
+        a.SORT     					as sort,
+        a.RESULT_SCORE              as resultScore,
+        a.CREATE_DATE               as createDate,
+        a.CREATE_BY                 as createBy,
+        a.CREATE_ORG                as orgId,
+        (select t.name from PERSION_INFO t
+        where t.id=a.GRADE_BY )     as grade,
+        (select t.name from PERSION_INFO t
+        where t.id=a.UPDATE_BY )     as updateBy
+        from ${fieldName} a
+        where a.SOCRE_T_ID=#{id}
+        order by length(SORT),SORT
+    </select>
+    <!--获取考评对象为部门的评分-->
+    <select id="getScoreByDept" resultType="String">
+        select trunc((select avg(nvl(t.score,0))
+          from EVALUATION_SOCRE t
+         where t.evaluation_plan_id = #{planId}
+         and t.obj=3 and t.state='2'
+        and t.dept_id=#{deptId} ), 1) from dual
+    </select>
+    <!--获取考评对象为人员的评分-->
+    <select id="getScoreByUser" resultType="String">
+        select trunc((select avg(nvl(t.score,0))
+          from EVALUATION_SOCRE t
+         where t.evaluation_plan_id = #{planId}
+         and t.obj=3 and t.state='2'
+        and t.user_id=#{userId} ), 1) from dual
+    </select>
+    <insert id="insertScore" parameterType="String">
+        insert into EVALUATION_SOCRE_RESULT
+        select
+        SOCRE_T_ID,
+		EVALUATION_PLAN_ID,
+		EVALUATION_MODEL_ID,
+		USER_ID,
+		SUBMIT_DATE,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE,
+		CREATE_ORG,
+		SELF,
+		OBJ,
+		DEPT_ID,
+		GRADE_BY,
+		TOTAL_SCORE,
+		END_DAY,
+		EVALUATION_TYPE_ID,
+		CREATE_DEPT,
+		USER_NAME,
+        (select sysdate from dual)
+        from EVALUATION_SOCRE t
+       where t.evaluation_plan_id = #{planId}
+    </insert>
+    <insert id="insertScoreDetail" parameterType="String">
+        insert into SOCRE_DETAIL_RESULT
+        select *
+        from EVALUATION_SOCRE_DETAIL t
+       where t.evaluation_plan_id = #{planId}
+    </insert>
+    <update id="updateScore" parameterType="String">
+        UPDATE EVALUATION_SOCRE SET
+        SCORE=#{score}
+        WHERE  SOCRE_T_ID=#{id}
+    </update>
+    <update id="updatePlanState" parameterType="String">
+        UPDATE EVALUATION_PLAN SET
+        STATE='3'
+        WHERE  EVALUATION_PLAN_ID=#{planId}
+    </update>
+    <delete id="delScore" parameterType="String">
+        delete EVALUATION_SOCRE s
+        where s.evaluation_plan_id = #{planId}
+    </delete>
+    <delete id="delScoreDetail" parameterType="String">
+        delete EVALUATION_SOCRE_DETAIL s
+        where s.evaluation_plan_id in #{planId}
+    </delete>
+    <update id="publish" parameterType="String">
+        UPDATE EVALUATION_PLAN SET
+        STATE='4'
+        WHERE  EVALUATION_PLAN_ID=#{planId}
+    </update>
+    <update id="delPlan" parameterType="EvaluationPlan">
+        UPDATE EVALUATION_PLAN SET
+        del_flag='1'
+        WHERE  EVALUATION_PLAN_ID=#{id}
+    </update>
+    <delete id="delPlanScore" parameterType="EvaluationPlan">
+        delete EVALUATION_SOCRE s
+        where s.evaluation_plan_id=#{id}
+    </delete>
+    <delete id="delPlanScoreDetail" parameterType="EvaluationPlan">
+        delete EVALUATION_SOCRE_DETAIL s
+        where s.evaluation_plan_id=#{id}
+    </delete>
+    <delete id="delPlanStandard" parameterType="EvaluationPlan">
+        delete EVALUATION_PLAN_STANDARD s
+        where s.EVALUATION_MODEL_ID=#{id}
+    </delete>
+</mapper>

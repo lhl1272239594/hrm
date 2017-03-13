@@ -1,0 +1,8 @@
+*.iml
+.idea/
+.idea
+/*.iml
+/jims-web/*.iml
+/jims-api/*.iml
+/jims-service/*.iml
+/jims-service/src/main/resources/jims.properties

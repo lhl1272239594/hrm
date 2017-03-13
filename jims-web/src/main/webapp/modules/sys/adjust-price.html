@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>价表调价</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../static/easyui/css/icon.css">
+
+    <style>
+        .aaa{
+            padding: 5px 5px 5px 30px;
+        }
+        .aaa td {
+            padding: 4px;
+        }
+        .validatebox-text {
+            width: 171px;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body class="easyui-layout">
+<div class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north'" style="height:55%;">
+        <table id="priceList"></table>
+        <div id="tb" style="padding:5px;">
+            <!--类别-->
+            <!--<input id="itemClass" name="itemClass" class="easyui-combobox">-->
+            <!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+            <label style="margin-left: 20px" for="itemName" id="code_text">项目名称定位:</label>
+            <input id="itemName" type="text" class="easyui-validatebox" onChange="load_data(this.value);" style="width: 153px;height:18px">
+            <span id="res-name"></span>
+        </div>
+    </div>
+    <!--<div data-options="region:'south'" style="height:50px;min-height: 50px">-->
+        <!--<div style="padding-left: 180px;padding-top: 8px" align="center">-->
+        <!--</div>-->
+    <!--</div>-->
+    <div data-options="region:'west'" title="原价" style="width:50%">
+        <table id="original_price" class="aaa">
+            <tr>
+                <td>项目名称:</td>
+                <td><input id="item_name" type="text" class="easyui-textbox"></td>
+            </tr>
+            <tr>
+                <td>基本价格:</td>
+                <td><input id="basic_price" type="text" class="easyui-textbox"></td>
+            </tr>
+            <tr>
+                <td>优惠价格:</td>
+                <td><input id="prefer_price" type="text" class="easyui-textbox"></td>
+            </tr>
+            <tr>
+                <td>外宾价格:</td>
+                <td><input id="foreigner_price" type="text" class="easyui-textbox"></td>
+            </tr>
+            <tr>
+                <td>启用日期:</td>
+                <td><input id="start_date" type="text" class="easyui-textbox"></td>
+            </tr>
+        </table>
+    </div>
+    <div data-options="region:'center',title:'调价'">
+        <table id="modify_price" class="aaa">
+            <tr>
+                <td>项目名称:</td>
+                <td><input id="item-name" type="text" class="easyui-textbox" style="width: 171px;height: 20px"></td>
+            </tr>
+            <tr>
+                <td>基本价格:</td>
+                <td><input id="modify_basic_price" type="text" class="easyui-numberbox" value="0.00"></td>
+            </tr>
+            <tr>
+                <td>优惠价格:</td>
+                <td><input id="modify_prefer_price" type="text" class="easyui-numberbox" value="0.00"></td>
+            </tr>
+            <tr>
+                <td>外宾价格:</td>
+                <td><input id="modify_foreigner_price" type="text" class="easyui-numberbox" value="0.00"></td>
+            </tr>
+            <tr>
+                <td>调价依据:</td>
+                <td><input id="changedMemo" type="text" class="easyui-textbox" style="width: 171px;height: 20px"></td>
+            </tr>
+            <tr>
+                <td>启用日期:</td>
+                <td><input id="start-date" type="text" class="easyui-textbox" style="width: 171px;height: 20px"></td>
+            </tr>
+        </table>
+        <div class="own-button-right">
+            <a href="#" id="save_data" class="easyui-linkbutton" iconCls="icon-save">保存</a>
+            <a href="#" id="clear" class="easyui-linkbutton" iconCls="icon-remove">清空</a>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript" src="../../static/jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="../../static/easyui/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../../static/js/spell.js"></script>
+<script type="text/javascript" src="/static/js/head.js"></script>
+<script type="text/javascript" src="../../modules/sys/js/adjust-price.js"></script>
+</body>
+</html>

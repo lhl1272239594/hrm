@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.peinfo.dao.PeInfoDao">
+
+    <!--我的信息-->
+    <select id="getmyinfo" resultType="MyInfo">
+      select o.id, o.pic as pic,
+       o.age as age,o.role as roleName,
+       (select t.label
+          from SYS_DICT t
+         where t.value = o.politic
+           and t.type = 'POLITIC_DICT'
+           and t.del_flag = '0'
+           and rownum = 1) as politic,
+      (select t.label
+          from SYS_DICT t
+         where t.value = a.title
+           and t.type = 'TITLE_DICT'
+           and t.del_flag = '0'
+           and rownum = 1) as title,
+      (select t.label
+          from SYS_DICT t
+         where t.value = o.title_level
+           and t.type = 'TITLE_LEVEL'
+           and t.del_flag = '0'
+           and rownum = 1) as title_level,
+      (select t.label
+          from SYS_DICT t
+         where t.value = o.type
+           and t.type = 'HUMAN_TYPE'
+           and t.del_flag = '0'
+           and rownum = 1) as type,
+      (select t.label
+          from SYS_DICT t
+         where t.value = o.classify
+           and t.type = 'HUMAN_CLASSIFY'
+           and t.del_flag = '0'
+           and rownum = 1) as classify,
+        (select t.SKILL
+          from HUMAN_SKILL t
+         where t.SKILL_ID = o.SKILL_ID
+           and rownum = 1) as skill,
+        (select t.LEVEL_NAME
+          from HUMAN_SKILL_LEVEL t
+         where t.LEVEL_ID = o.SKILL_LEVEL_ID
+           and rownum = 1) as skillLevel,
+       (select t.label
+          from SYS_DICT t
+         where t.value = o.education
+           and t.type = 'EDUCATION_DICT'
+           and t.del_flag = '0'
+           and rownum = 1) as education,
+       (select t.label
+      from SYS_DICT t
+     where t.value = o.education_final
+       and t.type = 'EDUCATION_DICT'
+       and t.del_flag = '0'
+       and rownum = 1) as educationFinal,
+       o.education_time as educationTime,
+       o.education_final_time as educationFinalTime,
+       decode(o.marry,'0','未婚','1','已婚','','') as marry,
+       (nvl(o.work_time,'')||nvl(o.work_time,'')) as workTime,
+       o.address as address,
+       o.exp as exp,
+       o.remark as remark,o.name as name,(select t.label from SYS_DICT t where t.value=o.sex and t.type='SEX_DICT' and t.del_flag='0' and rownum=1) as sex,
+(select t.label from SYS_DICT t where t.value=o.nation and t.type='NATION_DICT' and t.del_flag='0' and rownum=1) as mz,o.card_no as sfz,o.input_code,o.phone_num as dh,o.email as email,o.nick_name, a.dept_name as bm,
+ a.org_name as jg,
+ (select le.role_name from ORG_ROLE le where le.id=(select e.role_id from staff_vs_role e where e.staff_id = a.id and a.org_id=#{1} and rownum=1) and rownum=1) as zw
+  from PERSION_INFO o,
+       (select f.id,f.org_id,f.persion_id,f.title,
+               (select t.dept_name from DEPT_DICT t where t.id = f.dept_id and rownum=1) dept_name,
+               (select y.org_name from SYS_COMPANY y where y.id = f.org_id and rownum=1) org_name
+          from ORG_STAFF f) a
+ where o.id =#{0}
+   and o.id = a.persion_id
+   and o.del_flag != '1'
+
+
+    </select>
+
+    <!--人员综合查询-->
+    <select id="findHumanList" resultType="MyInfo">
+        SELECT
+        p.id,p.name,p.sex,p.card_no,p.phone_num,p.email,p.nick_name,p.nation,p.age,p.type,p.classify,p.education,p.education_final as educationFinal,
+        p.education_time as educationTime,p.education_final_time as educationFinalTime,p.politic as politic,p.work_time as workTime,p.come_time as comeTime,p.marry,p.pic,
+        p.address,p.exp,p.remark,p.title_level as titleLevel,p.skill_id as skill,
+        (select skill from human_skill t where t.skill_id=p.skill_id and rownum=1) AS skillName,
+        p.skill_level_id as skillLevel,
+        (select level_name from human_skill_level t where t.level_id=p.skill_level_id and rownum=1) AS levelName,
+        p.salary_level as typeId,(select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=p.salary_level and rownum=1) AS typeName,
+        p.role as roleName,o.title,o.id as staffId,
+        CEIL((sysdate-to_date(p.age,'yyyy-mm-dd'))/365) as age3,
+        o.dept_id as deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=o.DEPT_ID and rownum=1) AS dept
+        FROM org_staff o,persion_info p
+        WHERE o.persion_id=p.id
+        <if test="deptId != null and deptId != ''">
+            and ((o.dept_id=#{deptId}) OR ((select parent_id from DEPT_DICT where id = o.dept_id)=#{deptId} ))
+        </if>
+        <if test="name != null and name != ''">
+            and (select NAME from PERSION_INFO t where t.ID=p.ID and rownum=1) like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="cardNo != null and cardNo != ''">
+            and p.card_no like CONCAT('%',CONCAT(#{cardNo},'%'))
+        </if>
+        <if test="roleName != null and roleName != '' and roleName !='全部' ">
+            and p.role = #{roleName}
+        </if>
+        <if test="sex != null and sex !='' and sex !='ALL' ">
+            and p.sex = #{sex}
+        </if>
+        <if test="title != null and title !='' and title !='ALL' ">
+            and o.title = #{title}
+        </if>
+        <if test="titleLevel != null and titleLevel !='' and titleLevel !='ALL' ">
+            and p.title_level = #{titleLevel}
+        </if>
+        <if test="age1 != null and age1 != ''">
+            and (select CEIL((sysdate-to_date(p.age,'yyyy-mm-dd'))/365) from dual)>=to_number(#{age1})
+        </if>
+        <if test="age2 != null and age2 != ''">
+            and to_number(#{age2})>=(select CEIL((sysdate-to_date(p.age,'yyyy-mm-dd'))/365) from dual)
+        </if>
+        <if test="type != null and type !='' and type !='ALL' ">
+            and p.type = #{type}
+        </if>
+        <if test="classify != null and classify !='' and classify !='ALL' ">
+            and p.classify = #{classify}
+        </if>
+        <if test="education != null and education !='' and education !='ALL' ">
+            and p.education = #{education}
+        </if>
+        <if test="educationFinal != null and educationFinal !='' and educationFinal !='ALL' ">
+            and p.education_final = #{educationFinal}
+        </if>
+        <if test="politic != null  and politic !='' and politic !='ALL' ">
+            and p.politic = #{politic}
+        </if>
+        <if test="skill != null and skill !='' and skill !='ALL' ">
+            and p.skill_id = #{skill}
+        </if>
+        <if test="level != null and level !='' and level !='ALL' ">
+            and p.skill_level_id = #{level}
+        </if>
+        <if test="salaryLevel != null and salaryLevel !=''  ">
+            and p.salary_level = #{salaryLevel}
+        </if>
+        <if test="marry != null and marry !='' and marry !='ALL' ">
+            and p.marry = #{marry}
+        </if>
+        <if test="nation != null and nation !='' and nation !='ALL' ">
+            and p.nation = #{nation}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and o.dept_id in ( ${deptIds} )
+        </if>
+        and o.org_id=#{orgId}
+        and o.persion_id=p.id and o.del_flag='0' and p.del_flag='0'
+
+    </select>
+
+    <!--人员综合查询（登录人）-->
+    <select id="findHumanList1" resultType="MyInfo">
+        SELECT
+        p.id,p.name,p.sex,p.card_no,p.phone_num,p.email,p.nick_name,p.nation,p.age,p.type,p.classify,p.education,p.education_final as educationFinal,
+        p.education_time as educationTime,p.education_final_time as educationFinalTime,p.politic as politic,p.work_time as workTime,p.come_time as comeTime,p.marry,p.pic,
+        p.address,p.exp,p.remark,p.title_level as titleLevel,p.skill_id as skill,
+        (select skill from human_skill t where t.skill_id=p.skill_id and rownum=1) AS skillName,
+        p.skill_level_id as skillLevel,
+        (select level_name from human_skill_level t where t.level_id=p.skill_level_id and rownum=1) AS levelName,
+        p.salary_level as typeId,(select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=p.salary_level and rownum=1) AS typeName,
+        p.role as roleName,o.title,o.id as staffId,
+        CEIL((sysdate-to_date(p.age,'yyyy-mm-dd'))/365) as age3,
+        o.dept_id as deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=o.DEPT_ID and rownum=1) AS dept
+        FROM org_staff o,persion_info p
+        WHERE o.persion_id=p.id
+
+        and o.org_id=#{1} and p.id = #{0}
+        and o.persion_id=p.id and o.del_flag='0' and p.del_flag='0'
+
+    </select>
+
+    <!--删除人员-->
+    <update id="deleteByPid">
+        UPDATE org_staff SET
+        del_flag ='1'
+        WHERE persion_id = #{1}
+    </update>
+
+        <!--重置密码-->
+    <update id="back" parameterType="String" >
+        UPDATE SYS_USER SET
+        PASSWORD = '888888'
+
+        WHERE PERSION_ID = #{staffId}
+    </update>
+
+    <!--查询人员技能列表-->
+    <select id="skillList" resultType="HumanSkill">
+        select
+        a.SKILL_ID AS skillId,
+        a.SKILL AS skill,
+        a.CREATE_ORG AS orgId,
+        a.DEL_FLAG AS delFlag,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM HUMAN_SKILL a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--判断人员技能是否已存在-->
+    <select id="findSkillsame" resultType="HumanSkill">
+        SELECT count(*) num
+        FROM HUMAN_SKILL t
+        WHERE t.create_org=#{orgId}
+        and  t.skill =#{skill}
+        <if test="skillId != null and skillId != ''">
+            and t.SKILL_ID != #{skillId}
+        </if>
+        and t.del_flag is NULL
+    </select>
+
+    <!--批量删除人员技能-->
+    <update id="deleteSkill" parameterType="HumanSkill">
+        UPDATE HUMAN_SKILL t
+        SET t.DEL_FLAG = '1'
+        WHERE t.SKILL_ID = #{HumanSkill.skillId}
+    </update>
+
+    <!--新增-->
+    <insert id="insertSkill">
+        INSERT INTO HUMAN_SKILL(
+        SKILL_ID,
+        SKILL,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{HumanSkill.skill},
+        #{HumanSkill.orgId},
+        #{HumanSkill.createDept},
+        #{HumanSkill.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateSkill">
+        UPDATE HUMAN_SKILL SET
+        SKILL = #{HumanSkill.skill},
+        UPDATE_BY = #{HumanSkill.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE SKILL_ID = #{HumanSkill.skillId}
+    </update>
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="HumanSkill">
+        SELECT count(*) num
+        FROM HUMAN_SKILL_LEVEL t
+        WHERE t.create_org=#{HumanSkill.orgId}
+        and  t.skill_id =#{HumanSkill.skillId}
+        and t.del_flag is NULL
+    </select>
+
+    <!--人员技能下拉框带回-->
+    <select id="skillDownlist" resultType="HumanSkill">
+        SELECT t.skill_id as skillId,t.skill as skill
+        FROM HUMAN_SKILL t
+        WHERE t.create_org=#{orgId}
+        and t.del_flag is null order by t.create_date desc
+    </select>
+    <select id="skillDownlist1" resultType="HumanSkill">
+        SELECT 'ALL' as skillId,'全部' as skill
+        FROM dual
+        UNION ALL
+        SELECT t.skill_id as skillId,t.skill as skill
+        FROM HUMAN_SKILL t
+        WHERE t.create_org=#{orgId}
+        and t.del_flag is null
+    </select>
+    <!--技能等级联动下拉框带回-->
+    <select id="levelDownlist" resultType="HumanSkill">
+        SELECT t.level_id as levelId,t.level_name as "level"
+        FROM HUMAN_SKILL_LEVEL t
+        WHERE t.create_org=#{orgId} and t.SKILL_ID = #{skillId}
+        and t.del_flag is null
+    </select>
+    <select id="levelDownlist1" resultType="HumanSkill">
+        SELECT 'ALL' as levelId,'全部' as "level"
+        FROM dual
+        UNION ALL
+        SELECT t.level_id as levelId,t.level_name as "level"
+        FROM HUMAN_SKILL_LEVEL t
+        WHERE t.create_org=#{orgId} and t.SKILL_ID = #{skillId}
+        and t.del_flag is null
+    </select>
+
+    <select id="findList" resultType="HumanSkill">
+        select
+        ssi.LEVEL_ID as levelId,
+        ssi.LEVEL_NAME as "level",
+        ssi.SKILL_ID as skillId,
+        (select SKILL from HUMAN_SKILL t where t.SKILL_ID=ssi.SKILL_ID and rownum=1) AS skill,
+        ssi.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=ssi.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=ssi.CREATE_BY and rownum=1) AS createBy,
+        ssi.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=ssi.UPDATE_BY and rownum=1) AS updateBy,
+        ssi.UPDATE_DATE AS updateDate
+        from HUMAN_SKILL_LEVEL ssi
+        where ssi.del_flag is null
+        and ssi.CREATE_ORG=#{orgId}
+        ORDER BY ssi.SKILL_ID,ssi.CREATE_DATE DESC
+    </select>
+
+    <!--判断是否已存在-->
+    <select id="findSame" resultType="HumanSkill">
+        SELECT count(*) num
+        FROM HUMAN_SKILL_LEVEL t
+        WHERE t.create_org=#{orgId}
+        and  t.LEVEL_NAME =#{level}
+        and  t.SKILL_ID =#{skillId}
+        <if test="levelId != null and levelId != ''">
+            and t.LEVEL_ID != #{levelId}
+        </if>
+        and t.del_flag is null
+    </select>
+    <!--新增人员技能-->
+    <insert id="insertPrimary">
+        INSERT INTO HUMAN_SKILL_LEVEL(
+        LEVEL_ID,
+        LEVEL_NAME,
+        SKILL_ID,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT
+        ) VALUES (
+        sys_guid(),
+        #{HumanSkill.level},
+        #{HumanSkill.skillId},
+        #{HumanSkill.createBy},
+        sysdate,
+        #{HumanSkill.orgId},
+        #{HumanSkill.createDept}
+        )
+    </insert>
+    <!--更新人员技能-->
+    <update id="updatePrimary">
+        UPDATE HUMAN_SKILL_LEVEL SET
+        LEVEL_NAME = #{HumanSkill.level},
+        SKILL_ID = #{HumanSkill.skillId},
+        UPDATE_BY = #{HumanSkill.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE LEVEL_ID = #{HumanSkill.levelId}
+    </update>
+    <!--删除人员技能-->
+    <update id="delPrimary" >
+        UPDATE HUMAN_SKILL_LEVEL SET
+        del_flag = '1'
+        WHERE LEVEL_ID = #{dataId}
+    </update>
+    <!--删除工作经历-->
+    <update id="delExp" >
+        DELETE  FROM  HUMAN_WORK_EXP
+        WHERE PERSON_ID = #{personId} and CREATE_ORG = #{orgId}
+    </update>
+    <!--删除工作经历-->
+    <delete id="delForeign" parameterType="String">
+        DELETE FROM HUMAN_WORK_EXP t
+        WHERE t.EXP_ID = #{expId}
+    </delete>
+    <!--新增工作经历-->
+    <insert id="insertForeign">
+        INSERT INTO HUMAN_WORK_EXP(
+        EXP_ID,
+        PERSON_ID,
+        START_TIME,
+        END_TIME,
+        UNIT,
+        POST,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT
+        ) VALUES (
+        sys_guid(),
+        #{personId},
+        #{startTime},
+        #{endTime},
+        #{unit},
+        #{post},
+        #{createBy},
+        sysdate,
+        #{orgId},
+        #{createDept}
+        )
+    </insert>
+    <!--更新工作经历-->
+    <update id="updateForeign">
+        UPDATE HUMAN_WORK_EXP
+        set START_TIME=#{startTime},
+        END_TIME=#{endTime},
+        UNIT=#{unit},
+        POST=#{post} where EXP_ID = #{expId}
+    </update>
+    <!--工作经历经历-->
+    <select id="workExplist" resultType="MyInfo">
+        SELECT t.exp_id as expId,t.start_time as startTime,t.end_time as endTime,t.unit as unit,t.post as post
+        FROM HUMAN_WORK_EXP t
+        WHERE t.create_org=#{orgId}
+        and t.person_id = #{personId} order by to_date(t.start_time,'yyyy-mm-dd')
+    </select>
+    <!--删除社会关系-->
+    <update id="delRel" >
+        DELETE  FROM  HUMAN_RELATIONSHIP
+        WHERE PERSON_ID = #{personId} and CREATE_ORG = #{orgId}
+    </update>
+    <!--删除社会关系-->
+    <delete id="delForeign1" parameterType="String">
+        DELETE FROM HUMAN_RELATIONSHIP t
+        WHERE t.REL_ID = #{relId}
+    </delete>
+    <!--新增社会关系-->
+    <insert id="insertForeign1">
+        INSERT INTO HUMAN_RELATIONSHIP(
+        REL_ID,
+        PERSON_ID,
+        RELATIONSHIP,
+        AGE,
+        NAME,
+        UNIT,
+        POST,
+        HEALTH,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT
+        ) VALUES (
+        sys_guid(),
+        #{MyInfo.personId},
+        #{MyInfo.relationship},
+        #{MyInfo.relAge},
+        #{MyInfo.relName},
+        #{MyInfo.relUnit},
+        #{MyInfo.relPost},
+        #{MyInfo.health},
+        #{MyInfo.createBy},
+        sysdate,
+        #{MyInfo.orgId},
+        #{MyInfo.createDept}
+        )
+    </insert>
+    <!--更新社会关系-->
+    <update id="updateForeign1">
+        UPDATE HUMAN_RELATIONSHIP SET
+        RELATIONSHIP=#{MyInfo.relationship},
+        AGE=#{MyInfo.relAge},
+        NAME= #{MyInfo.relName},
+        UNIT=#{MyInfo.relUnit},
+        POST= #{MyInfo.relPost},
+        HEALTH=#{MyInfo.health}
+        where REL_ID=#{MyInfo.relId}
+    </update>
+    <!--社会关系列表-->
+    <select id="rellist" resultType="MyInfo">
+        SELECT t.rel_id as relId,t.relationship as relationship,t.name as relName,t.age as relAge,t.unit as relUnit,t.post as relPost,t.health as health
+        FROM HUMAN_RELATIONSHIP t
+        WHERE t.create_org=#{orgId}
+        and t.person_id = #{personId} order by t.create_Date
+    </select>
+</mapper>

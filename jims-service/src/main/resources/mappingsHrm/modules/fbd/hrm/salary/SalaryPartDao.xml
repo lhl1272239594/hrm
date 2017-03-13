@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryPartDao">
+
+
+    <!--查询工资组成列表-->
+    <select id="partList" resultType="SalaryPart">
+        select
+        a.PART_ID AS partId,
+        a.PART_NAME AS partName,
+        a.FLAG AS flag,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_PART a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="partName != null and partName != ''">
+            and a.PART_NAME like CONCAT('%',CONCAT(#{partName},'%'))
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_PART t
+        SET t.ENABLE_FLAG = '1'
+        WHERE t.PART_ID = #{partId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_PART t
+        SET t.ENABLE_FLAG = '0'
+        WHERE t.PART_ID = #{partId}
+    </update>
+    <!--匹配社保基数(选中置1)-->
+    <update id="match_part" parameterType="SalaryPart">
+        UPDATE SALARY_PART t
+        SET t.FLAG = '1',
+        t.UPDATE_DATE = sysdate,
+        t.UPDATE_BY = #{SalaryPart.updateBy}
+        WHERE t.PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--联动将工资计算公式中该部分FLAG置1-->
+    <update id="match_part_cal" parameterType="SalaryPart">
+        UPDATE SALARY_CALCULATE t
+        SET t.FLAG = '1'
+        WHERE t.PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--匹配社保基数(未选中置0)-->
+    <update id="match_part_other" parameterType="SalaryPart">
+        UPDATE SALARY_PART t
+        SET t.FLAG = '0'
+
+        WHERE t.PART_ID != #{SalaryPart.partId}
+    </update>
+    <!--恢复普通工资-->
+    <update id="back" parameterType="SalaryPart" >
+        UPDATE SALARY_PART SET
+        FLAG = #{SalaryPart.flag},
+        UPDATE_BY = #{SalaryPart.updateBy},
+        UPDATE_DATE = #{SalaryPart.updateDate}
+        WHERE PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--联动将工资计算公式普通工资flag置为0-->
+    <update id="back_cal" parameterType="SalaryPart" >
+        UPDATE SALARY_CALCULATE SET
+        FLAG = '0'
+        WHERE PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--启用停用-->
+    <update id="enableFlag" parameterType="SalaryPart" >
+        UPDATE SALARY_PART SET
+        ENABLE_FLAG = #{SalaryPart.enableFlag}
+        WHERE PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--批量删除-->
+    <update id="deletePart" parameterType="SalaryPart">
+        UPDATE SALARY_PART t
+        SET t.DEL_FLAG = '1'
+        WHERE t.PART_ID = #{SalaryPart.partId}
+    </update>
+    <!--删除-->
+    <update id="delete">
+        UPDATE SALARY_PART t
+        SET t.DEL_FLAG = '1'
+        WHERE t.PART_ID = #{partId}
+    </update>
+    <!--判断是否已存在-->
+    <select id="findPartsame" resultType="SalaryPart">
+        SELECT count(*) num
+        FROM SALARY_PART t
+        WHERE t.create_org=#{orgId}
+        and  t.part_name =#{partName}
+        <if test="partId != null and partId != ''">
+            and t.PART_ID != #{partId}
+        </if>
+        and t.del_flag is NULL
+    </select>
+    <!--判断社保基数是否已存在-->
+    <select id="findSbsame" resultType="SalaryPart">
+        SELECT count(*) num
+        FROM SALARY_PART t
+        WHERE t.create_org=#{orgId}
+        and t.flag ='1'
+        and t.del_flag is NULL
+    </select>
+    <!--新增-->
+    <insert id="insertPart">
+        INSERT INTO SALARY_PART(
+        PART_ID,
+
+        PART_NAME,
+        ENABLE_FLAG,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+
+        #{salaryPart.partName},
+        '1',
+        #{salaryPart.orgId},
+        #{salaryPart.createDept},
+        #{salaryPart.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updatePart">
+        UPDATE SALARY_PART SET
+        PART_NAME = #{salaryPart.partName},
+        UPDATE_BY = #{salaryPart.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE PART_ID = #{salaryPart.partId}
+    </update>
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="SalaryPart">
+        SELECT count(*) num
+        FROM SALARY_CALCULATE t
+        WHERE t.create_org=#{SalaryPart.orgId}
+        and  t.part_id =#{SalaryPart.partId}
+        and t.del_flag is NULL
+    </select>
+
+</mapper>

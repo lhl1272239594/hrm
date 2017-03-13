@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.TempAttendanceDao">
+
+
+    <select id="findList" resultType="TempAttendancePerson">
+        select
+        ta.temp_attendance_id as "tempAttId",
+        ta.temp_attendance_date as "tempAttDate",
+        ta.start_time as "startTime",
+        ta.end_time as "endTime",
+        ta.adjust_start_time as "adjustStartTime",
+        ta.adjust_end_time as "adjustEndTime",
+        ta.temp_attendance_name as "tempAttName",
+        ta.temp_attendance_place as "tempAttPlace",
+        wmsys.wm_concat(pi.NAME) as userName,
+        to_char(to_date(ta.start_time,'HH24:MI') +ta.adjust_start_time/(24*60),'hh24:mi') as "effectiveCheckInTime",
+        to_char(to_date(ta.end_time,'HH24:MI') +ta.adjust_end_time/(24*60),'hh24:mi') as "effectiveCheckOutTime",
+        sign(sysdate - to_date( (to_char(ta.temp_attendance_date, 'YYYY-MM-DD') || ' ' || to_char(to_date(ta.start_time, 'HH24:MI') + ta.adjust_start_time / (24 * 60), 'HH24:MI:SS')), 'YYYY-MM-DD HH24:MI:SS'))
+        as "statusType",
+        pi2.NAME as "createBy",
+        ta.CREATE_DATE as "createDate"
+        from TEMP_ATTENDANCE ta
+        left join TEMP_ATTENDANCE_PERSON tap
+        on ta.temp_attendance_id = tap.temp_attendance_id
+        and tap.del_flag = '0'
+        left join PERSION_INFO pi
+        on tap.user_id = pi.id
+        left join PERSION_INFO pi2
+        on tap.CREATE_BY = pi2.id
+        where ta.del_flag = '0'
+        and ta.create_org = #{createOrg}
+        <if test="tempAttName != null and tempAttName != ''">
+            and ta.temp_attendance_name LIKE CONCAT(CONCAT('%', #{tempAttName}),'%')
+        </if>
+        group by
+        ta.temp_attendance_id,
+        ta.start_time,
+        ta.end_time,
+        ta.adjust_start_time,
+        ta.adjust_end_time,
+        ta.temp_attendance_name,
+        ta.temp_attendance_date,
+        pi2.NAME,
+        ta.CREATE_DATE,
+        ta.temp_attendance_place,
+        (to_char(to_date(ta.start_time,'HH24:MI') +ta.adjust_start_time/(24*60),'hh24:mi')),
+        (to_char(to_date(ta.end_time,'HH24:MI') +ta.adjust_end_time/(24*60),'hh24:mi')),
+        sign(sysdate - to_date( (to_char(ta.temp_attendance_date, 'YYYY-MM-DD') || ' ' || to_char(to_date(ta.start_time, 'HH24:MI') + ta.adjust_start_time / (24 * 60), 'HH24:MI:SS')), 'YYYY-MM-DD HH24:MI:SS'))
+        ORDER BY ta.create_date desc
+    </select>
+    <select id="findPerson" resultType="TempAttendancePerson">
+        select
+        ta.real_check_in_time as "realCheckInTime",
+        ta.real_check_out_time as "realCheckOutTime",
+        ta.temp_attendance_id as "tempAttId",
+        to_char(to_date(ta.start_time,'HH24:MI') +ta.adjust_start_time/(24*60),'hh24:mi') as "effectiveCheckInTime",
+        to_char(to_date(ta.end_time,'HH24:MI') +ta.adjust_end_time/(24*60),'hh24:mi') as "effectiveCheckOutTime",
+        ta.temp_attendance_id   as "tempAttId",
+        ta.adjust_start_time as "adjustStartTime",
+        ta.adjust_end_time as "adjustEndTime",
+        pi.id                   as "userId",
+        pi.name as "userName",
+        dd.dept_name as "deptName",
+        tap.user_dept           as "deptId",
+        ta.start_time           as "startTime",
+        ta.end_time             as "endTime",
+        ta.temp_attendance_name as "tempAttendanceName",
+        ta.CREATE_BY            as "createBy",
+        ta.CREATE_DATE          as "createDate"
+        from TEMP_ATTENDANCE ta
+        left join TEMP_ATTENDANCE_PERSON tap
+        on ta.temp_attendance_id = tap.temp_attendance_id
+        and tap.del_flag = '0'
+        left join PERSION_INFO pi
+        on tap.user_id = pi.id
+        left join DEPT_DICT dd
+        on tap.user_dept = dd.id
+        where ta.del_flag = '0'
+        and ta.create_org = #{createOrg}
+        and ta.temp_attendance_id=#{tempAttId}
+        ORDER BY ta.create_date desc
+    </select>
+
+
+    <insert id="insertPrimary">
+		INSERT INTO TEMP_ATTENDANCE(
+		temp_attendance_id,
+		start_time,
+		end_time,
+		adjust_start_time,
+		adjust_end_time,
+		temp_attendance_name,
+		temp_attendance_place,
+		temp_attendance_date,
+        create_by,
+        create_dept,
+        create_org,
+        create_date,
+		del_flag
+		) VALUES (
+		#{tempAttId},
+		#{startTime},
+		#{endTime},
+		#{adjustStartTime},
+		#{adjustEndTime},
+		#{tempAttName},
+		#{tempAttPlace},
+		to_date(#{tempAttDate},'YYYY-MM-DD'),
+		#{createBy},
+		#{createDept},
+		#{createOrg},
+		sysdate,
+		'0'
+		)
+	</insert>
+    <insert id="insertForeign">
+        INSERT INTO TEMP_ATTENDANCE_PERSON(
+        temp_attendance_person_id,
+        temp_attendance_id,
+        user_id,
+        user_dept,
+        create_by,
+        create_dept,
+        create_org,
+        create_date,
+        del_flag
+        ) VALUES (
+        #{tempAttPersonId},
+        #{tempAttId},
+        #{userId},
+        #{deptId},
+        #{createBy},
+        #{createDept},
+        #{createOrg},
+        sysdate,
+        '0'
+        )
+    </insert>
+    <update id="updatePrimary">
+        UPDATE TEMP_ATTENDANCE SET
+        adjust_start_time=#{adjustStartTime},
+		adjust_end_time=#{adjustEndTime},
+		start_time=#{startTime},
+		end_time=#{endTime},
+		temp_attendance_name=#{tempAttName},
+		temp_attendance_place=#{tempAttPlace},
+		temp_attendance_date=to_date(#{tempAttDate},'YYYY-MM-DD')
+        WHERE temp_attendance_id = #{tempAttId}
+    </update>
+    <update id="delPrimary" parameterType="TempAttendancePerson">
+        UPDATE TEMP_ATTENDANCE t
+        SET t.DEL_FLAG = '1'
+        WHERE t.temp_attendance_id = #{tempAttId}
+    </update>
+    <update id="delForeign" parameterType="TempAttendancePerson">
+		UPDATE TEMP_ATTENDANCE_PERSON t
+		SET t.DEL_FLAG = '1'
+		WHERE t.temp_attendance_id = #{tempAttId}
+	</update>
+    <select id="findBoolean" resultType="TempAttendancePerson">
+        SELECT count(*) num
+        FROM TEMP_ATTENDANCE ta
+        WHERE ta.create_org=#{createOrg}
+        and ta.temp_attendance_place=#{tempAttPlace}
+        and ta.temp_attendance_date=to_date(#{tempAttDate},'YYYY-MM-DD')
+       <![CDATA[
+         and not
+        (
+        to_date((to_char(ta.temp_attendance_date, 'YYYY-MM-DD')||' '||ta.start_time),'YYYY-MM-DD HH24:MI')
+        >=
+        to_date((#{tempAttDate}||' '||#{endTime}),'YYYY-MM-DD HH24:MI')
+        or
+        to_date((to_char(ta.temp_attendance_date, 'YYYY-MM-DD')||' '||ta.end_time),'YYYY-MM-DD HH24:MI')
+        <=
+        to_date((#{tempAttDate}||' '||#{startTime}),'YYYY-MM-DD HH24:MI')
+        )
+        ]]>
+        <if test="tempAttId != '999'">
+            and ta.temp_attendance_id !=#{tempAttId}
+        </if>
+        and ta.DEL_FLAG='0'
+    </select>
+
+</mapper>

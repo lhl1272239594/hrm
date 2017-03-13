@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.OrgRoleDao">
+
+    <sql id="orgRoleColumns">
+		a.id AS "id",
+		a.org_id AS "orgId",
+		a.role_name AS "roleName",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy.id",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+
+    <sql id="orgRoleJoins">
+    </sql>
+
+
+    <select id="get" resultType="OrgRole">
+        SELECT
+        *
+        FROM org_role a
+
+        WHERE a.id = #{id}
+        AND a.del_flag = '0'
+</select>
+
+    <select id="findByName" resultType="OrgRole">
+        SELECT
+        *
+        FROM org_role a
+
+        WHERE a.role_name = #{roleName}
+        <if test="orgId!=null and orgId !=''">
+          and a.org_id=#{orgId}
+        </if>
+        AND a.del_flag = '0'
+    </select>
+
+
+    <select id="findAllList" resultType="OrgRole">
+        SELECT
+        <include refid="orgRoleColumns"/>
+        FROM org_role a
+        <where>
+            a.del_flag ='0' and org_id=#{orgId}
+        </where>
+        ORDER BY a.create_date
+    </select>
+	<select id="findAllList1" resultType="OrgRole">
+		select 'ALL' as id,'全部' as roleName from dual
+		union all
+		select AA.id as id,AA.role_name as roleName from (
+		SELECT a.id ,
+		a.org_id  ,
+		a.role_name  ,
+		a.remarks    ,
+		a.update_by ,
+		a.create_by  ,
+		a.update_date ,
+		a.del_flag   ,
+		a.create_date
+		FROM org_role a
+		<where>
+			a.del_flag ='0' and org_id=#{orgId}
+		</where>
+		ORDER BY a.create_date)AA
+	</select>
+
+    <select id="findByRoleName" resultType="OrgRole">
+        SELECT *
+        FROM org_role
+        where 1 = 1
+        AND del_flag = '0'
+        <if test="_parameter!=null and _parameter!=''">
+            AND role_name LIKE CONCAT(CONCAT('%', #{0}), '%')
+        </if>
+        AND org_id = #{1}
+    </select>
+
+    <insert id="insert">
+		INSERT INTO org_role(
+			id,
+			org_id,
+			role_name,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{orgId},
+			#{roleName},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE org_role SET
+			org_id = #{orgId},
+			role_name = #{roleName},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE org_role SET
+			del_flag ='1'
+		WHERE id = #{id}
+	</update>
+</mapper>

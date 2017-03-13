@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryHumanTypeDao">
+
+
+    <!--工资级别列表-->
+    <select id="htList" resultType="SalaryHumanType">
+    select
+    a.TYPE_ID AS typeId,
+    a.TYPE_NAME AS typeName,
+    a.PID AS parentId,
+    a.CREATE_ORG AS orgId,
+    a.ENABLE_FLAG AS enableFlag,
+    a.DEL_FLAG AS delFlag,
+    a.create_dept as createDept,
+    (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+    (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+    a.CREATE_DATE AS createDate,
+    (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+    a.UPDATE_DATE AS updateDate
+    FROM SALARY_HUMAN_TYPE a
+    <where>
+        a.DEL_FLAG is NULL
+        and a.CREATE_ORG=#{orgId} and a.PID!='0'
+    </where>
+    <if test="typeName != null and typeName != ''">
+        and a.TYPE_NAME like CONCAT('%',CONCAT(#{typeName},'%'))
+    </if>
+    ORDER BY a.CREATE_DATE DESC
+</select>
+
+    <!--人员类别树查询-->
+    <select id="htList1" resultType="SalaryHumanType">
+        select '1' as typeId,
+        '全部级别' as typeName,
+        '' as parentId,
+        '','','',null,'',null from dual
+        union all
+        select
+        a.TYPE_ID AS typeId,
+        a.TYPE_NAME AS typeName,
+        a.PID AS parentId,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_HUMAN_TYPE a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+    </select>
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_HUMAN_TYPE t
+            SET t.ENABLE_FLAG = '1',
+            t.UPDATE_DATE = sysdate
+        WHERE t.TYPE_ID = #{typeId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_HUMAN_TYPE t
+            SET t.ENABLE_FLAG = '0',
+            t.UPDATE_DATE = sysdate
+        WHERE t.TYPE_ID = #{typeId}
+    </update>
+    <!--启用停用-->
+    <update id="enableFlag" parameterType="SalaryHumanType" >
+        UPDATE SALARY_HUMAN_TYPE SET
+        ENABLE_FLAG = #{SalaryHumanType.enableFlag}
+        WHERE TYPE_ID = #{SalaryHumanType.typeId}
+    </update>
+    <!--批量删除-->
+    <update id="deleteHt" parameterType="SalaryHumanType">
+        UPDATE SALARY_HUMAN_TYPE t
+        SET t.DEL_FLAG = '1'
+        WHERE t.TYPE_ID = #{SalaryHumanType.typeId}
+    </update>
+    <!--删除-->
+    <update id="delete">
+        UPDATE SALARY_HUMAN_TYPE t
+        SET t.DEL_FLAG = '1'
+        WHERE t.TYPE_ID = #{typeId}
+    </update>
+    <!--判断是否已存在-->
+    <select id="findHtsame" resultType="SalaryHumanType">
+        SELECT count(*) num
+        FROM SALARY_HUMAN_TYPE t
+        WHERE t.create_org=#{orgId}
+        and  t.type_name =#{typeName}
+        and t.del_flag is NULL
+        <if test="typeId != null and typeId != ''">
+            and t.TYPE_ID != #{typeId}
+        </if>
+    </select>
+    <!--新增之前先删除全部类别根节点-->
+    <delete id="deleteAlltype">
+        DELETE from SALARY_HUMAN_TYPE
+        where TYPE_ID = '1'
+        and PID is null
+        and create_org = #{salaryHumanType.orgId}
+    </delete>
+    <!--删除后再新增一个全部类别根节点-->
+    <insert id="insertAlltype">
+        INSERT INTO SALARY_HUMAN_TYPE(
+        TYPE_ID,
+        PID,
+        TYPE_NAME,
+        ENABLE_FLAG,
+        CREATE_ORG
+        ) VALUES (
+        '1',
+        '',
+        '全部类别',
+        '',
+        #{salaryHumanType.orgId}
+
+        )
+    </insert>
+    <!--新增-->
+    <insert id="insertHt">
+        INSERT INTO SALARY_HUMAN_TYPE(
+        TYPE_ID,
+        PID,
+        TYPE_NAME,
+        ENABLE_FLAG,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        '1',
+        #{salaryHumanType.typeName},
+        '1',
+        #{salaryHumanType.orgId},
+        #{salaryHumanType.createDept},
+        #{salaryHumanType.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateHt">
+        UPDATE SALARY_HUMAN_TYPE SET
+        TYPE_NAME = #{salaryHumanType.typeName},
+
+        UPDATE_BY = #{salaryHumanType.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE TYPE_ID = #{salaryHumanType.typeId}
+    </update>
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="SalaryHumanType">
+        SELECT count(*) num
+        FROM SALARY_PROJECT_MONEY t
+        WHERE t.create_org=#{SalaryHumanType.orgId}
+        and  t.type_id =#{SalaryHumanType.typeId}
+        and t.del_flag is NULL
+    </select>
+
+</mapper>

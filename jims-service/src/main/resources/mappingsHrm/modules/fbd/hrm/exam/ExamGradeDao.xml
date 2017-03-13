@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.exam.dao.ExamGradeDao">
+	<!--查询试题分类-->
+	<select id="gradeList" resultType="ExamGradeVo">
+		select p.plan_id as planId,
+		p.plan_name as planName,
+		p.exam_id as examId,
+		e.exam_name as examName,
+		e.exam_type_id as typeId,
+		(select d.value from SYS_DICT d where d.id = e.exam_type_id) as typeName,
+		e.by_hand as byHand,
+		e.exam_score as score,
+		e.check_score as checkScore,
+		p.exam_start_time as "start",
+		p.exam_end_time as "end",
+		(select count(*) from exam_score s where s.plan_id=p.plan_id and s.state in ('3','4')) as gradeNum,
+		(select count(*) from exam_score s where s.plan_id=p.plan_id and s.state in ('2')) as unGradeNum,
+		p.create_org as orgId
+		from EXAM_PLAN p, EXAM e
+		where p.exam_id = e.exam_id
+		and p.state = '2'
+		and (select count(*)
+		from PLAN_AUTHORIZE a
+		where p.plan_id = a.plan_id ) > 0
+		and e.by_hand='1'
+		and (select count(*)
+		from EXAM_SCORE s
+		where p.plan_id = s.plan_id and s.state ='2')> 0
+		and p.create_org=#{orgId}
+		and sysdate > p.exam_end_time
+		<if test="typeId != null and typeId != ''">
+			and (select e.exam_type_id from exam e where e.exam_id=p.exam_id)=#{typeId}
+		</if>
+		<if test="planName != null and planName != ''">
+			and (select a.plan_name from EXAM_PLAN a where a.plan_id = p.plan_id) like  CONCAT(CONCAT('%', #{planName}),'%')
+		</if>
+		<if test="createDept != null and createDept != ''">
+			and p.CREATE_DEPT in ( ${createDept} )
+		</if>
+		order by p.CREATE_DATE desc
+	</select>
+	<!--获取考试成绩主表-->
+	<select id="getExamScore" resultType="ExamScore">
+		select s.score_t_id      as id,
+		s.plan_id         as planId,
+		s.exam_id         as examId,
+		s.user_id         as userId,
+		s.user_name       as userName,
+		s.exam_time       as time,
+		s.exam_start_time as startTime,
+		s.exam_end_time   as endTime,
+		s.score           as score,
+		s.create_org      as orgId,
+		s.state           as state
+		from exam_score s
+		where s.score_t_id = #{scoreId}
+
+	</select>
+	<!--查询试卷评分详细列表-->
+	<select id="gradeByEachList" resultType="ExamScore">
+		select s.score_t_id      as socreId,
+		s.plan_id         as planId,
+		s.exam_id         as examId,
+		(select b.exam_name from exam b where b.exam_id=s.exam_id) as examName,
+		s.user_id         as userId,
+		(select NAME from PERSION_INFO t where t.ID=s.user_id and rownum=1) AS userName,
+		s.exam_time       as time,
+		s.exam_start_time as startTime,
+		s.exam_end_time   as endTime,
+		s.score           as score,
+		s.state           as state,
+		s.grade_date 	  as gradeTime,
+		(select NAME from PERSION_INFO t where t.ID=s.grade_by and rownum=1) AS gradeBy
+		from exam_score s
+		where s.plan_id=#{planId} and s.state in ('2','3','4')
+
+	</select>
+	<!--获取得分-->
+	<select id="getScore" resultType="Integer">
+		select sum(d.result_score)
+		from EXAM_SCORE_DETAIL d
+		where  d.score_t_id = #{scoreId}
+	</select>
+	<!--查询提交限制的试卷-->
+	<select id="getExamScoreState" resultType="String">
+		select state
+		from EXAM_SCORE s
+		where s.score_t_id = #{scoreId}
+
+	</select>
+	<!--查询考试是否结束-->
+	<select id="getPlanIsComplete" resultType="Integer">
+		select count(*)
+		from exam_score s
+		where s.plan_id = #{planId}
+		and s.state in ('2')
+
+
+	</select>
+	<!--获取考试成绩行表-->
+	<select id="getQuestion" resultType="ExamDetail">
+		SELECT
+		d.SCORE_H_ID as id,
+		d.SCORE_T_ID as scoreId,
+		d.QUESTION_ID as queId,
+		d.EXAM_QUESTION_ID as examQueId,
+		nvl(d.ANSWER,'') as answer,
+		d.SCORE as score,
+		d.QUESTION_TYPE_ID as typeId,
+		d.QUESTION_TYPE_NAME as typeName,
+		q.QUESTION_NAME  as queName,
+		q.QUESTION_NUMBER as queNum,
+		q.QUESTION_CONTENT as queContent,
+		q.QUESTION_ANSWER as queAnswer,
+		d.EXAM_QUESTION_TYPE_ID as examQueTypeId,
+		q.QUESTION_ITEM_ID as itemId,
+		d.RESULT_SCORE as resultScore,
+		d.SORT as sort
+		FROM EXAM_SCORE_DETAIL d ,QUESTION q
+		where d.SCORE_T_ID=#{scoreId}
+		and d.QUESTION_ID=q.QUESTION_ID
+		and q.QUESTION_TYPE_ID='4'
+		order by length(SORT),SORT
+	</select>
+	<insert id="insertExamResult" parameterType="ExamScore">
+		INSERT INTO EXAM_SCORE_RESULT(
+		RESULT_ID,
+		PLAN_ID,
+		EXAM_ID,
+		USER_ID,
+		USER_NAME,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		EXAM_TIME,
+		EXAM_START_TIME,
+		EXAM_END_TIME,
+		CREATE_ORG
+		) VALUES (
+		#{ExamScore.id},
+		#{ExamScore.planId},
+		#{ExamScore.examId},
+		#{ExamScore.userId},
+		#{ExamScore.userName},
+		#{ExamScore.score},
+		#{ExamScore.state},
+		#{ExamScore.createBy},
+		sysdate,
+		(select ROUND(TO_NUMBER(s.exam_end_time - s.exam_start_time) * 24 * 60 * 60)
+			  from exam_score s
+			 where s.score_t_id =#{ExamScore.id} ),
+		(select exam_start_time from exam_score s
+			 where score_t_id =#{ExamScore.id} ),
+		(select exam_end_time from exam_score s
+			 where score_t_id =#{ExamScore.id} ),
+		#{ExamScore.orgId}
+
+		)
+	</insert>
+	<insert id="insertExamDetailResult" parameterType="String">
+		insert into EXAM_SCORE_DETAIL1
+		select *
+		from EXAM_SCORE_DETAIL t
+		where t.SCORE_T_ID = #{ExamScore.id}
+	</insert>
+	<update id="saveGrade" parameterType="ExamDetail"  >
+		UPDATE EXAM_SCORE_DETAIL SET
+		RESULT_SCORE = #{ExamDetail.resultScore}
+		WHERE SORT = #{ExamDetail.sort}
+	</update>
+	<update id="updateExamScore" parameterType="ExamDetail"  >
+		UPDATE EXAM_SCORE SET
+		GRADE_BY = #{userId},
+		GRADE_DATE =sysdate,
+		SCORE = #{score},
+		STATE = #{state}
+		WHERE SCORE_T_ID = #{scoreId}
+	</update>
+	<update id="finishPlan" parameterType="String"  >
+		UPDATE EXAM_PLAN SET
+		STATE = '3'
+		WHERE PLAN_ID = #{planId}
+
+	</update>
+	<delete id="delExamScore" parameterType="String"  >
+		delete from exam_score d
+		 where d.plan_id =#{id}
+		   and (select p.state from exam_plan p where p.plan_id=#{id})='3'
+
+	</delete>
+	<delete id="delExamDetail" parameterType="String"  >
+		delete from exam_score_detail d
+		 where d.plan_id =#{id}
+		   and (select p.state from exam_plan p where p.plan_id=#{id})='3'
+
+	</delete>
+</mapper>

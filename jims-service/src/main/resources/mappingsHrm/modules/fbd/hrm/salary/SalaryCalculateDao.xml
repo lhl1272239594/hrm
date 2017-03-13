@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryCalculateDao">
+
+
+    <!--查询工资公式-->
+    <select id="calList" resultType="SalaryCalculate">
+       select
+        a.CONTENT_ID AS contentId,
+        a.CONTENT AS content,
+        a.CODE AS code,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select type_name from salary_human_type t where t.type_id = a.human_type_id and rownum = 1) AS typeName,
+        a.PART_ID AS partId,
+        (select part_name from salary_part t where t.part_id = a.part_id and rownum = 1) AS partName,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_CALCULATE a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="typeId != null and typeId != '' ">
+            and a.HUMAN_TYPE_ID =#{typeId}
+        </if>
+        <if test="partId != null and partId != '' ">
+            and a.PART_ID =#{partId}
+        </if>
+            ORDER BY a.HUMAN_TYPE_ID,a.CREATE_DATE DESC
+
+    </select>
+    <!--工资项目下拉框-->
+    <select id="projectList" resultType="SalaryProjectMoney">
+        select
+        a.PROJECT_ID AS projectId,
+        (select project_name from salary_project t where t.project_id = a.project_id and rownum = 1) AS projectName,
+
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_PROJECT_MONEY a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="typeId != null and typeId != ''">
+            and a.TYPE_ID =#{typeId}
+        </if>
+
+        ORDER BY a.CREATE_DATE
+
+    </select>
+    <!--人员类别下拉框-->
+    <select id="htList" resultType="SalaryHumanType">
+        select
+        a.TYPE_ID AS typeId,
+        a.TYPE_NAME AS typeName,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_HUMAN_TYPE a
+        <where>
+            a.DEL_FLAG is NULL and a.pid is not null and a.ENABLE_FLAG='1'
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        ORDER BY a.CREATE_DATE
+    </select>
+    <!--工资组成部分下拉框-->
+    <select id="partList" resultType="SalaryPart">
+        select
+        a.PART_ID AS partId,
+        a.PART_NAME AS partName,
+        a.FLAG AS flag,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_PART a
+        <where>
+            a.DEL_FLAG is NULL and a.ENABLE_FLAG='1'
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        ORDER BY a.CREATE_DATE
+    </select>
+
+    <!--绩效考评下拉框-->
+    <select id="performanceList" resultType="SalaryCalculate">
+        select
+        a.ID AS id,
+        a.TYPE_NAME AS typeName
+        FROM EVALUATION_TYPE a
+        <where>
+            a.DEL_FLAG = '0' and a.state = '1'
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_CALCULATE t
+            SET t.ENABLE_FLAG = '1'
+        WHERE t.CONTENT_ID = #{contentId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_CALCULATE t
+            SET t.ENABLE_FLAG = '0'
+        WHERE t.CONTENT_ID = #{contentId}
+    </update>
+    <!--启用停用-->
+    <update id="enableFlag" parameterType="SalaryCalculate" >
+        UPDATE SALARY_CALCULATE SET
+        ENABLE_FLAG = #{SalaryCalculate.enableFlag},
+        UPDATE_BY = #{SalaryCalculate.updateBy},
+        UPDATE_DATE = #{SalaryCalculate.updateDate}
+        WHERE CONTENT_ID = #{SalaryCalculate.contentId}
+    </update>
+    <!--批量删除-->
+    <update id="deleteCal" parameterType="SalaryCalculate">
+        UPDATE SALARY_CALCULATE t
+        SET t.DEL_FLAG = '1'
+        WHERE t.CONTENT_ID = #{SalaryCalculate.contentId}
+    </update>
+    <!--判断公式是否已存在-->
+    <select id="findCalsame" resultType="SalaryCalculate">
+        SELECT count(*) num
+        FROM SALARY_CALCULATE t
+        WHERE t.create_org=#{orgId}
+        and  t.human_type_id =#{typeName}
+        and  t.part_id = #{partName}
+        and  t.del_flag is null
+    </select>
+    <!--新增公式-->
+    <insert id="insertCal">
+        INSERT INTO SALARY_CALCULATE(
+        CONTENT_ID,
+        CONTENT,
+        CODE,
+        HUMAN_TYPE_ID,
+        PART_ID,
+        FLAG,
+        ENABLE_FLAG,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{salaryCalculate.content},
+        #{salaryCalculate.code},
+        #{salaryCalculate.typeName},
+        #{salaryCalculate.partName},
+        (select flag from salary_part t where t.part_id = #{salaryCalculate.partName} and rownum=1 ),
+        '1',
+        #{salaryCalculate.orgId},
+        #{salaryCalculate.createDept},
+        #{salaryCalculate.createBy},
+        sysdate
+        )
+    </insert>
+    <!--更新公式-->
+    <update id="updateCal">
+        UPDATE SALARY_CALCULATE SET
+        CONTENT = #{salaryCalculate.content},
+        CODE = #{salaryCalculate.code},
+        HUMAN_TYPE_ID = #{salaryCalculate.typeName},
+        UPDATE_BY = #{salaryCalculate.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE CONTENT_ID = #{salaryCalculate.contentId}
+    </update>
+
+
+</mapper>

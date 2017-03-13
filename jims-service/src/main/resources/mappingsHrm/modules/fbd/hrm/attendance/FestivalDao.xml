@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.FestivalDao">
+
+
+    <select id="findFesList" resultType="Festival">
+       select
+	   f.festival_id as "fesId",
+       f.festival_description_id as "fesDesId",
+       f.year_id as "yearId",
+       f.CREATE_BY as "createBy",
+       f.CREATE_DATE as "createDate"
+          from FESTIVAL f
+		where f.del_flag='0'
+          and f.create_org=#{orgId}
+		       <if test="fesDesId!='999'">
+		  and f.FESTIVAL_DESCRIPTION_ID=#{fesDesId}
+		</if>
+		<if test="yearId!=''">
+		  and f.YEAR_ID=#{yearId}
+		</if>
+		order by  f.CREATE_DATE desc
+	</select>
+
+	<select id="findFesDateList" resultType="Festival">
+		select f.festival_id as "fesId",
+		fd.festival_date_id as "fesDateId",
+		f.festival_description_id as "fesDesId",
+		fd.festival_date_type as "fesDateType",
+        f.year_id as "yearId",
+		to_char(fd.festival_date,'yyyy-MM-dd')    as "fesDate",
+		f.CREATE_BY   as "createBy",
+		f.CREATE_DATE as "createDate"
+		from FESTIVAL f,
+		festival_date fd
+		where f.festival_id(+) = fd.festival_id
+		and f.DEL_FLAG = '0'
+		and fd.del_flag='0'
+		and f.create_org=#{orgId}
+		and f.festival_id=#{fesId}
+		order by FESTIVAL_DATE
+	</select>
+
+	<select id="findFesBoolean" resultType="Festival">
+		SELECT count(*) num
+		FROM FESTIVAL f
+		WHERE f.create_org=#{orgId}
+		and f.FESTIVAL_DESCRIPTION_ID=#{fesDesId}
+		and f.DEL_FLAG='0'
+		and f.YEAR_ID=#{yearId}
+        <if test="fesId!=null and fesId !='999'">
+            and t.festival_id!=#{fesId}
+        </if>
+	</select>
+
+
+    <insert id="insertPrimary">
+		INSERT INTO FESTIVAL(
+			FESTIVAL_ID,
+			YEAR_ID,
+			FESTIVAL_DESCRIPTION_ID,
+			CREATE_BY,
+			CREATE_DATE,
+			UPDATE_BY,
+			UPDATE_DATE,
+			CREATE_ORG,
+			DEL_FLAG,
+			StATUS_TYPE
+		) VALUES (
+			#{fesId},
+			#{yearId},
+			#{fesDesId},
+			#{createBy},
+			sysdate,
+			#{updateBy},
+			sysdate,
+			#{orgId},
+			'0',
+			'0'
+		)
+	</insert>
+
+
+	<insert id="insertForeign">
+		INSERT INTO FESTIVAL_DATE(
+		FESTIVAL_DATE_ID,
+		FESTIVAL_ID,
+		FESTIVAL_DATE_TYPE,
+		FESTIVAL_DATE,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE,
+		CREATE_ORG,
+		DEL_FLAG
+		) VALUES (
+		#{fesDateId},
+		#{fesId},
+		#{fesDateType},
+		(to_date( #{fesDate},'YYYY-MM-DD' )),
+		#{createBy},
+		sysdate,
+		#{updateBy},
+		sysdate,
+		#{orgId},
+		'0'
+		)
+	</insert>
+
+	<update id="updateForeign">
+	UPDATE FESTIVAL_DATE SET
+			FESTIVAL_DATE_TYPE = #{fesDateType},
+			FESTIVAL_DATE = (to_date( #{fesDate},'YYYY-MM-DD' )),
+			UPDATE_BY = #{updateBy},
+			UPDATE_DATE = sysdate
+		WHERE FESTIVAL_DATE_ID = #{fesDateId}
+	</update>
+
+    <update id="delPrimary" parameterType="Festival" >
+		UPDATE FESTIVAL SET
+			del_flag = '1'
+		WHERE FESTIVAL_ID = #{fesId}
+	</update>
+
+	<!--删除行-->
+	<update id="delForeign" parameterType="Festival" >
+		UPDATE FESTIVAL_DATE SET
+		del_flag = '1'
+		WHERE FESTIVAL_DATE_ID = #{Festival.fesDateId}
+	</update>
+
+	<!--删除行对应的头-->
+	<update id="delForeign1" parameterType="Festival" >
+		UPDATE FESTIVAL t SET
+		t.del_flag = '1'
+		WHERE t.FESTIVAL_ID = (select d.FESTIVAL_ID from FESTIVAL_DATE d where d.FESTIVAL_ID = t.FESTIVAL_ID
+		and d.FESTIVAL_DATE_ID = #{Festival.fesDateId} and rownum = 1)
+	</update>
+	<!--删除从表行信息-->
+	<delete id="delFestival" parameterType="String" >
+		delete FESTIVAL_DATE d where d.festival_id=#{fesId}
+	</delete>
+</mapper>

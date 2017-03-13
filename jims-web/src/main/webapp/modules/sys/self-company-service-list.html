@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>个人主页--首页</title>
+    <link rel="icon" href="/static/bookstrap/images/favicons/16X16.ico"/>
+    <link href="/static/bookstrap/css/default.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/bookstrap/css/span.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/bookstrap/css/step-info.css" rel="stylesheet" type="text/css">
+    <link href="/static/bookstrap/css/rgen_min.css" rel="stylesheet"/>
+    <link href="/static/bookstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/bookstrap/css/demo.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="/static/bookstrap/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/bookstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../sys/js/self-company-service-list.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bookstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <link href="../sys/style/yunhospitalmain.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        .nav { left: 250px; }
+        .nav-other { float: right; margin-top: 10px; }
+        .service-set h3 { font-size: 20px; padding: 10px 0 10px 10px; margin-top: 0px; border-radius: 5px; }
+        .font-green{ color:#0a0 !important; }
+        .btn-small{padding: 2px 5px;}
+    </style>
+</head>
+<body>
+<nav class="nav-wrp nav-3 dark navbar-fixed-top nav-hide nav-sticky nav-show" data-sticky="y" data-glass="y"
+     data-hide="y">
+    <div class="container">
+        <div class="nav-header">
+            <a class="navbar-brand" ><img src="/static/bookstrap/images/logo1.png" alt="Brand logo"/></a>
+            <a class="nav-handle fs-touch-element" data-nav=".nav"><i class="fa fa-bars"></i></a>
+        </div>
+        <div class="nav vm-item def-menu">
+            <ul style="cursor: pointer">
+                <li><a  id="default">个人首页</a></li>
+                <!--<li><a >寻医问药</a></li>-->
+                <!--<li><a >私人医生</a></li>-->
+                <!--<li><a >健康管理</a></li>-->
+                <li><a >个人信息管理</a></li>
+                <li><a >我的消息</a></li>
+                <li><a id="myServices">我的服务</a></li>
+                <li class="active"><a id="myOrgServices">机构服务</a></li>
+            </ul>
+            <div class="nav-other">
+                <a id="exit" class="btn btn-primary btn-sm">退出</a>
+            </div>
+        </div>
+        <!-- /.nav -->
+    </div>
+    <!-- /.container -->
+</nav>
+<div class="container padd50-top">
+    <div class="col-md-9">
+        <div class="yun_daohang">
+            <div class="yun_daohangtil">
+                <span>医生首页　/　我的服务管理</span>我的机构服务管理
+            </div>
+        </div>
+        <div class="clearfix" id="myServiceModel">
+
+        </div>
+        <!-- 我的服务详情描述模态start -->
+        <div class="modal fade" id="serviceDialog" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document" style="width:540px; height: 250px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">服务描述</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ser-type clearfix" id="serviceDialogDes">
+                        </div>
+                    </div>
+                    <div class="modal-footer" align="center">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 我的服务详情描述模态end -->
+
+        <!-- 续费或继续定制 -->
+        <div class="modal fade" id="goServiceModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document" style="width:350px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">我的机构服务续定</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-service-list">
+                            <div class="ser-type clearfix">
+                                <ul>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" id="saveGoService">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yun_daohang">
+            <div class="yun_daohangtil">机构管理服务
+            </div>
+        </div>
+        <div class="ser-type clearfix" id="addServiceModel">
+            <ul>
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-3 def-rinfo">
+        <div class="priv-info clearfix">
+            <div class="priv-headimg fd-left">
+                <img src="/static/bookstrap/images/bg-img2.jpg"/>
+            </div>
+            <div class="priv-otherinfo fd-left">
+                双滦区人民医院
+                <br/>
+                <ul>
+                    <li><a href="private-info.html">个人资料</a></li>
+                    <li><img src="/static/bookstrap/images/v1.png" width="20"/></li>
+                    <li><img src="/static/bookstrap/images/flower.png" width="20"/>(58)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="othersys-reg clearfix">
+            <ul>
+                <li>
+                    <button class="btn btn-info" onclick="window.location.href='doctor-authentication.html'">我是医生
+                    </button>
+                </li>
+                <li>
+                    <button class="btn btn-warning" id="setCompany">注册机构
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="priv-pluser clearfix">
+            <ul>
+                <li><a href="online-ask.html">在线问诊</a></li>
+                <li><a >查找医生</a></li>
+                <li><a >查找医院</a></li>
+                <li><a >我的关注</a></li>
+                <li><a >我的消息<span class="num-sign">5</span></a></li>
+                <li><a >我的好友</a></li>
+            </ul>
+        </div>
+        <div class="history-info">
+            <h3>历史记录</h3>
+            <ol>
+                <li>更新了好友<a >@周成</a>的健康记录<span class="his-time">2016-01-18 15:48:02</span></li>
+                <li>修改了个人资料<span class="his-time">2016-01-18 15:48:02</span></li>
+                <li>更新了好友<a >@周成</a>的健康记录<span class="his-time">2016-01-18 15:48:02</span></li>
+                <li>在线问诊<span class="his-time">2016-01-18 15:48:02</span></li>
+                <li>更新了好友<a >@周成</a>的健康记录<span class="his-time">2016-01-18 15:48:02</span></li>
+                <li>查找了“心脏病”相关的信息<span class="his-time">2016-01-18 15:48:02</span></li>
+            </ol>
+        </div>
+    </div>
+</div>
+<footer>
+    <div class="text-center">
+        &copy; 2013 北京极目云软件有限公司 网站备案：京ICP备13045463号
+    </div>
+</footer>
+</body>
+</html>

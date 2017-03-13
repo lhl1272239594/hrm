@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.template.dao.OrgRoleTemplateDao">
+
+    <sql id="orgRoleTemplateColumns">
+        a.ID as id,
+        a.ROLE_NAME as roleName,
+        a.MASTER_ID as masterId
+    </sql>
+
+    <select id="get" resultType="OrgRoleTemplate">
+        SELECT
+        <include refid="orgRoleTemplateColumns"/>
+        FROM ORG_ROLE_TEMPLATE a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="OrgRoleTemplate">
+        select a.role_name,a.id ,a.master_id from org_role_template a,template_master b
+        <where>
+              a.master_id=b.id
+             <if test=" area !=null and area !=''">
+                 AND b.area=#{area}
+             </if>
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="OrgRoleTemplate">
+        SELECT
+        <include refid="orgRoleTemplateColumns"/>
+        FROM ORG_ROLE_TEMPLATE a
+        <where> 1=1
+            <if test=" masterId !=null and masterId !=''">
+                AND a.master_id=#{masterId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO ORG_ROLE_TEMPLATE(
+            ID,
+            ROLE_NAME,
+            MASTER_ID
+        ) VALUES (
+            #{id},
+            #{roleName},
+            #{masterId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE ORG_ROLE_TEMPLATE SET
+            ROLE_NAME = #{roleName},
+            MASTER_ID = #{masterId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM ORG_ROLE_TEMPLATE
+        WHERE id = #{id}
+    </delete>
+</mapper>

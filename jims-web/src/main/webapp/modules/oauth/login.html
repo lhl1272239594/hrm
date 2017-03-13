@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极目云医</title>
+
+    <!--pageMeta-->
+    <!-- Lib CSS -->
+    <link href="/static/css/login.css" rel="stylesheet">
+    <link href="/static/css/demo.css" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <link rel="icon" href="/static/images/favicons/16X16.ico">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../oauth/js/login.js"></script>
+</head>
+<body>
+<div class="login-wrap">
+    <div class="login-inp">
+        <ul>
+            <li style="display:none;">*请输入正确的用户名,密码</li>
+            <li>
+                <input type="text" placeholder="用户名/手机号/身份证号/邮箱" class="inptext l-inptext" id="loginName"/>
+            </li>
+            <li><input type="text" placeholder="密码" class="inptext l-inptext" id="password"/></li>
+            <li>
+                <input type="text" placeholder="验证码" class="inptext s-inptext" id="validateCode" />
+                <img style="-webkit-user-select: none" id="verification" onclick="refresh()" src="/servlet/validateCodeServlet">
+            </li>
+            </ul>
+                <br/>
+             <button class="lr-btn login-btn"  id="btnSubmit"></button><br/>
+
+    </div>
+</div>
+<script>
+    //刷新验证码
+    function refresh(){
+        var imgSrc = $("#verification");
+        var src = imgSrc.attr("src");
+        imgSrc.attr("src",chgUrl(src));
+    }
+    function chgUrl(url){
+        var timestamp = (new Date()).valueOf();
+        url = url.substring(0,28);
+        if((url.indexOf("&")>=0)){
+            url = url + "×tamp=" + timestamp;
+        }else{
+            url = url + "?timestamp=" + timestamp;
+        }
+        return url;
+    }
+</script>
+</body>
+</html>

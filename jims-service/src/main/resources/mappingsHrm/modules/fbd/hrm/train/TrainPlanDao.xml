@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.train.dao.TrainPlanDao">
+
+    <select id="findList" resultType="TrainPlan">
+        select
+        tp.train_plan_id as "trainPlanId",
+        tp.train_plan_tittle as "trainPlanTittle",
+        tp.train_plan_content as "trainPlanContent",
+        tp.train_plan_type as "trainPlanType",
+        tp.train_teacher   as "trainTeacher",
+        tp.CREATE_ORG      as "orgId",
+        tp.status_type as "statusType",
+        tp.create_by as "createBy",
+        tp.create_date as "createDate"
+        from train_plan tp
+        where tp.del_flag = '0'
+        and tp.CREATE_ORG=#{orgId}
+        <if test="trainPlanTittle != null and trainPlanTittle != ''">
+        and tp.train_plan_tittle LIKE CONCAT(CONCAT('%', #{trainPlanTittle}),'%')
+        </if>
+        <if test="trainPlanType != null and trainPlanType != ''">
+        and tp.train_plan_type =#{trainPlanType}
+        </if>
+        order by tp.create_date desc
+    </select>
+    <select id="findAllList" resultType="TrainPlan">
+        select
+        tp.train_plan_id as "trainPlanId",
+        tp.train_plan_tittle as "trainPlanTittle",
+        tp.train_plan_id as "value",
+        tp.train_plan_tittle as "label",
+        tp.train_plan_content as "trainPlanContent",
+        tp.train_plan_type as "trainPlanType",
+        tp.train_teacher as "trainTeacher",
+        tp.create_by as "createBy",
+        tp.create_date as "createDate"
+        from train_plan tp
+        where  tp.del_flag = '0'
+        and tp.CREATE_ORG=#{orgId}
+        <if test="trainPlanType != null and trainPlanType != ''">
+            and tp.train_plan_type = #{trainPlanType}
+        </if>
+        <if test="trainPlanId != null and trainPlanId != ''">
+        and tp.train_plan_id = #{trainPlanId}
+        </if>
+        order by tp.create_date desc
+
+    </select>
+    <!--查询名称是否重复-->
+    <select id="checkName" resultType="Integer">
+        select count(*)
+        from TRAIN_PLAN t
+        where t.create_org=#{orgId}
+        and t.del_flag='0'
+        <if test="name!=null and name !=''">
+            and t.train_plan_tittle=#{name}
+        </if>
+        <if test="id!='999'">
+            and t.train_plan_id!=#{id}
+        </if>
+        <if test="type!=null and type !=''">
+            and t.train_plan_type=#{type}
+        </if>
+    </select>
+
+    <insert id="insertPrimary">
+        INSERT INTO train_plan(
+        train_plan_id,
+        train_plan_tittle,
+        train_plan_content,
+        train_plan_type,
+        TRAIN_TEACHER,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_DEPT,
+        CREATE_ORG,
+        DEL_FLAG,
+        status_type
+        ) VALUES (
+        #{trainPlanId},
+        #{trainPlanTittle},
+        #{trainPlanContent},
+        #{trainPlanType},
+        #{trainTeacher},
+        #{createBy},
+        sysdate,
+        #{createDept},
+        #{createOrg},
+        '0',
+        '1'
+        )
+    </insert>
+
+    <update id="updatePrimary">
+        UPDATE train_plan SET
+        train_plan_tittle = #{trainPlanTittle},
+        train_plan_content = #{trainPlanContent},
+        train_plan_type = #{trainPlanType},
+        TRAIN_TEACHER=#{trainTeacher},
+        USER_ID = #{userId},
+        DEPT_ID = #{deptId},
+        ORG_ID = #{orgId},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE train_plan_id = #{trainPlanId}
+    </update>
+
+    <select id="findTrainBoolean" resultType="Integer">
+        SELECT count(*) num
+        FROM TRAIN_NOTICE tn
+        WHERE tn.create_org=#{orgId}
+        and tn.DEL_FLAG='0'
+        and tn.TRAIN_PLAN_ID=#{trainPlanId}
+    </select>
+    <update id="change" parameterType="TrainPlan">
+        UPDATE train_plan SET
+        status_type =#{flag}
+        WHERE train_plan_id = #{TrainPlan.trainPlanId}
+    </update>
+    <update id="trainPlanDel" parameterType="TrainPlan">
+        UPDATE train_plan SET
+        del_flag ='1'
+        WHERE train_plan_id = #{TrainPlan.trainPlanId}
+    </update>
+</mapper>

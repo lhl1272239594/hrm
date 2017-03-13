@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.ServiceVsMenuDao">
+    
+	<sql id="serviceVsMenuColumns">
+		a.id AS "id",
+		a.service_id AS "serviceId",
+		a.menu_id AS "menuId",
+		a.menu_sort AS "menuSort",
+		a.create_by AS "createBy",
+		a.remarks AS "remark",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="serviceVsMenuJoins">
+	</sql>
+
+    <select id="findByServiceId" resultType="ServiceVsMenu">
+        SELECT
+        *
+        FROM service_vs_menu
+        WHERE 1 = 1
+        <if test=" _parameter!=null and _parameter!='' ">
+            AND service_id = #{_parameter}
+        </if>
+        AND del_flag = '0'
+    </select>
+    
+	<select id="serviceVsMenuList" resultType="ServiceVsMenu">
+		SELECT 
+			<include refid="serviceVsMenuColumns"/>
+		FROM service_vs_menu a
+		<include refid="serviceVsMenuJoins"/>
+		WHERE a.service_id = #{serviceId}
+        and a.del_flag = '0'
+	</select>
+	<select id="get" resultType="ServiceVsMenu">
+		SELECT
+			<include refid="serviceVsMenuColumns"/>
+		FROM service_vs_menu a
+		<include refid="serviceVsMenuJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ServiceVsMenu">
+		SELECT 
+			<include refid="serviceVsMenuColumns"/>
+		FROM service_vs_menu a
+		<include refid="serviceVsMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ServiceVsMenu">
+		SELECT 
+			<include refid="serviceVsMenuColumns"/>
+		FROM service_vs_menu a
+		<include refid="serviceVsMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO service_vs_menu(
+			id,
+			service_id,
+			menu_id,
+			menu_sort,
+			create_by,
+			remarks,
+			update_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{serviceId},
+			#{menuId},
+			#{menuSort},
+			#{createBy},
+			#{remarks},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE service_vs_menu SET 	
+			service_id = #{serviceId},
+			menu_id = #{menuId},
+			menu_sort = #{menuSort},
+			create_by = #{createBy},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE service_vs_menu SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	<delete id="deleteByServiceId">
+         delete from service_vs_menu where service_id = #{serviceId}
+    </delete>
+</mapper>

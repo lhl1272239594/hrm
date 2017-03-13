@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.task.TaskDao">
+	<!--查询试题分类-->
+	<select id="getNow" resultType="Date">
+		select sysdate from dual
+	</select>
+	<!--获取考评类型-->
+	<select id="getType" resultType="String">
+		select t.type from EVALUATION_TYPE t where t.id=
+		(select m.evaluation_type_id from evaluation_model m where m.evaluation_model_id=#{templetId} )
+	</select>
+	<!--获取符合条件的考评模板-->
+	<select id="getTemplet" resultType="TempletVo">
+		select m.evaluation_model_id as id,
+       m.evaluation_model_name as name,
+       m.evaluation_type_id as typeId,
+       m.evaluation_mode_id as modeId,
+       nvl(m.score, 0) as score,
+       m.state as state,
+       m.s_state as s_state,
+       m.u_state as u_state,
+       m.create_by as createBy,
+       m.create_date as createDate,
+       m.create_org as orgId,
+       m.create_dept as createDept,
+       m.del_flag as delFlag,
+       m.evaluation_start_type as startType,
+       m.expiry_date as expiryDate,
+       m.start_day as startDay,
+       m.period as period,
+       m.period_type as periodType,
+       m.self as self,
+       m.obj as obj,
+       m.last_start_date as lastStartDate
+	  from EVALUATION_MODEL m
+	 where m.del_flag = '0'
+	   and m.state = '1'
+	   and m.evaluation_start_type = '2'
+	   and (select count(*) from evaluation_authorize a where a.evaluation_model_id=m.evaluation_model_id)>0
+	</select>
+	<!--查询考核对象-->
+	<select id="getPerson" resultType="PersonVo">
+		select
+		a.user_id as userId
+		from evaluation_authorize a
+		where a.evaluation_model_id =#{templetId}
+		and a.type =#{obj}
+		<if test="depId!=null and depId !=''">
+			and    a.id=#{depId}
+		</if>
+	</select>
+	<!--查询考核对象-->
+	<select id="getDept" resultType="PersonVo">
+		select
+		a.id as depId
+		from evaluation_authorize a
+		where a.evaluation_model_id =#{templetId}
+		<if test="type!=null and type !=''">
+			and
+			(((select count(*)
+			from evaluation_socre s
+			where s.state = '2'
+			and s.dept_id = a.id
+			and (select p.type
+			from evaluation_plan p
+			where p.evaluation_plan_id = s.evaluation_plan_id) = '1'
+			and to_char((select p.evaluation_plan_state_time
+			from evaluation_plan p
+			where p.evaluation_plan_id = s.evaluation_plan_id),
+			'yyyy-MM') = to_char(add_months(sysdate,-1), 'yyyy-MM') )>0) or
+			((select count(*)
+			from evaluation_socre_result r
+			where r.state = '2'
+			and r.dept_id = a.id
+			and (select p.type
+			from evaluation_plan p
+			where p.evaluation_plan_id = r.evaluation_plan_id) = '1'
+			and
+			to_char((select p.evaluation_plan_state_time
+			from evaluation_plan p
+			where p.evaluation_plan_id = r.evaluation_plan_id),
+			'yyyy-MM') = to_char(add_months(sysdate,-1), 'yyyy-MM'))>0))
+		</if>
+		and a.type =#{obj} group by a.id
+	</select>
+	<!--获取科室考评标准总分-->
+	<select id="getTotalScore" resultType="String">
+		select nvl(sum(nvl(t.score,0)),0)
+		from EVALUATION_DEPT_STANDARD t
+		where t.dept_id=#{depId}
+
+	</select>
+	<!--获取评分人员-->
+	<select id="getGradePerson" resultType="PersonVo">
+		select
+		(select s.dept_id from org_staff s where s.persion_id=a.user_id) as depId,
+		a.user_id as userId
+		from evaluation_authorize a
+		where a.evaluation_model_id =#{templetId}
+		and a.type =#{type}
+
+	</select>
+	<!--从已选科室中查询出上月未参加自评的科室-->
+	<select id="getDeptNotGrade" resultType="PersonVo">
+		select
+		a.id as depId
+		from evaluation_authorize a
+		where a.evaluation_model_id =#{templetId}
+		and
+		(((select count(*)
+		from evaluation_socre s
+		where s.state = '2'
+		and s.dept_id = a.id
+		and (select p.type
+		from evaluation_plan p
+		where p.evaluation_plan_id = s.evaluation_plan_id) = '1'
+		and to_char((select p.evaluation_plan_state_time
+		from evaluation_plan p
+		where p.evaluation_plan_id = s.evaluation_plan_id),
+		'yyyy-MM') = to_char(add_months(sysdate,-1), 'yyyy-MM') )=0) and
+		((select count(*)
+		from evaluation_socre_result r
+		where r.state = '2'
+		and r.dept_id = a.id
+		and (select p.type
+		from evaluation_plan p
+		where p.evaluation_plan_id = r.evaluation_plan_id) = '1'
+		and
+		to_char((select p.evaluation_plan_state_time
+		from evaluation_plan p
+		where p.evaluation_plan_id = r.evaluation_plan_id),
+		'yyyy-MM') = to_char(add_months(sysdate,-1), 'yyyy-MM'))=0))
+		and a.type =#{obj} group by a.id
+	</select>
+
+
+	<insert id="insertEvaluationPlan" parameterType="EvaluationPlan">
+		INSERT INTO EVALUATION_PLAN(
+		EVALUATION_PLAN_ID,
+		EVALUATION_PLAN_NAME,
+		EVALUATION_MODEL_ID,
+		EVALUATION_TYPE_ID,
+		SCORE,
+		SELF,
+		OBJ,
+		TYPE,
+		EVALUATION_PLAN_STATE_TIME,
+		EVALUATION_PLAN_END_TIME,
+		STATE,
+		DEL_FLAG,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_DEPT,
+		CREATE_ORG
+		) VALUES (
+		#{EvaluationPlan.id},
+		#{EvaluationPlan.name},
+		#{EvaluationPlan.templetId},
+		#{EvaluationPlan.typeId},
+		'0',
+		#{EvaluationPlan.self},
+		#{EvaluationPlan.obj},
+		#{EvaluationPlan.type},
+		#{EvaluationPlan.startDate},
+		#{EvaluationPlan.endDate},
+		'1',
+		'0',
+		#{EvaluationPlan.createBy},
+		sysdate,
+		#{EvaluationPlan.createDept},
+		#{EvaluationPlan.orgId})
+	</insert>
+	<insert id="insertEvaluationScore" parameterType="EvaluationScoreVo">
+		INSERT INTO EVALUATION_SOCRE(
+		SOCRE_T_ID,
+		EVALUATION_PLAN_ID,
+		EVALUATION_MODEL_ID,
+		USER_ID,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		GRADE_BY,
+		TOTAL_SCORE,
+		SELF,
+		OBJ,
+		EVALUATION_TYPE_ID,
+		DEPT_ID
+		) VALUES (
+		#{EvaluationScoreVo.id},
+		#{EvaluationScoreVo.planId},
+		#{EvaluationScoreVo.templetId},
+		#{EvaluationScoreVo.userId},
+		'0',
+		'0',
+		#{EvaluationScoreVo.createBy},
+		sysdate,
+		#{EvaluationScoreVo.orgId},
+		(select d.dept_id from ORG_STAFF d where d.org_id=#{EvaluationScoreVo.orgId} and d.persion_id=#{EvaluationScoreVo.userId} and rownum=1),
+		#{EvaluationScoreVo.gradeBy},
+		#{EvaluationScoreVo.totalScore},
+		#{EvaluationScoreVo.self},
+		#{EvaluationScoreVo.obj},
+		#{EvaluationScoreVo.typeId},
+		#{EvaluationScoreVo.deptId})
+	</insert>
+	<insert id="insertPlanStandard" parameterType="String">
+		insert into EVALUATION_PLAN_STANDARD
+		select
+		id,
+		#{id},
+		evaluation_standard_code,
+		evaluation_standard_name,
+		score,
+		create_by,
+		create_date,
+		sort,
+		create_org,
+		evaluation_project_code,
+		evaluation_project_scode,
+		kpi
+		from EVALUATION_MODEL_STANDARD t
+		where t.evaluation_model_id = #{templetId}
+	</insert>
+	<update id="lastPublish" parameterType="String" >
+		UPDATE EVALUATION_MODEL SET
+		LAST_START_DATE=sysdate,
+		UPDATE_BY='admin',
+		UPDATE_DATE=sysdate
+		WHERE   EVALUATION_MODEL_ID=#{templetId}
+	</update>
+	<update id="finishPlan" parameterType="String" >
+		UPDATE EVALUATION_PLAN SET
+		state='2',
+		UPDATE_BY='admin',
+		UPDATE_DATE=sysdate
+		WHERE  state='1' and sysdate>EVALUATION_PLAN_END_TIME
+	</update>
+	<update id="startPlan" parameterType="String" >
+		UPDATE EVALUATION_PLAN SET
+		state='1',
+		UPDATE_BY='admin',
+		UPDATE_DATE=sysdate
+		WHERE  state='0' and sysdate>EVALUATION_PLAN_STATE_TIME
+	</update>
+</mapper>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>输入法字典维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+
+</head>
+<body class="easyui-layout">
+<style type="text/css" rel="stylesheet">
+    .fitem label {
+        width: 60px;
+    }
+</style>
+<div id="master" data-options="region:'west'" style="padding:1px;background:#eee;width: 300px;">
+    <table id="masterGrid" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="classft" style="padding: 5px;">
+    <a href="#" id="addMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a href="#" id="saveMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a href="#" id="removeMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+<div id="detail" data-options="region:'center',fit:true" style="padding:1px;background:#eee;">
+    <table id="detailGrid" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="ft" style="padding: 5px;">
+    <a href="#" id="addDetailBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a href="#" id="saveDetailBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a href="#" id="removeDetailBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+
+<script type="text/javascript" src="/modules/sys/js/input-setting.js"></script>
+<!--<script type="text/javascript" src="/static/js/head.js"></script>-->
+
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.MenuUpdateExplainDao">
+
+    <sql id="menuUpdateExplainColumns">
+        a.ID as id,
+        a.SERVICE_ID as serviceId,
+        a.EXPLAIN as explain,
+        a.TITLE as title,
+        a.CREATE_DATE as createDate,
+        a.CREATE_BY as createBy,
+        a.UPDATE_BY as updateBy,
+        a.UPDATE_DATE as updateDate,
+        a.REMARKS as remarks
+    </sql>
+
+    <select id="get" resultType="MenuUpdateExplain">
+        SELECT
+        <include refid="menuUpdateExplainColumns"/>
+        FROM MENU_UPDATE_EXPLAIN a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="MenuUpdateExplain">
+        SELECT
+        <include refid="menuUpdateExplainColumns"/>
+        FROM MENU_UPDATE_EXPLAIN a
+        <where> 1=1
+            <if test="serviceId!=null and serviceId != ''">
+                AND a.SERVICE_ID =  #{serviceId}
+            </if>
+        </where>
+        ORDER BY a.UPDATE_DATE DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO MENU_UPDATE_EXPLAIN(
+            ID,
+            SERVICE_ID,
+            EXPLAIN,
+            TITLE,
+            CREATE_DATE,
+            CREATE_BY,
+            UPDATE_BY,
+            UPDATE_DATE,
+            REMARKS
+        ) VALUES (
+            #{id},
+            #{serviceId},
+            #{explain},
+            #{title},
+            #{createDate},
+            #{createBy},
+            #{updateBy},
+            #{updateDate},
+            #{remarks}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE MENU_UPDATE_EXPLAIN SET
+            SERVICE_ID = #{serviceId},
+            EXPLAIN = #{explain},
+            TITLE = #{title},
+            UPDATE_BY = #{updateBy},
+            UPDATE_DATE = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM MENU_UPDATE_EXPLAIN
+        WHERE id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.oauth.dao.AppDao">
+    
+	<sql id="appColumns">
+		a.app_key AS "appKey",
+		a.secret_key AS "secretKey",
+		a.callback_url AS "callbackUrl",
+		a.description AS "description",
+		a.name AS "name",
+		a.status AS "status",
+		a.create_time AS "createTime",
+		a.owner AS "owner",
+		a.scope AS "scope",
+		a.approval AS "approval"
+	</sql>
+	
+	<sql id="appJoins">
+	</sql>
+    
+	<select id="selectByPrimaryKey" resultType="App">
+		SELECT 
+			<include refid="appColumns"/>
+		FROM app a
+		<include refid="appJoins"/>
+		WHERE a.app_key = #{appKey}
+	</select>
+	
+	<select id="findList" resultType="App">
+		SELECT 
+			<include refid="appColumns"/>
+		FROM app a
+		<include refid="appJoins"/>
+		<where>
+			
+			<if test="name != null and name != ''">
+				AND a.name LIKE 
+					<if test="dbName == 'oracle'">'%'||#{name}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{name}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{name},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="App">
+		SELECT 
+			<include refid="appColumns"/>
+		FROM app a
+		<include refid="appJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO app(
+			app_key,
+			secret_key,
+			callback_url,
+			description,
+			name,
+			status,
+			create_time,
+			owner,
+			scope,
+			approval
+		) VALUES (
+			#{appKey},
+			#{secretKey},
+			#{callbackUrl},
+			#{description},
+			#{name},
+			#{status},
+			#{createTime},
+			#{owner},
+			#{scope},
+			#{approval}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE app SET 	
+			secret_key = #{secretKey},
+			callback_url = #{callbackUrl},
+			description = #{description},
+			name = #{name},
+			status = #{status},
+			create_time = #{createTime},
+			owner = #{owner},
+			scope = #{scope},
+			approval = #{approval}
+		WHERE app_key = #{appKey}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM app
+		WHERE app_key = #{appKey}
+	</update>
+	
+</mapper>

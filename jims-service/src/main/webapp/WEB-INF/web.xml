@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE web-app [
+        <!ELEMENT web-app (context-param|listener)*>
+        <!ELEMENT context-param (param-name|param-value)*>
+        <!ELEMENT param-name (#PCDATA)>
+        <!ELEMENT param-value (#PCDATA)>
+        <!ELEMENT listener (listener-class)*>
+        <!ELEMENT listener-class (#PCDATA)>
+        ]>
+<web-app>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath*:/*.xml</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>log4jRefreshInterval</param-name>
+        <param-value>6000</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>
+            org.springframework.web.util.Log4jConfigListener
+        </listener-class>
+    </listener>
+</web-app>

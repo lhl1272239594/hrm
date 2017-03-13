@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryProjectMoneyDao">
+
+    <!--项目金额查询-->
+    <select id="moneyList" resultType="SalaryProjectMoney">
+		select t.psid AS psId,
+		t.project_id AS projectId,
+        (select a.project_name from salary_project a where a.project_id = t.project_id and rownum=1)as projectName,
+        t.money as money,
+        t.type_id as typeId,
+        (select a.type_name from salary_human_type a where a.type_id = t.type_id and rownum=1)as typeName,
+        t.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT a where a.ID=t.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO a where a.ID=t.CREATE_BY and rownum=1) AS createBy,
+        t.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO a where a.ID=t.UPDATE_BY and rownum=1) AS updateBy,
+        t.UPDATE_DATE AS updateDate
+        from salary_project_money t
+         where t.CREATE_ORG = #{orgId}
+         and t.type_id = #{typeId}
+         and t.del_flag is null
+         ORDER BY t.CREATE_DATE DESC
+
+    </select>
+    <!--项目列表-->
+    <select id="projectList" resultType="SalaryProject" parameterType="String">
+        select
+        a.PROJECT_ID AS projectId,
+        a.PROJECT_NAME AS projectName,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_PROJECT a
+        <where>
+        a.DEL_FLAG is NULL
+        and a.CREATE_ORG=#{orgId}
+        </where>
+    </select>
+    <!--新增项目金额数据-->
+    <insert id="insertSpm" parameterType="SalaryProjectMoney">
+        INSERT INTO salary_project_money(
+        PSID,
+        TYPE_ID,
+        PROJECT_ID,
+        MONEY,
+        ENABLE_FLAG,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT
+
+        ) VALUES (
+        sys_guid(),
+        #{typeId},
+        #{SalaryProjectMoney.projectId},
+        #{SalaryProjectMoney.money},
+        '1',
+        #{personId},
+        sysdate,
+        #{SalaryProjectMoney.orgId},
+        #{createDept}
+        )
+    </insert>
+    <update id="update">
+        UPDATE salary_project_money SET
+        PROJECT_ID = #{projectId},
+        MONEY = #{money},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE PSID = #{psId}
+    </update>
+    <update id="del_spm" parameterType="String" >
+        UPDATE salary_project_money SET
+        DEL_FLAG = '1'
+        WHERE PSID = #{ids}
+    </update>
+
+</mapper>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>职务对应员工维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../static/easyui/css/icon.css">
+    <script type="text/javascript" src="../../static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="../../static/easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../static/js/spell.js"></script>
+    <script type="text/javascript" src="../../static/js/tool.js"></script>
+    <script type="text/javascript" src="../sys/js/role-vs-staff.js"></script>
+
+</head>
+<body class="easyui-layout">
+
+<div region="center">
+
+    <div id="cc"  class="easyui-layout" style="width: 100%;height: 100%">
+        <div region="north"  style="padding:5px;height:38px" >
+            <a href="#" id="addBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">新增员工</a>
+            <a href="#" id="delBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除员工</a>
+        </div>
+
+        <div region="west"  style="width:35%;height: 100%;">
+            <table id="roleList" class="easyui-datagrid" style="height: 100%"></table>
+        </div>
+        <div region="center" style="width:65%;height: 100%;">
+            <table id="staffList" class="easyui-datagrid" style="height: 100%"></table>
+        </div>
+    </div>
+
+</div>
+
+<div id="addStaff"  style="height: 340px;width:300px;" data-options="footer:'#classWinFt'">
+    <form id="staffForm" data-options="fit:true" >
+        <div style="padding-top:10px;" class="fitem" hidden="hidden">
+            职务ID：
+            <input class="easyui-textbox" id="roleId" type="text"  data-options="width:175,height:25"  />
+        </div>
+        <div style="padding-top:10px;" class="fitem">
+            职务：
+            <input class="easyui-textbox" id="roleName" type="text"  data-options="width:175,height:25" disabled />
+        </div>
+        <div style="padding-top:10px;" class="fitem">
+            员工：
+            <input class="easyui-combogrid" id="personList" type="text" data-options="required:true,missingMessage:'请选择人员',width:175,height:25" />
+        </div>
+    </form>
+</div>
+<div style="padding:5px;text-align:right;" id="classWinFt">
+    <a href="#" id="saveBtn" class="easyui-linkbutton" icon="icon-ok">确定</a>
+    <a href="#" id="cancelBtn" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.template.dao.TemplateMasterDao">
+
+    <sql id="templateMasterColumns">
+        a.ID as id,
+        a.TABLE_NAME as tableName,
+        a.AREA as area,
+        a.AREA_NAME as areaName,
+        a.DETAILS as details ,
+        a.TEMPLATE_NAME as templateName
+    </sql>
+
+    <select id="get" resultType="TemplateMaster">
+        SELECT
+        <include refid="templateMasterColumns"/>
+        FROM TEMPLATE_MASTER a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getArea" resultType="TemplateMaster">
+        SELECT
+        <include refid="templateMasterColumns"/>
+        FROM TEMPLATE_MASTER a
+        WHERE 1=1
+        <if test="area != null and area !='' ">
+            AND a.area=#{area}
+        </if>
+        <if test="tableName != null and tableName !='' ">
+            AND upper(a.table_name)=upper(#{tableName})
+        </if>
+    </select>
+
+    <select id="findList" resultType="TemplateMaster">
+        SELECT
+        <include refid="templateMasterColumns"/>
+        FROM TEMPLATE_MASTER a
+        <where>
+            <if test="tableName != null and tableName !='' ">
+                AND upper(a.table_name)=upper(#{tableName})
+            </if>
+            <if test="area != null and area !='' ">
+                AND a.area=#{area}
+            </if>
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="TemplateMaster">
+        SELECT
+        <include refid="templateMasterColumns"/>
+        FROM TEMPLATE_MASTER a
+    </select>
+
+    <insert id="insert">
+        INSERT INTO TEMPLATE_MASTER(
+            ID,
+            TABLE_NAME,
+            AREA,
+            AREA_NAME,
+            DETAILS,
+            TEMPLATE_NAME
+        ) VALUES (
+            #{id},
+            #{tableName},
+            #{area},
+            #{areaName} ,
+            #{details},
+            #{templateName}
+        )
+    </insert>
+
+    <insert id="insertById">
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select sys_guid() as id from dual
+        </selectKey>
+        INSERT INTO TEMPLATE_MASTER(
+        ID,
+        TABLE_NAME,
+        AREA,
+        AREA_NAME,
+        DETAILS ,
+        TEMPLATE_NAME
+        ) VALUES (
+        #{id},
+        #{tableName},
+        #{area},
+        #{areaName} ,
+        #{details},
+        #{templateName}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE TEMPLATE_MASTER SET
+            TABLE_NAME = #{tableName},
+            AREA = #{area},
+            DETAILS = #{details} ,
+            TEMPLATE_NAME=#{templateName}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM TEMPLATE_MASTER
+        WHERE id = #{id}
+    </delete>
+</mapper>

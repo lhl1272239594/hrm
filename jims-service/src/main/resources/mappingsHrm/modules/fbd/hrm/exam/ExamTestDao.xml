@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.exam.dao.ExamTestDao">
+	<!--查询考生是否开始考试-->
+	<select id="checkTest" resultType="ExamScore">
+		select s.score_t_id      as id,
+		s.plan_id         as planId,
+		s.exam_id         as examId,
+		s.user_id         as userId,
+		s.user_name       as userName,
+		s.exam_time       as time,
+		s.exam_start_time as startTime,
+		s.exam_end_time   as endTime,
+		s.score           as score,
+		s.state           as state
+		from exam_score s
+		where s.plan_id=#{planId}
+		and s.user_id =#{userId}
+
+	</select>
+	<!--判断是否过了考试限制的时间-->
+	<select id="checkTime" resultType="Integer">
+		select ROUND(TO_NUMBER(
+		sysdate - (select exam_start_time from exam_plan p where p.plan_id=#{planId})) * 24 * 60 *60)
+		from dual
+
+	</select>
+	<!--查询剩余时间-->
+	<select id="LeftTime" resultType="Integer">
+		select ROUND(TO_NUMBER(
+		to_date('${start}','YYYY-MM-DD hh24:mi:ss')-sysdate) * 24 * 60 * 60)
+		from dual
+
+	</select>
+	<!--查询提交限制的试卷-->
+	<select id="checkSubmitTime" resultType="Integer">
+		select ROUND(TO_NUMBER(sysdate - s.exam_start_time) * 24 * 60 * 60)
+		from EXAM_SCORE s
+		where s.score_t_id =#{scoreId}
+
+	</select>
+	<!--查询提交限制的试卷-->
+	<select id="checkNotAnswerNum" resultType="Integer">
+		select count(*)
+		from EXAM_SCORE_DETAIL d
+		where d.score_t_id = #{scoreId}
+		and d.answer is null
+
+	</select>
+	<!--查询提交限制的试卷-->
+	<select id="getExamScoreState" resultType="String">
+		select state
+		from EXAM_SCORE s
+		where s.score_t_id = #{scoreId}
+
+	</select>
+	<!--查询考试是否结束-->
+	<select id="getPlanIsComplete" resultType="Integer">
+		select count(*)
+		  from exam_score s
+		 where s.plan_id = #{planId}
+		   and s.state in ('0', '1')
+
+
+	</select>
+	<!--获取得分-->
+	<select id="getScore" resultType="Integer">
+		select decode(sum(d.result_score),null,'0',sum(d.result_score))
+		from EXAM_SCORE_DETAIL d
+		where d.answer is not null
+		and d.score_t_id = #{scoreId}
+		and d.question_type_id!='4'
+	</select>
+	<!--获取考试成绩主表-->
+	<select id="getExamScore" resultType="ExamScore">
+		select s.score_t_id      as id,
+		s.plan_id         as planId,
+		s.exam_id         as examId,
+		s.user_id         as userId,
+		s.user_name       as userName,
+		s.exam_time       as time,
+		s.exam_start_time as startTime,
+		s.exam_end_time   as endTime,
+		s.score           as score,
+		s.create_org      as orgId,
+		s.state           as state
+		from exam_score s
+		where s.score_t_id = #{scoreId}
+
+	</select>
+	<!--查询试卷试题-->
+	<select id="getExamQuestion" resultType="ExamDetail">
+		SELECT a.QUESTION_ID AS "queId",
+		a.EXAM_QUESTION_ID AS "examQueId",
+		a.EXAM_ID AS "examId",
+		a.QUESTION_NAME  as "queName",
+		a.QUESTION_TYPE_ID AS "typeId",
+		a.QUESTION_NUMBER AS "queNum",
+		(select c.QUESTION_TYPE_NAME from QUESTION_TYPE c  where c.QUESTION_TYPE_ID=a.QUESTION_TYPE_ID) as typeName,
+		a.QUESTION_ITEM_ID AS "itemId",
+		a.QUESTION_CONTENT AS "queContent",
+		a.QUESTION_ANSWER AS "queAnswer",
+		a.EXAM_QUESTION_TYPE_ID AS "examQueTypeId",
+		a.SCORE AS "score"
+		FROM EXAM_QUESTION a
+		where a.EXAM_ID=#{examId}
+		order by a.QUESTION_TYPE_ID
+
+	</select>
+	<!--获取考试成绩行表-->
+	<select id="getExamDetail" resultType="ExamDetail">
+		SELECT
+		d.SCORE_H_ID as id,
+		d.SCORE_T_ID as scoreId,
+		d.QUESTION_ID as queId,
+		d.EXAM_QUESTION_ID as examQueId,
+		d.ANSWER as answer,
+		d.SCORE as score,
+		d.QUESTION_TYPE_ID as typeId,
+		d.QUESTION_TYPE_NAME as typeName,
+		q.QUESTION_NAME  as queName,
+		q.QUESTION_NUMBER as queNum,
+		q.QUESTION_CONTENT as queContent,
+		q.QUESTION_ANSWER as queAnswer,
+		d.EXAM_QUESTION_TYPE_ID as examQueTypeId,
+		q.QUESTION_ITEM_ID as itemId,
+		d.RESULT_SCORE as resultScore,
+		d.SORT as sort
+		FROM EXAM_SCORE_DETAIL d ,QUESTION q
+		where d.SCORE_T_ID=#{id} and d.QUESTION_ID=q.QUESTION_ID
+		order by length(SORT),SORT
+
+	</select>
+
+	<!--获取考试成绩行表-->
+	<select id="getQuestion" resultType="ExamDetail">
+		SELECT
+		d.SCORE_H_ID as id,
+		d.SCORE_T_ID as scoreId,
+		d.QUESTION_ID as queId,
+		d.EXAM_QUESTION_ID as examQueId,
+		d.ANSWER as answer,
+		d.SCORE as score,
+		d.QUESTION_TYPE_ID as typeId,
+		d.QUESTION_TYPE_NAME as typeName,
+		q.QUESTION_NAME  as queName,
+		q.QUESTION_NUMBER as queNum,
+		q.QUESTION_CONTENT as queContent,
+		q.QUESTION_ANSWER as queAnswer,
+		d.EXAM_QUESTION_TYPE_ID as examQueTypeId,
+		q.QUESTION_ITEM_ID as itemId,
+		d.RESULT_SCORE as resultScore,
+		d.SORT as sort
+		FROM EXAM_SCORE_DETAIL d ,QUESTION q
+		where d.SCORE_T_ID=#{scoreId} and d.SORT=#{sort}
+		and d.QUESTION_ID=q.QUESTION_ID
+		  order by length(SORT),SORT
+	</select>
+	<insert id="insertExamScore" parameterType="ExamScore">
+		INSERT INTO EXAM_SCORE(
+		SCORE_T_ID,
+		PLAN_ID,
+		EXAM_ID,
+		USER_ID,
+		USER_NAME,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_DEPT,
+		EXAM_START_TIME,
+		CREATE_ORG
+		) VALUES (
+		#{ExamScore.id},
+		#{ExamScore.planId},
+		#{ExamScore.examId},
+		#{ExamScore.userId},
+		(select t.NAME from PERSION_INFO t where t.ID=#{ExamScore.userId} and rownum=1),
+		'0',
+		'0',
+		#{ExamScore.createBy},
+		sysdate,
+		(select d.dept_id from ORG_STAFF d where d.org_id=#{ExamScore.orgId} and d.persion_id=#{ExamScore.userId} and rownum=1),
+		sysdate,
+		#{ExamScore.orgId}
+
+		)
+	</insert>
+	<insert id="insertExamResult" parameterType="ExamScore">
+		INSERT INTO EXAM_SCORE_RESULT(
+		RESULT_ID,
+		PLAN_ID,
+		EXAM_ID,
+		USER_ID,
+		USER_NAME,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		EXAM_TIME,
+		EXAM_START_TIME,
+		EXAM_END_TIME,
+		CREATE_ORG
+		) VALUES (
+		#{ExamScore.id},
+		#{ExamScore.planId},
+		#{ExamScore.examId},
+		#{ExamScore.userId},
+		#{ExamScore.userName},
+		#{ExamScore.score},
+		#{ExamScore.state},
+		#{ExamScore.createBy},
+		sysdate,
+		(select ROUND(TO_NUMBER(s.exam_end_time - s.exam_start_time) * 24 * 60 * 60)
+			  from exam_score s
+			 where s.score_t_id =#{ExamScore.id} ),
+		(select exam_start_time from exam_score s
+			 where score_t_id =#{ExamScore.id} ),
+		(select exam_end_time from exam_score s
+			 where score_t_id =#{ExamScore.id} ),
+		#{ExamScore.orgId}
+
+		)
+	</insert>
+	<insert id="insertExamDetail" parameterType="ExamDetail">
+		INSERT INTO EXAM_SCORE_DETAIL(
+		SCORE_H_ID,
+		SCORE_T_ID,
+		QUESTION_ID,
+		EXAM_QUESTION_ID,
+		ANSWER,
+		SCORE,
+		QUESTION_TYPE_ID,
+		QUESTION_TYPE_NAME,
+		QUESTION_NAME,
+		QUESTION_NUMBER,
+		QUESTION_CONTENT,
+		QUESTION_ANSWER,
+		EXAM_QUESTION_TYPE_ID,
+		QUESTION_ITEM_ID,
+		RESULT_SCORE,
+		PLAN_ID,
+		EXAM_ID,
+		SORT
+		) VALUES (
+		#{ExamDetail.id},
+		#{ExamDetail.scoreId},
+		#{ExamDetail.queId},
+		#{ExamDetail.examQueId},
+		'',
+		#{ExamDetail.score},
+		#{ExamDetail.typeId},
+		#{ExamDetail.typeName},
+		#{ExamDetail.queName},
+		#{ExamDetail.queNum},
+		#{ExamDetail.queContent},
+		#{ExamDetail.queAnswer},
+		#{ExamDetail.examQueTypeId},
+		#{ExamDetail.itemId},
+		'0',
+		#{ExamDetail.planId},
+		#{ExamDetail.examId},
+		#{ExamDetail.sort}
+
+		)
+	</insert>
+	<insert id="insertExamDetailResult" parameterType="ExamDetail">
+		INSERT INTO EXAM_SCORE_DETAIL1
+		select * from EXAM_SCORE_DETAIL d where  d.score_t_id=#{id}
+	</insert>
+	<update id="saveAnswer" parameterType="ExamDetail"  >
+		UPDATE EXAM_SCORE_DETAIL SET
+		ANSWER = #{ExamDetail.answer},
+		RESULT_SCORE = #{ExamDetail.resultScore}
+		WHERE SCORE_H_ID = #{ExamDetail.id}
+	</update>
+	<update id="updateExamScore" parameterType="ExamDetail"  >
+		UPDATE EXAM_SCORE SET
+		EXAM_END_TIME = sysdate,
+		SCORE = #{score},
+		STATE = #{state}
+		WHERE SCORE_T_ID = #{scoreId}
+	</update>
+	<!--更新考试主表状态-->
+	<update id="updateScore" parameterType="String"  >
+		UPDATE EXAM_SCORE SET
+		STATE = '1',
+		EXAM_START_TIME=sysdate
+		WHERE SCORE_T_ID = #{id}
+	</update>
+	<update id="finishPlan" parameterType="String"  >
+		UPDATE EXAM_PLAN SET
+		STATE = '2'
+		WHERE PLAN_ID = #{planId}
+
+	</update>
+	<delete id="delExamDetail" parameterType="String"  >
+		delete from exam_score_detail d
+		 where d.score_t_id =#{id}
+
+	</delete>
+
+</mapper>

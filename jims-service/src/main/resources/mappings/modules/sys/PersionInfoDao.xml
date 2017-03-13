@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.PersionInfoDao">
+
+    <!--<sql id="register">
+        a.id AS "id",
+        a.name AS "name",
+        a.sex AS "sex",
+        a.nation AS "nation",
+        a.card_no AS "cardNo",
+        a.phone_num AS "phoneNum",
+        a.email AS "email",
+        a.nick_name AS "nickName",
+        a.remarks AS "remarks",
+        a.update_by AS "updateBy.id",
+        a.create_by AS "createBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        a.create_date AS "createDate"
+    </sql>-->
+
+    <sql id="persionInfoColumns">
+        a.id AS "id",
+        a.name AS "name",
+        a.sex AS "sex",
+        a.nation AS "nation",
+        a.card_no AS "cardNo",
+        a.phone_num AS "phoneNum",
+        a.email AS "email",
+        a.nick_name AS "nickName",
+        a.remarks AS "remarks",
+        a.update_by AS "updateBy.id",
+        a.create_by AS "createBy.id",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        a.create_date AS "createDate"
+    </sql>
+    <insert id="insert">
+        <!--保存用户注册信息-->
+        INSERT INTO persion_info(
+        id,
+        name,
+        sex,
+        nation,
+        card_no,
+        role,
+        phone_num,
+        email,
+        input_code,
+        nick_name,
+        remarks,
+        type ,
+        classify,
+        skill_id,
+        skill_level_id,
+        title_level,
+        education,
+        education_final,
+        education_time,
+        education_final_time,
+        politic,
+        work_time,
+        come_time,
+        age ,
+        marry ,
+        pic ,
+        address ,
+        exp ,
+        remark ,
+        create_by,
+
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{name},
+        #{sex},
+        #{nation},
+        #{cardNo},
+        #{roleName},
+        #{phoneNum},
+        #{email},
+        #{inputCode},
+        #{nickName},
+        #{remarks},
+        #{type},
+        #{classify},
+        #{skill},
+        #{skillLevel},
+        #{title_level},
+        #{education},
+        #{educationFinal},
+        #{educationTime},
+        #{educationFinalTime},
+        #{politic},
+        #{workTime},
+        #{comeTime},
+        #{age},
+        #{marry},
+        #{pic},
+        #{address},
+        #{exp},
+        #{remark},
+        #{createBy},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <insert id="register">
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select sys_guid() as id from dual
+        </selectKey>
+        <!--保存用户注册信息-->
+        INSERT INTO persion_info(
+        id,
+        name,
+        sex,
+        nation,
+        card_no,
+        role,
+        phone_num,
+        email,
+        input_code,
+        nick_name,
+        remarks,
+        type ,
+        classify,
+        skill_id,
+        skill_level_id,
+        title_level,
+        education,
+        education_final,
+        education_time,
+        education_final_time,
+        politic,
+        work_time,
+        come_time,
+        age ,
+        marry ,
+        pic ,
+        address ,
+        exp ,
+        remark ,
+        create_by,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{name},
+        #{sex},
+        #{nation},
+        #{cardNo},
+        #{roleName},
+        #{phoneNum},
+        #{email},
+        #{inputCode},
+        #{nickName},
+        #{remarks},
+        #{type},
+        #{classify},
+        #{skill},
+        #{skillLevel},
+        #{title_level},
+        #{education},
+        #{educationFinal},
+        #{educationTime},
+        #{educationFinalTime},
+        #{politic},
+        #{workTime},
+        #{comeTime},
+        #{age},
+        #{marry},
+        #{pic},
+        #{address},
+        #{exp},
+        #{remark},
+        #{createBy},
+
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <!--查询身份证号是否唯一-->
+    <select id="getCard" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info
+        WHERE 1=1
+
+        <if test="cardNo!=null and cardNo !=''">
+            and card_no=#{cardNo}
+        </if>
+        <if test="id!=null and id !=''">
+           and  id=#{id}
+        </if>
+
+
+    </select>
+    <!--查询邮箱是否唯一-->
+    <select id="getEmail" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info
+        WHERE  1=1
+
+        <if test="email!=null and email !=''">
+            and  email=#{email}
+        </if>
+        <if test="id!=null and id !=''">
+            and  id=#{id}
+        </if>
+
+    </select>
+    <!--查询手机号是否唯一-->
+    <select id="getPhone" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info
+        WHERE  1=1
+        <if test="phoneNum!=null and phoneNum !=''">
+            and   phone_num=#{phoneNum}
+        </if>
+        <if test="id!=null and id !=''">
+            and  id=#{id}
+        </if>
+
+
+    </select>
+    <!--查询用户名是否唯一-->
+    <select id="getNick" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info
+        WHERE
+           1=1
+        <if test="nickName!=null and nickName !=''">
+            and    nick_name=#{nickName}
+        </if>
+        <if test="id!=null and id !=''">
+            and  id=#{id}
+        </if>
+
+
+    </select>
+
+    <select id="findInfoByCardNo" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info
+        WHERE  card_no=#{cardNo} AND
+        del_flag='0'
+    </select>
+    <select id="get" resultType="PersionInfo">
+        SELECT
+        *
+        FROM persion_info a
+        WHERE a.id = #{id}
+    </select>
+
+    <update id="update">
+
+        UPDATE persion_info SET
+        name = #{name},
+        sex = #{sex},
+        nation = #{nation},
+        card_no = #{cardNo},
+        role = #{roleName},
+        phone_num = #{phoneNum},
+        email = #{email},
+        nick_name = #{nickName},
+        remarks = #{remarks},
+        type = #{type},
+        classify= #{classify},
+        skill_id= #{skill},
+        skill_level_id= #{skillLevel},
+        title_level=#{title_level},
+        education = #{education},
+        education_final = #{educationFinal},
+        education_time = #{educationTime},
+        education_final_time = #{educationFinalTime},
+        politic = #{politic},
+        work_time = #{workTime},
+        come_time = #{comeTime},
+        age = #{age},
+        marry = #{marry},
+        pic = #{pic},
+        address = #{address},
+        exp = #{exp},
+        remark = #{remark},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateById">
+        UPDATE persion_info SET
+        name = #{name},
+        sex = #{sex},
+        nation = #{nation},
+        card_no = #{cardNo},
+        role = #{roleName},
+        phone_num = #{phoneNum},
+        email = #{email},
+        nick_name = #{nickName},
+        remarks = #{remarks},
+        type = #{type},
+        classify= #{classify},
+        skill_id= #{skill},
+        skill_level_id= #{skillLevel},
+        title_level= #{title_level},
+        education = #{education},
+        education_final = #{educationFinal},
+        education_time = #{educationTime},
+        education_final_time = #{educationFinalTime},
+        politic = #{politic},
+        work_time = #{workTime},
+        come_time = #{comeTime},
+        age = #{age},
+        marry = #{marry},
+        pic = #{pic},
+        address = #{address},
+        exp = #{exp},
+        remark = #{remark},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+    <!--向职业信息表中插入数据-->
+    <insert id="insertCareer">
+        insert into CAREER_INFO (
+        career_id,
+        person_id,
+        title,
+        title_level,
+        dept_id,
+        create_date,
+        create_org)
+        VALUES (
+        sys_guid(),
+        #{id},
+        #{title},
+        #{titleLevel},
+        #{deptId},
+        sysdate,
+        #{orgId}
+        )
+    </insert>
+</mapper>

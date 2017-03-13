@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云his工作平台</title>
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/modules/sys/js/chargePriceSchedule.js"></script>
+</head>
+<body onload="onloadMethod()">
+
+    <table id="list_data" width="100%"  cellspacing="0" cellpadding="0">
+
+    </table>
+<div id="dlg" class="easyui-dialog" style="width: 30%; height: 60%; padding: 10px 20px;"
+     closed="true" buttons="#dlg-buttons">
+    <form id="chargePriceScheduleForm" method="post">
+        <input name="id"  type="hidden" name="id"/>
+        <div class="fitem fitem_pop">
+            <label>
+                医院：
+            </label>
+            <input name="hosId" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                费别：
+            </label>
+            <input name="chargeType" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                收费系数分子(住院)：
+            </label>
+            <input name="priceCoeffNumerator" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                收费系数分母(住院)：
+            </label>
+            <input name="priceCoeffDenominator" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                适用特殊收适用特殊收费项目标志：
+            </label>
+            <input name="chargeSpecialIndicator" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                收费系数分子(门诊)：
+            </label>
+            <input name="numeratorOutp" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                收费系数分母(门诊)：
+            </label>
+            <input name="denominatorOutp" class="easyui-validatebox" required="true" />
+        </div>
+    </form>
+
+
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton"onclick="saveDict()" iconcls="icon-save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')"
+           iconcls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

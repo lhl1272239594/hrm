@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryTmpDao">
+
+
+    <!--创建工资列表-->
+    <select id="salaryList" resultType="SalaryTmp">
+       select
+        a.CREATE_ORG AS orgId,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_TMP t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_TMP a
+        <where>
+            (a.FLAG = '0' or a.FLAG = '1')
+            and a.CREATE_ORG=#{orgId} and SALARY_MONTH = to_char(sysdate,'YYYY')||'-'||to_char(sysdate,'MM')
+        </where>
+        <if test="personName != null and personName != ''">
+            and (select NAME
+            from PERSION_INFO t
+            where t.ID = a.PERSON_ID
+            and rownum = 1) like CONCAT('%',CONCAT(#{personName},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.DEPT_ID = #{deptId}
+        </if>
+        <if test="typeId != null and typeId != '' ">
+            and a.HUMAN_TYPE_ID = #{typeId}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.DEPT_ID in ( ${deptIds} )
+        </if>
+            ORDER BY a.DEPT_ID
+    </select>
+    <!--待发放工资列表-->
+    <select id="salarytodoList" resultType="SalaryTmp">
+        select
+        a.CREATE_ORG AS orgId,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_TMP t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_TMP a
+        <where>
+            a.FLAG = '0' and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="personName != null and personName != ''">
+            and (select NAME
+            from PERSION_INFO t
+            where t.ID = a.PERSON_ID
+            and rownum = 1) like CONCAT('%',CONCAT(#{personName},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.DEPT_ID = #{deptId}
+        </if>
+        <if test="typeId != null and typeId != '' ">
+            and a.HUMAN_TYPE_ID = #{typeId}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.DEPT_ID in ( ${deptIds} )
+        </if>
+        ORDER BY a.DEPT_ID
+    </select>
+    <!--待发放工资列表-->
+    <select id="salarytodoList1" resultType="SalaryTmp">
+        select
+        a.CREATE_ORG AS orgId,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_TMP t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_TMP a
+        <where>
+            a.FLAG = '0' and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="personName != null and personName != ''">
+            and (select NAME
+            from PERSION_INFO t
+            where t.ID = a.PERSON_ID
+            and rownum = 1) like CONCAT('%',CONCAT(#{personName},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.DEPT_ID in (${deptId})
+        </if>
+        <if test="typeId != null and typeId != '' ">
+            and a.HUMAN_TYPE_ID = #{typeId}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.DEPT_ID in ( ${deptIds} )
+        </if>
+        ORDER BY a.DEPT_ID
+    </select>
+
+    <!--手工调整-->
+    <update id="change" parameterType="SalaryTmp" >
+        UPDATE SALARY_TMP SET
+        SHIFA = SHIFA+#{SalaryTmp.adjustMoney},
+        ADJUST_MONEY = #{SalaryTmp.adjustMoney},
+        ADJUST_REASON = #{SalaryTmp.adjustReason},
+        ADJUST_BY = #{userName},
+        ADJUST_DATE = sysdate
+        WHERE TMP_ID = #{SalaryTmp.tmpId}
+    </update>
+    <!--创建之前先删除-->
+    <delete id="deleteSalary" parameterType="PersonVo" >
+        delete from SALARY_TMP where CREATE_ORG = #{PersonVo.orgId} and DEPT_ID=#{PersonVo.userId} and FLAG = '0'
+        and SALARY_MONTH = to_char(sysdate,'YYYY')||'-'||to_char(sysdate,'MM')
+    </delete>
+
+    <!--创建工资-->
+    <select id="create" parameterType="PersonVo" statementType="CALLABLE">
+        CALL P_SALARY_CA(#{PersonVo.orgId},#{PersonVo.userId},#{PersonVo.name})
+    </select>
+    <!--重新计算-->
+    <select id="recal" parameterType="SalaryTmp" statementType="CALLABLE">
+        CALL P_SALARY_RECAL(#{SalaryTmp.orgId},#{SalaryTmp.personId},#{SalaryTmp.tmpId})
+    </select>
+    <!--下发工资后变更工资状态(全部发放)-->
+    <update id="updateState" parameterType="SalaryTmp" >
+        UPDATE SALARY_TMP SET
+        FLAG = '1',
+        CONFIRM_MAN = #{SalaryTmp.confirmMan},
+        CONFIRM_DATE = sysdate
+        WHERE CREATE_ORG = #{SalaryTmp.orgId} and FLAG = '0'
+    </update>
+    <!--按部门-->
+    <update id="updateStateByDept" parameterType="PersonVo" >
+        UPDATE SALARY_TMP SET
+        FLAG = '1',
+        CONFIRM_MAN = #{PersonVo.name},
+        CONFIRM_DATE = sysdate
+        WHERE CREATE_ORG = #{PersonVo.orgId} and DEPT_ID = #{PersonVo.userId} and FLAG = '0'
+    </update>
+
+    <!--工资数据插入到工资表中(全部发放)-->
+    <insert id="insertHistory" parameterType="SalaryTmp" >
+        insert into SALARY_HISTORY select * from SALARY_TMP
+        WHERE CREATE_ORG = #{SalaryTmp.orgId} and FLAG = '0'
+    </insert>
+    <!--按部门-->
+    <insert id="insertHistoryByDept" parameterType="PersonVo" >
+        insert into SALARY_HISTORY select * from SALARY_TMP
+        WHERE CREATE_ORG = #{PersonVo.orgId} and DEPT_ID = #{PersonVo.userId} and FLAG = '0'
+    </insert>
+
+    <!--更新确认人和确认时间-->
+    <update id="updateConfirm" parameterType="SalaryTmp" >
+        UPDATE SALARY_HISTORY SET
+        CONFIRM_MAN = #{SalaryTmp.confirmMan},
+        CONFIRM_DATE = sysdate
+        WHERE CREATE_ORG = #{SalaryTmp.orgId} and CONFIRM_MAN is null and CONFIRM_DATE is null
+    </update>
+    <!--按部门-->
+    <update id="updateConfirmDept" parameterType="PersonVo" >
+        UPDATE SALARY_HISTORY SET
+        CONFIRM_MAN = #{PersonVo.name},
+        CONFIRM_DATE = sysdate
+        WHERE CREATE_ORG = #{PersonVo.orgId} and DEPT_ID = #{PersonVo.userId} and CONFIRM_MAN is null and CONFIRM_DATE is null
+    </update>
+    <!--查询工资单列表-->
+    <select id="salaryHistorylist" resultType="SalaryTmp">
+        select
+        a.CREATE_ORG AS orgId,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_HISTORY t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_HISTORY a
+        <where>
+         a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="salaryMonth != null and salaryMonth != ''">
+            and  SALARY_MONTH = #{salaryMonth}
+        </if>
+        <if test="salaryMonth == ''">
+            and SALARY_MONTH = to_char(sysdate,'YYYY')||'-'||to_char(sysdate,'MM')
+        </if>
+        <if test="personName != null and personName != ''">
+            and (select NAME
+            from PERSION_INFO t
+            where t.ID = a.PERSON_ID
+            and rownum = 1) like CONCAT('%',CONCAT(#{personName},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.DEPT_ID = #{deptId}
+        </if>
+        <if test="typeId != null and typeId != '' ">
+            and a.HUMAN_TYPE_ID = #{typeId}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.DEPT_ID in ( ${deptIds} )
+        </if>
+        ORDER BY a.DEPT_ID
+    </select>
+    <!--查询历史信息-->
+    <select id="salaryHistoryall" resultType="SalaryTmp">
+        select
+        a.CREATE_ORG AS orgId,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_HISTORY t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_HISTORY a
+        <where>
+            a.PERSON_ID = #{personId}
+        </where>
+        ORDER BY to_date(a.SALARY_MONTH,'YYYY-MM') DESC
+    </select>
+    <!--查询我的工资-->
+    <select id="getmypay" resultType="SalaryTmp">
+        select
+        a.CREATE_ORG AS orgId,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.TMP_ID AS tmpId,
+        a.FLAG AS flag,
+        a.SALARY_MONTH AS salaryMonth,
+        a.PERSON_ID AS personId,
+        a.HUMAN_TYPE_ID AS typeId,
+        (select NAME from PERSION_INFO t where t.ID=a.PERSON_ID and rownum=1) AS personName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptId,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=a.HUMAN_TYPE_ID and rownum=1) AS typeName,
+        a.STATE AS state,
+        a.SHEBAO_JISHU AS socialSecuritybase,
+        a.SHEBAO_DANWEI AS socialSecuritycompany,
+        a.YINGFA AS salaryBefore,
+        a.SHEBAO AS socialSecuritypersonal,
+        a.SHUIJIN AS salaryTax,
+        a.ADJUST_MONEY AS adjustMoney,
+        (select decode(sign(a.SHIFA),-1,0,MIN(to_number(a.SHIFA))) from SALARY_HISTORY t where t.tmp_id = a.tmp_id)AS salaryAfter,
+        a.ADJUST_REASON AS adjustReason,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.CONFIRM_MAN and rownum=1) AS confirmMan,
+        a.CONFIRM_DATE AS comfirmDate,
+        (select NAME from PERSION_INFO t where t.ID=a.ADJUST_BY and rownum=1) AS adjustBy,
+        a.ADJUST_DATE AS adjustDate
+        FROM SALARY_HISTORY a
+        <where>
+            a.CREATE_ORG=#{orgId}
+            and a.person_id=#{tmpId}
+        </where>
+        <if test="salaryMonth != null and salaryMonth != ''">
+            and  SALARY_MONTH = #{salaryMonth}
+        </if>
+        <if test="salaryMonth == ''">
+            and SALARY_MONTH = to_char(sysdate,'YYYY')||'-'||to_char(sysdate,'MM')
+        </if>
+        ORDER BY a.DEPT_ID
+    </select>
+    <!--判断工资是否已下发-->
+    <select id="findSalarysame" resultType="SalaryTmp">
+        SELECT *
+        FROM SALARY_HISTORY t
+        WHERE t.create_org=#{orgId}
+        and  t.salary_month = to_char(sysdate,'YYYY')||'-'||to_char(sysdate,'MM')
+    </select>
+
+    <!--创建工资工资详情-->
+    <select id="salaryDetail" resultType="SalaryTmp">
+        select (select t.project_name from salary_project t where t.project_id = spm.project_id and rownum =1)as item,to_char(spm.money,'999999999.99') as money from salary_project_money spm,salary_tmp sh
+        where spm.type_id = #{typeId} and spm.create_org = #{orgId} and spm.del_flag is null and sh.human_type_id = spm.type_id and sh.person_id =#{personId} and sh.salary_month = #{salaryMonth}
+        union all
+        select (select t.part_name from salary_part t where t.part_id = sc.part_id and rownum = 1)as item,sc.content as money from salary_calculate sc,salary_tmp sh
+        where sc.human_type_id = #{typeId} and sc.create_org = #{orgId} and sc.del_flag is null and sc.human_type_id = sh.human_type_id and sh.person_id =#{personId} and sh.salary_month = #{salaryMonth}
+        union all
+        select '应发工资' as item,decode(to_char(sh.yingfa,'999999999.99'),.00,'0',to_char(sh.yingfa,'999999999.99')) as money from salary_tmp sh where sh.human_type_id = #{typeId} and
+        sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+        union all
+        select '代扣社保' as item,decode(to_char(sh.shebao,'999999999.99'),.00,'0',to_char(sh.shebao,'999999999.99')) as money from salary_tmp sh where sh.human_type_id = #{typeId} and
+        sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+        union all
+        select '代扣个税' as item,decode(to_char(sh.shuijin,'999999999.99'),.00,'0',to_char(sh.shuijin,'999999999.99')) as money from salary_tmp sh where sh.human_type_id = #{typeId} and
+        sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+        union all
+        select '手工调整额' as item,decode(to_char(sh.adjust_money,'999999999.99'),.00,'0',to_char(sh.adjust_money,'999999999.99')) as money from salary_tmp sh where sh.human_type_id = #{typeId} and
+        sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+        union all
+        select '实发工资' as item,decode(to_char(sh.shifa,'999999999.99'),.00,'0',to_char(sh.shifa,'999999999.99')) as money from salary_tmp sh where sh.human_type_id = #{typeId} and
+        sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+
+    </select>
+
+    <!--工资详单-->
+    <select id="salaryInfo" resultType="SalaryTmp">
+        select (select t.project_name from salary_project t where t.project_id = spm.project_id and rownum =1)as item,to_char(spm.money,'999999999.99') as money from salary_project_money spm,salary_history sh
+ where spm.type_id = #{typeId} and spm.create_org = #{orgId} and spm.del_flag is null and sh.human_type_id = spm.type_id and sh.person_id =#{personId} and sh.salary_month = #{salaryMonth}
+ union all
+select (select t.part_name from salary_part t where t.part_id = sc.part_id and rownum = 1)as item,sc.content as money from salary_calculate sc,salary_history sh
+where sc.human_type_id = #{typeId} and sc.create_org = #{orgId} and sc.del_flag is null and sc.human_type_id = sh.human_type_id and sh.person_id =#{personId} and sh.salary_month = #{salaryMonth}
+ union all
+select '应发工资' as item,decode(to_char(sh.yingfa,'999999999.99'),.00,'0',to_char(sh.yingfa,'999999999.99')) as money from salary_history sh where sh.human_type_id = #{typeId} and
+sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+ union all
+select '代扣社保' as item,decode(to_char(sh.shebao,'999999999.99'),.00,'0',to_char(sh.shebao,'999999999.99')) as money from salary_history sh where sh.human_type_id = #{typeId} and
+sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+ union all
+select '代扣个税' as item,decode(to_char(sh.shuijin,'999999999.99'),.00,'0',to_char(sh.shuijin,'999999999.99')) as money from salary_history sh where sh.human_type_id = #{typeId} and
+sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+ union all
+select '手工调整额' as item,decode(to_char(sh.adjust_money,'999999999.99'),.00,'0',to_char(sh.adjust_money,'999999999.99')) as money from salary_history sh where sh.human_type_id = #{typeId} and
+sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+ union all
+select '实发工资' as item,decode(to_char(sh.shifa,'999999999.99'),.00,'0',to_char(sh.shifa,'999999999.99')) as money from salary_history sh where sh.human_type_id = #{typeId} and
+sh.person_id = #{personId} and sh.create_org = #{orgId} and sh.salary_month = #{salaryMonth}
+    </select>
+
+</mapper>

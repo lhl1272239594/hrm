@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.FrequencyRuleDao">
+
+
+	<select id="findFreRuleAllList" resultType="FrequencyRule">
+		select fr.frequency_rule_id          as "value",
+               fr.frequency_rule_description as "label",
+               fr.frequency_rule_id          as "freRuleId",
+               fr.frequency_rule_description as "freRuleDes",
+               fr.frequency_loop_days as "freLoopDays",
+               fr.create_date as "creatDate"
+         from frequency_rule fr
+         where fr.del_flag = '0'
+         and fr.create_org = #{orgId}
+           order by fr.create_date
+	</select>
+
+	<select id="findFreRuleDataAllList" resultType="FrequencyRule">
+		     select fr.frequency_rule_id          as "freRuleId",
+		     fr.frequency_rule_description as "freRuleDes",
+		     frd.frequency_rule_data_id    as "freRuleDataId",
+		     frd.frequency_item_order      as "freItemOrder",
+		     fi.frequency_item_description as "freItemDes",
+		     fi.frequency_item_id          as "freItemId",
+		     frd.frequency_item_order      as "value",
+		     fi.frequency_item_description as "label"
+           from frequency_item fi, frequency_rule fr, frequency_rule_data frd
+           where fr.create_org = #{orgId}
+           and fr.frequency_rule_id = #{freRuleId}
+           and fr.frequency_rule_id(+) = frd.frequency_rule_id
+           and frd.frequency_item_id = fi.frequency_item_id
+           and frd.del_flag='0'
+           and fi.del_flag='0'
+           and fr.del_flag='0'
+           and fr.frequency_rule_id = frd.frequency_rule_id
+		order by to_number(frd.frequency_item_order)
+	</select>
+	<select id="findFreRuleList" resultType="FrequencyRule">
+		select
+		fr.FREQUENCY_RULE_ID          as "freRuleId",
+		fr.FREQUENCY_RULE_DESCRIPTION as "freRuleDes",
+		fr.FREQUENCY_LOOP_DAYS          as "freLoopDays",
+		fr.CREATE_BY                  as "createBy",
+		fr.CREATE_DATE                as "createDate"
+		from FREQUENCY_RULE fr
+		where  fr.del_flag='0'
+		and fr.create_org = #{orgId}
+		<if test="freRuleDes!='999'">
+			and fr.FREQUENCY_RULE_DESCRIPTION = #{freRuleDes}
+		</if>
+		order by fr.create_date desc
+
+	</select>
+
+	<select id="findFreRuleDataList" resultType="FrequencyRule">
+
+		select fr.frequency_rule_id as "freRuleId",
+       fr.frequency_rule_description as "freRuleDes",
+        frd.frequency_rule_data_id as "freRuleDataId",
+       frd.frequency_item_order as "freItemOrder",
+        frd.frequency_item_id          as "freItemId",
+        fi.frequency_item_description as "freItemDes"
+       from frequency_item fi, frequency_rule fr, frequency_rule_data frd
+       where fr.frequency_rule_id(+) = frd.frequency_rule_id
+        and frd.frequency_item_id = fi.frequency_item_id
+        and fr.create_org = #{orgId}
+        and frd.del_flag='0'
+        and fi.del_flag='0'
+        and fr.del_flag='0'
+		and fr.frequency_rule_id = #{freRuleId}
+		order by to_number(frd.frequency_item_order)
+	</select>
+
+	<select id="findFreRuleBoolean" resultType="FrequencyRule">
+		SELECT count(*) num
+		FROM FREQUENCY_RULE fi
+		WHERE fi.create_org=#{orgId}
+		and fi.del_flag='0'
+		and fi.FREQUENCY_RULE_DESCRIPTION=#{freRuleDes}
+        <if test="freRuleId!='999'">
+        and fi.frequency_rule_id!=#{freRuleId}
+        </if>
+	</select>
+
+
+    <insert id="insertPrimary">
+		INSERT INTO FREQUENCY_RULE(
+			FREQUENCY_RULE_ID,
+			FREQUENCY_RULE_DESCRIPTION,
+			FREQUENCY_LOOP_DAYS,
+			CREATE_BY,
+			CREATE_DATE,
+			UPDATE_BY,
+			UPDATE_DATE,
+			CREATE_ORG,
+			STATUS_TYPE,
+			DEL_FLAG
+		) VALUES (
+			#{freRuleId},
+			#{freRuleDes},
+			#{freLoopDays},
+			#{createBy},
+			sysdate,
+			#{updateBy},
+			sysdate,
+			#{orgId},
+			'1',
+			'0'
+		)
+	</insert>
+
+
+	<insert id="insertForeign">
+		INSERT INTO FREQUENCY_RULE_DATA(
+		FREQUENCY_RULE_DATA_ID,
+		FREQUENCY_RULE_ID,
+		FREQUENCY_ITEM_ID,
+		FREQUENCY_ITEM_ORDER,
+		CREATE_BY,
+		CREATE_DATE,
+		UPDATE_BY,
+		UPDATE_DATE,
+		CREATE_ORG,
+		STATUS_TYPE,
+		DEL_FLAG
+		) VALUES (
+		#{freRuleDataId},
+		#{freRuleId},
+		#{freItemId},
+		#{freItemOrder},
+		#{createBy},
+		sysdate,
+		#{updateBy},
+	    sysdate,
+		#{orgId},
+		'1',
+		'0'
+		)
+	</insert>
+
+	<update id="updatePrimary">
+		UPDATE FREQUENCY_RULE SET
+		FREQUENCY_RULE_DESCRIPTION = #{freRuleDes},
+		FREQUENCY_LOOP_DAYS = #{freLoopDays},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE FREQUENCY_RULE_ID = #{freRuleId}
+	</update>
+	<update id="updateForeign">
+	UPDATE FREQUENCY_RULE_DATA SET
+		    FREQUENCY_ITEM_ID = #{freItemId},
+		    FREQUENCY_ITEM_ORDER= #{freItemOrder},
+			UPDATE_BY = #{updateBy},
+			UPDATE_DATE = sysdate
+		WHERE FREQUENCY_RULE_DATA_ID = #{freRuleDataId}
+	</update>
+	<update id="updateLoopDays" parameterType="String">
+		UPDATE FREQUENCY_RULE SET
+		FREQUENCY_LOOP_DAYS=#{freLoopDays},
+		UPDATE_DATE = sysdate
+		WHERE FREQUENCY_RULE_ID =#{freRuleId}
+	</update>
+	<!--判断删除是否占用-->
+	<select id="findOccupy" resultType="Integer" parameterType="FrequencyRule">
+		SELECT count(*) num
+		FROM FREQUENCY_RECORD t
+		where t.create_org = #{FrequencyRule.orgId}
+		and t.FREQUENCY_RULE_ID = #{FrequencyRule.freRuleId}
+		and t.del_flag = '0'
+	</select>
+    <update id="delPrimary" parameterType="String" >
+		UPDATE FREQUENCY_RULE SET
+			del_flag = '1'
+		WHERE FREQUENCY_RULE_ID = #{freRuleId}
+	</update>
+
+	<update id="delForeign" parameterType="String" >
+		UPDATE FREQUENCY_RULE_DATA SET
+		del_flag = '1'
+		WHERE FREQUENCY_RULE_DATA_ID = #{freRuleDataId}
+	</update>
+
+</mapper>

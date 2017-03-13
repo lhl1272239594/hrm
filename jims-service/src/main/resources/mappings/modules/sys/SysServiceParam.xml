@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.SysServiceParamDao">
+
+    <sql id="sysServiceParamColumn">
+        ID,
+       PARAM_NAME AS paramName,
+       SERVICE_ID AS serviceId,
+       VALUE_RANGE AS valueRange,
+       PARAM_DESP AS paramDesp,
+       SERVICE_TYPE serviceType
+    </sql>
+
+    <select id="findSysServiceParamDao" resultType="SysServiceParam">
+        SELECT <include refid="sysServiceParamColumn"/>
+      FROM SYS_SERVICE_PARAM
+      WHERE service_id=#{serviceId}
+    </select>
+
+    <insert id="insert">
+        insert into SYS_SERVICE_PARAM(ID,PARAM_NAME ,SERVICE_ID ,VALUE_RANGE,PARAM_DESP ,SERVICE_TYPE)
+        VALUES
+        (
+          #{id},#{paramName},#{serviceId},#{valueRange},#{paramDesp},#{serviceType}
+        )
+    </insert>
+
+    <update id="update">
+        update SYS_SERVICE_PARAM set
+        param_name=#{paramName},service_id=#{serviceId},value_range=#{valueRange},param_desp=#{paramDesp},service_type=#{serviceType}
+        where id=#{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM SYS_SERVICE_PARAM where id=#{id}
+    </delete>
+
+    <select id="findSysServiceParamBySelfServiceId" resultType="SysServiceParam">
+        SELECT A.ID,
+            PARAM_NAME AS PARAMNAME,
+            SERVICE_ID AS SERVICEID,
+            VALUE_RANGE AS VALUERANGE,
+            PARAM_DESP AS PARAMDESP,
+            SERVICE_TYPE SERVICETYPE
+          FROM SYS_SERVICE_PARAM A, SERVICE_SELF_VS_SYS B
+         WHERE A.SERVICE_ID = B.SYS_SERVICE_ID
+           AND B.SELF_SERVICE_ID =#{selfServiceId}
+    </select>
+
+    <select id="execuSql" parameterType="com.jims.sys.vo.SqlAdapter" resultType="ParamVo">
+        ${sql}
+    </select>
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.OrgServiceParamDao">
+
+    <sql id="orgServiceParamColumns">
+        a.ID as id
+        ,a.PARAM_NAME as paramName
+        ,a.PARAM_VALUE as paramValue
+        ,a.SERVICE_ID as serviceId
+        ,a.VALUE_RANGE as valueRange
+        ,a.PARM_DESP as parmDesp
+        ,a.SERVICE_TYPE as serviceType
+        ,a.ORG_ID as orgId
+    </sql>
+
+    <select id="get" resultType="OrgServiceParam">
+        SELECT
+        <include refid="orgServiceParamColumns"/>
+        FROM ORG_SERVICE_PARAM a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="OrgServiceParam">
+        SELECT
+        <include refid="orgServiceParamColumns"/>
+        FROM ORG_SERVICE_PARAM a
+        <where>
+            a.org_id =  #{orgId}
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="OrgServiceParam">
+        SELECT
+        <include refid="orgServiceParamColumns"/>
+        FROM ORG_SERVICE_PARAM a
+    </select>
+
+    <insert id="insert">
+        INSERT INTO ORG_SERVICE_PARAM(
+        ID
+        ,PARAM_NAME
+        ,PARAM_VALUE
+        ,SERVICE_ID
+        ,VALUE_RANGE
+        ,PARM_DESP
+        ,SERVICE_TYPE
+        ,ORG_ID
+        ) VALUES (
+        #{id}
+        ,#{paramName}
+        ,#{paramValue}
+        ,#{serviceId}
+        ,#{valueRange}
+        ,#{parmDesp}
+        ,#{serviceType}
+        ,#{orgId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE ORG_SERVICE_PARAM SET
+        PARAM_NAME = #{paramName}
+        ,PARAM_VALUE = #{paramValue}
+        ,SERVICE_ID = #{serviceId}
+        ,VALUE_RANGE = #{valueRange}
+        ,PARM_DESP = #{parmDesp}
+        ,SERVICE_TYPE = #{serviceType}
+        ,ORG_ID = #{orgId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM ORG_SERVICE_PARAM
+        WHERE id = #{id}
+    </delete>
+</mapper>

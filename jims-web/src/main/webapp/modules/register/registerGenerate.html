@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html class="panel-fit"><head>
+    <meta charset="UTF-8">
+    <title>号表生成</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/modules/register/js/registerGenerate.js"></script>
+    <script type="text/javascript" src="/static/data/data_register_day_time.js"></script>
+</head>
+
+<body onload="onloadMethod()">
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div data-options="region:'center',split:true">
+        <div id="searchDiv">
+            星期：<input type="text" class="easyui-combobox" id="weekId" style="width:40px;"/>
+            时间：<input type="text" class="easyui-combobox" id="timeIntervalId" style="width:50px;"/>
+            号别名称：<input type="text" class="validatebox-text vt-text-percent" id="clinicNameId" style="width:90px;"/>
+            <button class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="searchClinicIndex();">查 询</button>
+        </div>
+        <table id="list_data"   cellspacing="0" cellpadding="0">
+
+        </table>
+    </div>
+    <div data-options="region:'east',iconCls:'icon-ok'"  style="width:60%;">
+
+        <div id="time">
+           门诊号表生成日期： <input class="easyui-datebox" id="startTime"> 至 <input class="easyui-datebox" id="endTime">
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="addRowCol();">生 成</button>
+            <button class="easyui-linkbutton" data-options="iconCls:'icon-remove'" onclick="deleteForReg();">删 除</button>
+        </div>
+        <table id="list_data_num"   cellspacing="0" cellpadding="0">
+
+        </table>
+    </div>
+</div>
+</body>
+</html>

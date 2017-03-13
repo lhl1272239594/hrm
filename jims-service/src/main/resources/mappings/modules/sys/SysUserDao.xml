@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.SysUserDao">
+
+    <sql id="sysUserColumns">
+        a.id AS "id",
+        a.login_name AS "loginName",
+        a.password AS "password",
+        a.last_login_time AS "lastLoginTime",
+        a.persion_id AS "persionId",
+        a.remarks AS "remarks",
+        a.update_by AS "updateBy",
+        a.create_by AS "createBy",
+        a.update_date AS "updateDate",
+        a.del_flag AS "delFlag",
+        a.create_date AS "createDate"
+    </sql>
+
+    <select id="login" resultType="SysUser">
+        SELECT
+        *
+        FROM sys_user
+        WHERE
+        login_name=#{loginName}
+        AND
+        password=#{password}
+    </select>
+
+
+    <select id="selectLoginName" resultType="SysUser">
+        SELECT
+        *
+        FROM sys_user
+        WHERE
+        login_name=#{loginName}
+        and del_flag='0'
+    </select>
+
+    <select id="selectPasswrod" resultType="SysUser">
+        SELECT
+        password
+        FROM sys_user
+        WHERE
+        login_name=#{loginName}
+    </select>
+
+
+    <select id="findByLoginName" resultType="SysUser">
+        SELECT
+        *
+        FROM sys_user
+        WHERE
+        login_name=#{0}  and persion_id=#{1}
+    </select>
+    <select id="findPasswordByPersionId" resultType="SysUser">
+        SELECT
+        password
+        FROM sys_user
+        WHERE
+        persion_id=#{1} and del_flag='0' group by password
+    </select>
+
+    <select id="findPasswordByPid" resultType="SysUser">
+        SELECT
+        *
+        FROM sys_user
+        WHERE
+        1=1 AND del_flag='0'
+        <if test="persionId!=null and persionId !=''">
+            AND persion_id=#{persionId}
+        </if>
+
+    </select>
+
+
+
+
+
+    <insert id="insert">
+        INSERT INTO sys_user(
+        id,
+        login_name,
+        password,
+        last_login_time,
+        persion_id,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{loginName},
+        '888888',
+        #{lastLoginTime},
+        #{persionId},
+        #{remarks},
+        #{updateBy.id},
+        #{createBy.id},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user SET
+        login_name = #{loginName},
+
+        last_login_time = #{lastLoginTime},
+        persion_id = #{persionId},
+        remarks = #{remarks},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateById">
+        UPDATE sys_user SET
+        login_name = #{loginName},
+
+        last_login_time = #{lastLoginTime},
+        persion_id = #{persionId},
+        remarks = #{remarks},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id=#{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE sys_user SET
+        password = #{password},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE persion_id=#{persionId}
+    </update>
+
+    <update id="delete">
+        UPDATE sys_user SET
+        del_flag = '1'
+        WHERE id = #{id}
+    </update>
+
+</mapper>

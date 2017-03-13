@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.SysServiceDao">
+
+    <sql id="sysServiceColumns">
+		a.id AS "id",
+		a.service_name AS "serviceName",
+		a.service_description AS "serviceDescription",
+		a.service_type AS "serviceType",
+		a.service_class AS "serviceClass",
+		a.service_image AS "serviceImage",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy",
+		a.create_by AS "createBy",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+
+    <sql id="sysServiceJoins">
+    </sql>
+
+    <select id="serviceListByTC" resultType="SysService">
+        SELECT
+        <include refid="sysServiceColumns"/>
+        FROM sys_service a
+        <include refid="sysServiceJoins"/>
+        WHERE a.service_type = #{0}
+        AND  a.service_class = #{1}
+        and a.del_flag = '0'
+    </select>
+    <select id="get" resultType="SysService">
+        SELECT
+        <include refid="sysServiceColumns"/>
+        FROM sys_service a
+        <include refid="sysServiceJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findServiceById" resultType="SysService">
+        SELECT
+        *
+        FROM sys_service a
+        WHERE a.id = #{serviceId}
+    </select>
+
+    <select id="findList" resultType="SysService">
+        SELECT
+        <include refid="sysServiceColumns"/>
+        FROM sys_service a
+        <include refid="sysServiceJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="SysService">
+        SELECT
+        <include refid="sysServiceColumns"/>
+        FROM sys_service a
+        <include refid="sysServiceJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO sys_service(
+			id,
+			service_name,
+			service_description,
+			service_type,
+			service_class,
+			service_image,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{serviceName},
+			#{serviceDescription},
+			#{serviceType},
+			#{serviceClass},
+			#{serviceImage},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE sys_service SET 	
+			service_name = #{serviceName},
+			service_description = #{serviceDescription},
+			service_type = #{serviceType},
+			service_class = #{serviceClass},
+			service_image = #{serviceImage},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		DELETE FROM sys_service t
+		WHERE t.id = #{id}
+	</update>
+
+    <select id="findServiceWithPrice" resultMap="serviceMap">
+        SELECT
+        a.id,a.service_name,a.service_image,a.service_description,b.service_price,b.service_time_limit
+        FROM sys_service a ,sys_service_price b
+        <where>
+            a.del_flag = '0'
+            and b.del_flag = '0'
+            and a.id = b.service_id
+            <if test="id != null and id != ''">
+                and a.id = #{id}
+            </if>
+            <if test="serviceClass != null and serviceClass != '3'">
+                and (a.service_class = #{serviceClass} or a.service_class = '2')
+            </if>
+            <if test="serviceClass == '3'">
+                and a.service_class = '3'
+            </if>
+            <if test="serviceType != null and serviceType != ''">
+                and a.service_type = #{serviceType}
+            </if>
+
+            and EXISTS (select 1 from service_vs_menu c where a.id=c.service_id and c.del_flag = '0')
+
+            <choose>
+                <when test="persionId != null and persionId != '' and state != null and state != ''">
+                    and a.id in (select c.service_id from persion_service_list c where c.persion_id=#{persionId})
+                </when>
+                <when test="persionId != null and persionId != '' and state != null and state == ''">
+                    and a.id not in (select c.service_id from persion_service_list c where c.persion_id=#{persionId})
+                </when>
+                <otherwise>
+                </otherwise>
+            </choose>
+        </where>
+        order by b.service_time_limit
+    </select>
+    <resultMap id="serviceMap" type="SysService">
+        <id property="id" column="id"/>
+        <result property="serviceName" column="service_name"/>
+        <result property="serviceImage" column="service_image"/>
+        <collection property="sysServicePriceList" ofType="com.jims.sys.entity.SysServicePrice">
+            <result property="servicePrice" column="service_price"/>
+            <result property="serviceTimeLimit" column="service_time_limit"/>
+        </collection>
+    </resultMap>
+</mapper>

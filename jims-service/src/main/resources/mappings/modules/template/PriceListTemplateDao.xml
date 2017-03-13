@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.template.dao.PriceListTemplateDao">
+
+    <sql id="priceListTemplateColumns">
+        a.ITEM_CLASS as itemClass,
+        a.ITEM_CODE as itemCode,
+        a.ITEM_NAME as itemName,
+        a.ITEM_SPEC as itemSpec,
+        a.UNITS as units,
+        a.PRICE as price,
+        a.PREFER_PRICE as preferPrice,
+        a.FOREIGNER_PRICE as foreignerPrice,
+        a.PERFORMED_BY as performedBy,
+        a.FEE_TYPE_MASK as feeTypeMask,
+        a.CLASS_ON_INP_RCPT as classOnInpRcpt,
+        a.CLASS_ON_OUTP_RCPT as classOnOutpRcpt,
+        a.CLASS_ON_RECKONING as classOnReckoning,
+        a.SUBJ_CODE as subjCode,
+        a.CLASS_ON_MR as classOnMr,
+        a.MEMO as memo,
+        a.START_DATE as startDate,
+        a.STOP_DATE as stopDate,
+        a.OPERATOR as operator,
+        a.ENTER_DATE as enterDate,
+        a.HIGH_PRICE as highPrice,
+        a.MATERIAL_CODE as materialCode,
+        a.SCORE_1 as score1,
+        a.SCORE_2 as score2,
+        a.PRICE_NAME_CODE as priceNameCode,
+        a.CONTROL_FLAG as controlFlag,
+        a.INPUT_CODE as inputCode,
+        a.INPUT_CODE_WB as inputCodeWb,
+        a.STD_CODE_1 as stdCode1,
+        a.CHANGED_MEMO as changedMemo,
+        a.CLASS_ON_INSUR_MR as classOnInsurMr,
+        a.CWTJ_CODE as cwtjCode,
+        a.XM_WY as xmWy,
+        a.LB_WY as lbWy,
+        a.MZSJ_WY as mzsjWy,
+        a.ZYSJ_WY as zysjWy,
+        a.GROUP_FLAG as groupFlag,
+        a.STOP_OPERATOR as stopOperator,
+        a.ID as id,
+        a.MASTER_ID as masterId
+    </sql>
+
+    <select id="get" resultType="PriceListTemplate">
+        SELECT
+        <include refid="priceListTemplateColumns"/>
+        FROM PRICE_LIST_TEMPLATE a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="PriceListTemplate">
+        SELECT
+        <include refid="priceListTemplateColumns"/>,m.area,m.area_name
+        FROM PRICE_LIST_TEMPLATE a,template_master m
+        <where> m.id = a.master_id
+            AND upper(m.TABLE_NAME) = 'PRICE_LIST_TEMPLATE'
+            <if test="itemClass!=null and itemClass != ''">
+                AND a.item_class = #{itemClass}
+            </if>
+            <if test="area!=null and area != ''">
+                AND m.area = #{area}
+            </if>
+            <if test="masterId!=null and masterId != ''">
+                AND a.master_id = #{masterId}
+            </if>
+        </where>
+    </select>
+
+    <select id="sum" resultType="Integer">
+        SELECT
+        count(*)
+        FROM PRICE_LIST_TEMPLATE a,template_master m
+        <where> m.id = a.master_id
+            AND upper(m.TABLE_NAME) = 'PRICE_LIST_TEMPLATE'
+            AND m.area = #{area}
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="PriceListTemplate">
+        SELECT
+        <include refid="priceListTemplateColumns"/>
+        FROM PRICE_LIST_TEMPLATE a
+    </select>
+
+    <insert id="insert">
+        INSERT INTO PRICE_LIST_TEMPLATE(
+            ITEM_CLASS,
+            ITEM_CODE,
+            ITEM_NAME,
+            ITEM_SPEC,
+            UNITS,
+            PRICE,
+            PREFER_PRICE,
+            FOREIGNER_PRICE,
+            PERFORMED_BY,
+            FEE_TYPE_MASK,
+            CLASS_ON_INP_RCPT,
+            CLASS_ON_OUTP_RCPT,
+            CLASS_ON_RECKONING,
+            SUBJ_CODE,
+            CLASS_ON_MR,
+            MEMO,
+            START_DATE,
+            STOP_DATE,
+            OPERATOR,
+            ENTER_DATE,
+            HIGH_PRICE,
+            MATERIAL_CODE,
+            SCORE_1,
+            SCORE_2,
+            PRICE_NAME_CODE,
+            CONTROL_FLAG,
+            INPUT_CODE,
+            INPUT_CODE_WB,
+            STD_CODE_1,
+            CHANGED_MEMO,
+            CLASS_ON_INSUR_MR,
+            CWTJ_CODE,
+            XM_WY,
+            LB_WY,
+            MZSJ_WY,
+            ZYSJ_WY,
+            GROUP_FLAG,
+            STOP_OPERATOR,
+            ID,
+            MASTER_ID
+        ) VALUES (
+            #{itemClass},
+            #{itemCode},
+            #{itemName},
+            #{itemSpec},
+            #{units},
+            #{price},
+            #{preferPrice},
+            #{foreignerPrice},
+            #{performedBy},
+            #{feeTypeMask},
+            #{classOnInpRcpt},
+            #{classOnOutpRcpt},
+            #{classOnReckoning},
+            #{subjCode},
+            #{classOnMr},
+            #{memo},
+            #{startDate},
+            #{stopDate},
+            #{operator},
+            #{enterDate},
+            #{highPrice},
+            #{materialCode},
+            #{score1},
+            #{score2},
+            #{priceNameCode},
+            #{controlFlag},
+            #{inputCode},
+            #{inputCodeWb},
+            #{stdCode1},
+            #{changedMemo},
+            #{classOnInsurMr},
+            #{cwtjCode},
+            #{xmWy},
+            #{lbWy},
+            #{mzsjWy},
+            #{zysjWy},
+            #{groupFlag},
+            #{stopOperator},
+            #{id},
+            #{masterId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE PRICE_LIST_TEMPLATE SET
+            ITEM_CLASS = #{itemClass},
+            ITEM_CODE = #{itemCode},
+            ITEM_NAME = #{itemName},
+            ITEM_SPEC = #{itemSpec},
+            UNITS = #{units},
+            PRICE = #{price},
+            PREFER_PRICE = #{preferPrice},
+            FOREIGNER_PRICE = #{foreignerPrice},
+            PERFORMED_BY = #{performedBy},
+            FEE_TYPE_MASK = #{feeTypeMask},
+            CLASS_ON_INP_RCPT = #{classOnInpRcpt},
+            CLASS_ON_OUTP_RCPT = #{classOnOutpRcpt},
+            CLASS_ON_RECKONING = #{classOnReckoning},
+            SUBJ_CODE = #{subjCode},
+            CLASS_ON_MR = #{classOnMr},
+            MEMO = #{memo},
+            START_DATE = #{startDate},
+            STOP_DATE = #{stopDate},
+            OPERATOR = #{operator},
+            ENTER_DATE = #{enterDate},
+            HIGH_PRICE = #{highPrice},
+            MATERIAL_CODE = #{materialCode},
+            SCORE_1 = #{score1},
+            SCORE_2 = #{score2},
+            PRICE_NAME_CODE = #{priceNameCode},
+            CONTROL_FLAG = #{controlFlag},
+            INPUT_CODE = #{inputCode},
+            INPUT_CODE_WB = #{inputCodeWb},
+            STD_CODE_1 = #{stdCode1},
+            CHANGED_MEMO = #{changedMemo},
+            CLASS_ON_INSUR_MR = #{classOnInsurMr},
+            CWTJ_CODE = #{cwtjCode},
+            XM_WY = #{xmWy},
+            LB_WY = #{lbWy},
+            MZSJ_WY = #{mzsjWy},
+            ZYSJ_WY = #{zysjWy},
+            GROUP_FLAG = #{groupFlag},
+            STOP_OPERATOR = #{stopOperator},
+            MASTER_ID = #{masterId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM PRICE_LIST_TEMPLATE
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="executeInsertSql">
+        ${sql}
+    </insert>
+</mapper>

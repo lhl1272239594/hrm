@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.EvaluationStandardDao">
+	<!--查询考评项目-->
+	<select id="projectList" resultType="ProjectVo">
+		select a.id                as id,
+		a.parent_id  			   as parentId,
+		a.evaluation_project_name  as name,
+		a.score                    as score,
+		a.evaluation_method_id     as methodId,
+		a.evaluation_project_type  as typeId,
+		a.create_date              as createDate,
+		a.state                    as state,
+		a.del_flag                 as delFlag,
+		a.create_org               as orgId,
+		a.type               	   as type,
+		a.dept_id                  as depId
+		from EVALUATION_PROJECT a
+		where a.create_org = #{orgId}
+		and del_flag='0'
+		and state='1'
+		order by create_date
+	</select>
+
+	<!--根据项目查询标准-->
+	<select id="standardByProject" resultType="StandardVo">
+		select a.ID                 as id,
+		(select p.parent_id from evaluation_project p
+		where p.id=a.EVALUATION_PROJECT_CODE) as pcode,
+		(select EVALUATION_PROJECT_NAME from evaluation_project b
+		where b.id=((select p.parent_id from evaluation_project p
+		where p.id=a.EVALUATION_PROJECT_CODE))) as pname,
+		a.EVALUATION_PROJECT_CODE   as scode,
+		a.EVALUATION_STANDARD_NAME  as name,
+		(select EVALUATION_PROJECT_NAME from EVALUATION_PROJECT t
+		where t.create_org = #{orgId}
+		and t.ID=a.EVALUATION_PROJECT_CODE
+		) as sname,
+		a.SCORE                     as score,
+		a.KPI     					as kpi,
+		a.CREATE_DATE               as createDate,
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.STATE                     as state,
+		a.DEL_FLAG                  as delFlag,
+		a.CREATE_ORG                as orgId,
+		a.CREATE_DEPT               as depId,
+		a.CREATE_ROLE				as roleId
+		from EVALUATION_STANDARD a
+		where a.create_org = #{orgId}  and a.del_flag='0'
+		<if test="pcode != null and pcode != ''">
+			and a.EVALUATION_PROJECT_CODE=#{pcode}
+		</if>
+		order by a.CREATE_DATE
+	</select>
+	<!--查看标准评分是否超过项目评分-->
+	<select id="checkScore" resultType="Integer">
+			select count(*)
+			  from EVALUATION_PROJECT p
+			 where p.create_org = #{orgId}
+			 and p.evaluation_project_scode =#{pcode}
+			 and ((select sum(s.score)
+               from EVALUATION_STANDARD s
+              where s.evaluation_project_scode =#{pcode})+to_number(#{score})) > p.score
+	</select>
+	<!--查询项目编码是否重复-->
+	<select id="getCode" resultType="Integer">
+		select count(*)
+		from EVALUATION_STANDARD s
+		where s.create_org = #{orgId} and s.del_flag='0'
+			and s.EVALUATION_STANDARD_CODE =#{code}
+			and s.EVALUATION_PROJECT_SCODE =#{pcode}
+	</select>
+	<!--查看考评标准是否被占用-->
+	<select id="checkStandardIsUsed" resultType="Integer">
+		select count(*) from evaluation_model_standard m
+		where m.evaluation_standard_code=#{id}
+		   and (((select e.del_flag
+          from evaluation_model e
+         where e.evaluation_model_id = m.evaluation_model_id) = 0)
+    or ((select count(*)
+          from evaluation_mould mm
+         where mm.id = m.evaluation_model_id
+           and mm.mould_type = '2') > 0))
+	</select>
+	<!--查看授权人员-->
+	<select id="getPersonById" resultType="StandardPersonVo">
+		select PERSON_ID as userId,
+		(select t.name from PERSION_INFO t  where t.id=PERSON_ID) as name,
+		CREATE_ORG as orgId,
+		DEPT_ID as depId,
+		(select d.dept_name from DEPT_DICT d where d.id=DEPT_ID) as depName
+		from STANDARD_PERSON s
+		where s.STANDARD_ID = #{id}
+	</select>
+	<!--查询项目名称是否重复-->
+	<select id="getName" resultType="Integer">
+		select count(*)
+		from EVALUATION_STANDARD s
+		where s.create_org = #{orgId} and s.del_flag='0'
+		and s.EVALUATION_PROJECT_CODE =#{pcode}
+		and s.EVALUATION_STANDARD_NAME =#{name}
+		<if test="id!=null and id !=''">
+			and s.id!=#{id}
+		</if>
+	</select>
+	<!--查询项目名称是否重复-->
+	<select id="getScore" resultType="String">
+		select score
+		from EVALUATION_STANDARD s
+		where  s.id=#{id}
+	</select>
+
+	<!--新增考评标准-->
+	<insert id="insertStandard" parameterType="StandardVo">
+		INSERT INTO EVALUATION_STANDARD(
+		ID,
+		EVALUATION_PROJECT_CODE,
+		EVALUATION_STANDARD_NAME,
+		SCORE,
+		CREATE_BY,
+		CREATE_DATE,
+		STATE,
+		KPI,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{StandardVo.id},
+		#{StandardVo.pcode},
+		#{StandardVo.name},
+		#{StandardVo.score},
+		#{StandardVo.createBy},
+		sysdate,
+		'1',
+		#{StandardVo.kpi},
+		#{StandardVo.orgId},
+		#{StandardVo.createDept},
+		'0'
+		)
+	</insert>
+	<insert id="insertStandardPerson" parameterType="StandardPersonVo">
+		INSERT INTO STANDARD_PERSON(
+		ID,
+		STANDARD_ID,
+		PERSON_ID,
+		CREATE_ORG,
+		DEPT_ID
+		) VALUES (
+		#{StandardPersonVo.id},
+		#{StandardPersonVo.standardId},
+		#{StandardPersonVo.userId},
+		#{StandardPersonVo.orgId},
+		#{StandardPersonVo.depId}
+		)
+	</insert>
+	<update id="updateScore" parameterType="StandardVo" >
+		UPDATE EVALUATION_PROJECT p
+		   SET SCORE = SCORE + #{StandardVo.score}
+		 WHERE p.id = #{StandardVo.pcode}
+			or p.id =
+			   (select t.id
+				  from EVALUATION_PROJECT t
+         where t.id =
+               (select a.parent_id
+                  from EVALUATION_PROJECT a
+                 where a.id =#{StandardVo.pcode}))
+
+	</update>
+	<update id="subScore" parameterType="StandardVo" >
+		UPDATE EVALUATION_PROJECT p
+		SET SCORE = SCORE - #{StandardVo.score}
+		WHERE p.id = #{StandardVo.pcode}
+		or p.id =
+		(select t.id
+		from EVALUATION_PROJECT t
+		where t.id =
+		(select a.parent_id
+		from EVALUATION_PROJECT a
+		where a.id =#{StandardVo.pcode}))
+
+	</update>
+	<update id="delStandard" parameterType="String" >
+		UPDATE EVALUATION_STANDARD SET
+			DEL_FLAG='1'
+		WHERE   ID=#{id}
+	</update>
+	<update id="updateStandard" parameterType="String" >
+		UPDATE EVALUATION_STANDARD SET
+			EVALUATION_STANDARD_NAME=#{StandardVo.name},
+			SCORE=#{StandardVo.score},
+			KPI=#{StandardVo.kpi}
+		WHERE   ID=#{StandardVo.id}
+	</update>
+	<update id="editStandard" parameterType="String" >
+		UPDATE EVALUATION_STANDARD SET
+		<if test="type=='ok'">
+			STATE='1'
+		</if>
+		<if test="type=='no'">
+			STATE='0'
+		</if>
+		WHERE 1=1
+
+		<if test="type=='ok'">
+				and ID=#{id}
+		</if>
+		<if test="type=='no'">
+				and ID=#{id}
+		</if>
+	</update>
+	<delete id="removeStandardPerson" parameterType="String">
+		DELETE FROM STANDARD_PERSON p
+		where p.STANDARD_ID=#{id}
+	</delete>
+
+
+
+
+	<!--查询项目编码是否重复-->
+	<select id="getPcode" resultType="String">
+		select t.id from EVALUATION_PROJECT t where t.evaluation_project_name=#{pname} and type='1'
+	</select>
+	<!--查询项目编码是否重复-->
+	<select id="getScode" resultType="String">
+		select t.id from EVALUATION_PROJECT t where t.evaluation_project_name=#{sname} and t.parent_id=#{pcode} and type='2'
+	</select>
+	<select id="getUser" resultType="StandardPersonVo">
+	select t.dept_id as deptId,p.id from ORG_STAFF t,Persion_Info p where t.persion_id=p.id and p.name=#{userName}
+	</select>
+</mapper>

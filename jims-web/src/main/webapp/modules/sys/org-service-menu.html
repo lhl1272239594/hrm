@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云his工作平台</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="../sys/js/org-service-menu.js"></script>
+</head>
+<body class="easyui-layout">
+    <div data-options="region:'west'" title="选择角色" style="width:15%;">
+        <table id="roleId"></table>
+
+    </div>
+    <div data-options="region:'center',title:'选择服务'" style="width:auto">
+        <table id="serviceId"></table>
+    </div>
+    <div data-options="region:'east'" title="选择菜单" style="width:40%;">
+        <table id="tt"></table>
+    </div>
+
+    <div id="tb" style="padding:5px; height: auto">
+        <div>
+            <a href="#" id="save_menu" class="easyui-linkbutton" iconCls="icon-save">保存</a>&nbsp;
+            <select id="allSelect" class="easyui-combobox" panelHeight="auto" style="width:130px;height: 28px"></select>
+        </div>
+    </div>
+
+</body>
+</html>

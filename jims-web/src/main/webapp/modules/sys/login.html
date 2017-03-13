@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极目云医</title>
+
+    <!--pageMeta-->
+    <!-- Lib CSS -->
+    <link href="/static/css/login.css" rel="stylesheet">
+    <link href="/static/css/demo.css" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="icon" href="/static/images/favicons/16X16.ico">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/modules/sys/js/login.js"></script>
+
+    <link href="/static/bookstrap/css/default.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/bookstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/easyui/js/jquery.easyui.min.js"></script>
+
+    <style>
+        #addServiceModelDiv ul li{
+            float:left;
+            cursor: pointer;
+        }
+        #addServiceModelDiv ul li a .service-name:hover{
+            text-shadow:#2a2a2a 2px 1px 1px;
+        }
+        #addServiceModelDiv ul li a .service-name{
+            text-shadow:none;
+        }
+        #addServiceModelDiv ul li .service-Company:hover{
+            text-shadow:#ccc 2px 1px 1px;
+        }
+        #addServiceModelDiv ul li .service-Company{
+             display: block;
+             /*font-weight: bold;*/
+             /*color: #606060;*/
+             /*font-size: 30px;*/
+             /*margin: 60px 0 0 30px;*/
+             color: #e6e6e6;
+             font-size: 200px;
+             margin: -48px 0 0 15px;
+         }
+
+        .window-proxy-mask, .window-mask {
+            background: black;
+        }
+    </style>
+
+</head>
+<body onkeydown = "Change()">
+<div class="login-wrap" id="loginAllDiv" style="opacity:1">
+    <div class="login-inp">
+        <ul>
+            <li style="display:none;">*请输入正确的用户名,密码</li>
+            <li>
+                <input type="text" placeholder="用户名/手机号/身份证号/邮箱" class="inptext l-inptext" id="loginName"/>
+            </li>
+            <li><input type="password" placeholder="密码" class="inptext l-inptext" id="password"/></li>
+            <!--<li>-->
+                <!--<input type="text" placeholder="验证码" class="inptext s-inptext" id="validateCode" />-->
+                <!--<img style="-webkit-user-select: none" id="verification" onclick="refresh()" src="/servlet/validateCodeServlet">-->
+            <!--</li>-->
+            </ul>
+                <br/>
+                <div class="paddb-10">
+                    <div style="clear:both;" id="login"></div>
+                </div>
+                <button class="lr-btn login-btn"  id="btnSubmit"></button><br/>
+
+    </div>
+</div>
+
+<div id="addServiceModel" class="easyui-dialog" style="padding: 10px 20px;" closed="true">
+    <div class="ser-type clearfix" id="addServiceModelDiv" style="height: auto;overflow: hidden;">
+        <ul></ul>
+    </div>
+</div>
+<script>
+    //刷新验证码
+    function refresh(){
+        var imgSrc = $("#verification");
+        var src = imgSrc.attr("src");
+        imgSrc.attr("src",chgUrl(src));
+    }
+    function chgUrl(url){
+        var timestamp = (new Date()).valueOf();
+        url = url.substring(0,28);
+        if((url.indexOf("&")>=0)){
+            url = url + "×tamp=" + timestamp;
+        }else{
+            url = url + "?timestamp=" + timestamp;
+        }
+        return url;
+    }
+    $("#loginName").focus();
+    function Change(){
+        var keys;
+        keys = event.keyCode;
+        if(keys == 13){
+            login();
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.InputSettingDetailDao">
+
+    <sql id="inputSettingDetailColumns">
+		a.id AS "id",
+		a.data_col AS "dataCol",
+		a.data_title AS "dataTitle",
+		a.flag_show AS "flagShow"
+		a.flag_isName AS "flagIsname"
+		a.result_sort AS "resultSort"
+		a.show_width AS "showWidth"
+		a.input_setting_master_id AS "inputSettingMasterId"
+		a.input_code AS "inputCode"
+	</sql>
+
+    <sql id="inputSettingDetailJoins">
+    </sql>
+
+    <select id="get" resultType="InputSettingDetail">
+        SELECT
+        <include refid="inputSettingDetailColumns"/>
+        FROM input_setting_detail a
+        <include refid="inputSettingDetailJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+
+    <select id="listTableColByTableName" resultType="String">
+        SELECT
+        DISTINCT column_name
+        FROM all_tab_columns
+        WHERE upper(table_name) = upper(#{tableName})
+    </select>
+
+    <select id="getColumnName" resultType="InputSettingVo">
+      SELECT distinct b.column_name,a.result_sort
+        FROM all_tab_columns b, input_setting_detail a, input_setting_master c
+        WHERE
+        upper(b.table_name) = upper(#{0})
+        and a.input_setting_master_id=c.id
+        and c.dict_type=#{0}
+        and b.column_name=a.data_col
+        and a.flag_isName = 'Y'
+        and a.flag_show = '1'
+        and c.org_id =#{1}
+        order by a.result_sort
+    </select>
+
+    <select id="findListBy" resultType="BaseDto" statementType="STATEMENT">
+       SELECT
+        ${param}
+        from  ${dictType}
+    </select>
+
+
+    <select id="listInputDataByParam" resultType="BaseDto">
+        SELECT
+        <if test='param!=null and param!=""'>
+            ${param}
+        </if>
+        <if test='param==null or param==""'>
+           *
+        </if>
+        from  ${dictType} WHERE 1=1
+        <if test='list!=null and list!=""'>
+            <foreach collection="list" item="item" index="index">
+                AND ${item.colName} ${item.operateMethod} #{item.colValue}
+            </foreach>
+        </if>
+
+
+    </select>
+
+
+    <select id="listInputDataBy" resultType="BaseDto">
+        SELECT
+        <if test='param!=null and param!=""'>
+            ${param}
+        </if>
+        <if test='param==null or param==""'>
+            *
+        </if>
+        from  ${dictType} WHERE 1=1
+        <if test='list!=null and list!=""'>
+            <foreach collection="list" item="item" index="index">
+                AND ${item}
+            </foreach>
+        </if>
+
+
+    </select>
+
+
+    <select id="findList" resultType="InputSettingDetail">
+        SELECT
+        <include refid="inputSettingDetailColumns"/>
+        FROM input_setting_detail a
+        <include refid="inputSettingDetailJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findListDetail" resultType="InputSettingDetail">
+        SELECT * FROM input_setting_detail  WHERE del_flag = '0' and input_setting_master_id=#{id}  order by show_sort
+	</select>
+
+    <insert id="insert">
+		INSERT INTO input_setting_detail(
+			id,
+			data_col,
+			data_title,
+			flag_show,
+			flag_isName,
+			result_sort,
+			show_sort,
+			show_width,
+			input_setting_master_id,
+			input_code,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{dataCol},
+			#{dataTitle},
+			#{flagShow},
+			#{flagIsname},
+			#{resultSort},
+			#{showSort},
+			#{showWidth},
+			#{inputSettingMasterId},
+			#{inputCode},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE input_setting_detail SET
+			 data_col= #{dataCol},
+			data_title = #{dataTitle},
+			flag_show = #{flagShow},
+			flag_isName = #{flagIsname},
+			result_sort = #{resultSort},
+			show_width = #{showWidth},
+			input_code = #{inputCode},
+			remarks = #{remarks},
+			update_by = #{updateBy},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+    <delete id="delete">
+	  DELETE  FROM  input_setting_detail WHERE id=#{id}
+	</delete>
+
+
+</mapper>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.socialSecurity.dao.SocialSecurityPlanDao">
+
+
+    <select id="findList" resultType="SocialSecurityPlan">
+		select ssp.plan_id  as "ssPlanId",
+		ssp.plan_description as "ssPlanDes",
+		wm_concat(item.item_description) as "ssItemDes",
+		ssp.create_org as orgId,
+		ssp.create_dept as createDept,
+		(select DEPT_NAME from DEPT_DICT t where t.ID=ssp.create_dept and rownum=1) AS createDeptname,
+		(select NAME from PERSION_INFO t where t.ID=ssp.CREATE_BY and rownum=1) AS createBy,
+		ssp.CREATE_DATE AS createDate,
+		(select NAME from PERSION_INFO t where t.ID=ssp.UPDATE_BY and rownum=1) AS updateBy,
+		ssp.UPDATE_DATE AS updateDate
+		from social_security_plan   ssp,
+		social_security_detail ssd,
+		social_security_item   item
+		where ssp.create_org=#{orgId}
+		and ssp.plan_id = ssd.plan_id
+		and ssd.item_id = item.item_id
+		and ssp.create_org = ssd.create_org
+		and ssd.create_org = item.create_org
+		and ssp.del_flag='0'
+		and ssd.del_flag='0'
+		<if test="ssPlanDes != null and ssPlanDes != ''">
+			and ssp.PLAN_DESCRIPTION like CONCAT('%',CONCAT(#{ssPlanDes},'%'))
+		</if>
+		group by ssp.plan_id,ssp.plan_description,ssp.create_org,ssp.create_dept,ssp.create_by,ssp.create_date,ssp.update_by,ssp.update_date
+		order by ssp.create_date desc
+	</select>
+
+	<select id="findAllList" resultType="SocialSecurityPlan">
+	select
+		ssp.plan_id  as "value",
+	      ssp.plan_description as "label"
+	    from social_security_plan   ssp
+	    where   ssp.create_org=#{orgId}
+	    and ssp.del_flag='0'
+		and ssp.plan_id in (select a.plan_id from SOCIAL_SECURITY_DETAIL a where a.plan_id = ssp.plan_id and a.del_flag='0' and rownum=1)
+		<if test="ssPlanId != null and ssPlanId != ''">
+			and ssp.plan_id=#{ssPlanId}
+		</if>
+	</select>
+	<select id="findDetailList" resultType="SocialSecurityPlan">
+		select ssd.plan_id  as "ssPlanId",
+		ssd.DETAIL_ID as "ssDetailId",
+		ssd.item_id as "ssItemId",
+		item.item_description as "ssItemDes",
+		(ssd.company_pay)*100     as "companyPay",
+		(ssd.personal_pay)*100    as "personPay",
+		ssd.create_by as "createBy",
+		ssd.create_date as "createDate"
+		from social_security_detail ssd,
+		     social_security_item   item
+		where  ssd.del_flag='0'
+		and ssd.create_org=#{orgId}
+		and ssd.plan_id=#{ssPlanId}
+		and ssd.item_id = item.item_id
+	    and ssd.create_org = item.create_org
+
+	</select>
+	<!--判断是否已存在-->
+	<select id="findSame" resultType="SocialSecurityPlan">
+		SELECT count(*) num
+		FROM social_security_plan t
+		WHERE t.create_org=#{orgId}
+		and  t.PLAN_DESCRIPTION =#{ssPlanDes}
+		and t.plan_id in (select a.plan_id from SOCIAL_SECURITY_DETAIL a where a.plan_id = t.plan_id and a.del_flag='0' and rownum=1)
+		<if test="id != null and id != ''">
+			and t.PLAN_ID != #{id}
+		</if>
+		and t.del_flag = '0'
+	</select>
+    <insert id="insertPrimary">
+		INSERT INTO SOCIAL_SECURITY_PLAN(
+			PLAN_ID,
+			PLAN_DESCRIPTION,
+			CREATE_BY,
+			CREATE_DATE,
+			CREATE_ORG,
+			CREATE_DEPT,
+			DEL_FLAG
+		) VALUES (
+			#{ssPlanId},
+			#{ssPlanDes},
+			#{createBy},
+			sysdate,
+			#{orgId},
+			#{createDept},
+			'0'
+		)
+	</insert>
+
+
+	<insert id="insertForeign">
+		INSERT INTO SOCIAL_SECURITY_DETAIL(
+		DETAIL_ID,
+		PLAN_ID,
+		ITEM_ID,
+		COMPANY_PAY,
+		PERSONAL_PAY,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{ssDetailId},
+		#{ssPlanId},
+		#{ssItemId},
+		to_char((to_number(#{companyPay})/100)),
+		to_char((to_number(#{personPay})/100)),
+		#{createBy},
+		sysdate,
+		#{orgId},
+		#{createDept},
+		'0'
+		)
+	</insert>
+
+	<update id="updatePrimary">
+	UPDATE SOCIAL_SECURITY_PLAN SET
+			PLAN_DESCRIPTION = #{ssPlanDes},
+			UPDATE_BY = #{updateBy},
+			UPDATE_DATE = sysdate
+		WHERE PLAN_ID = #{ssPlanId}
+	</update>
+
+	<update id="updateForeign">
+		UPDATE SOCIAL_SECURITY_DETAIL SET
+		ITEM_ID = #{ssItemId},
+		COMPANY_PAY = to_char((to_number(#{companyPay})/100)),
+		PERSONAL_PAY = to_char((to_number(#{personPay})/100)),
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE DETAIL_ID = #{ssDetailId}
+	</update>
+
+	<!--判断删除是否占用-->
+	<select id="findOccupy" resultType="Integer" parameterType="SocialSecurityPlan">
+		SELECT count(*) num
+		FROM SOCIAL_SECURITY_INSURE t
+		WHERE t.create_org=#{SocialSecurityPlan.orgId}
+		and  t.plan_id =#{SocialSecurityPlan.ssPlanId}
+		and t.del_flag = '0'
+	</select>
+	<!--批量删除-->
+	<update id="delPrimary">
+		UPDATE SOCIAL_SECURITY_PLAN t
+		SET t.DEL_FLAG = '1'
+		WHERE t.PLAN_ID = #{SocialSecurityPlan.ssPlanId}
+	</update>
+	<update id="delForeign" parameterType="String" >
+		UPDATE SOCIAL_SECURITY_DETAIL SET
+		del_flag = '1'
+		WHERE DETAIL_ID = #{dataId}
+	</update>
+
+</mapper>

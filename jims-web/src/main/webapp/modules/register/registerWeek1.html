@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html class="panel-fit"><head>
+    <meta charset="UTF-8">
+    <title>门诊安排-周</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/modules/register/js/registerWeek1.js"></script>
+
+</head>
+
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+    <div data-options="region:'center',split:true">
+        <div id="lookListData">
+            <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td class="text-right">门诊科室：</td>
+                    <td><input type="text" class="validatebox-text vt-text-percent" id="deptName"/></td>
+                    <td class="text-right">门诊号名称：</td>
+                    <td><input type="text" class="validatebox-text vt-text-percent" id="clinicIndexName"/></td>
+                </tr>
+                <tr>
+                    <td class="text-right">医生：</td>
+                    <td><input type="text" class="validatebox-text vt-text-percent" id="doctor"/></td>
+                    <td>
+                        <button class="easy-nbtn easy-nbtn-info" onclick="searchClinicIndex();">查询</button>
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+        <table id="list_data"   cellspacing="0" cellpadding="0">
+
+        </table>
+    </div>
+    <div data-options="region:'east',iconCls:'icon-ok'"  style="width:65%;">
+        <table id="listWeek"   cellspacing="0" cellpadding="0" >
+        </table>
+    </div>
+
+</div>
+
+
+
+
+</body>
+
+
+</html>

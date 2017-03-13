@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.socialSecurity.dao.SocialSecurityItemDao">
+
+    <select id="findList" resultType="SocialSecurityItem">
+        select
+        ssi.ITEM_ID as "ssItemId",
+        ssi.ITEM_DESCRIPTION as "ssItemDes",
+        ssi.ITEM_TYPE_ID as "ssItemTypeId",
+        ssi.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=ssi.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=ssi.CREATE_BY and rownum=1) AS createBy,
+        ssi.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=ssi.UPDATE_BY and rownum=1) AS updateBy,
+        ssi.UPDATE_DATE AS updateDate
+        from SOCIAL_SECURITY_ITEM ssi
+        where ssi.del_flag = '0'
+        and ssi.CREATE_ORG=#{orgId}
+        ORDER BY ssi.CREATE_DATE DESC
+    </select>
+
+    <select id="findAllList" resultType="SocialSecurityItem">
+        select
+        ssi.ITEM_ID as "ssItemId",
+        ssi.ITEM_DESCRIPTION as "ssItemDes"
+        from SOCIAL_SECURITY_ITEM ssi
+        where ssi.del_flag = '0'
+        and ssi.CREATE_ORG=#{orgId}
+    </select>
+    <!--判断是否已存在-->
+    <select id="findSame" resultType="SocialSecurityItem">
+        SELECT count(*) num
+        FROM SOCIAL_SECURITY_ITEM t
+        WHERE t.create_org=#{orgId}
+        and  t.ITEM_DESCRIPTION =#{editItemDes}
+        <if test="id != null and id != ''">
+            and t.ITEM_ID != #{id}
+        </if>
+        and t.del_flag = '0'
+    </select>
+    <insert id="insertPrimary">
+        INSERT INTO SOCIAL_SECURITY_ITEM(
+        ITEM_ID,
+        ITEM_DESCRIPTION,
+        ITEM_TYPE_ID,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG
+        ) VALUES (
+        #{ssItemId},
+        #{ssItemDes},
+        #{ssItemTypeId},
+        #{createBy},
+        sysdate,
+        #{orgId},
+        #{createDept},
+        '0'
+        )
+    </insert>
+
+    <update id="updatePrimary">
+        UPDATE SOCIAL_SECURITY_ITEM SET
+        ITEM_DESCRIPTION = #{ssItemDes},
+        ITEM_TYPE_ID = #{ssItemTypeId},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE ITEM_ID = #{ssItemId}
+    </update>
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="SocialSecurityItem">
+        SELECT count(*) num
+        FROM SOCIAL_SECURITY_DETAIL t,SOCIAL_SECURITY_PLAN d
+        WHERE t.plan_id = d.plan_id
+        and d.create_org = #{SocialSecurityItem.orgId}
+        and t.create_org = #{SocialSecurityItem.orgId}
+        and t.item_id = #{SocialSecurityItem.ssItemId}
+        and d.del_flag = '0' and t.del_flag = '0'
+    </select>
+    <update id="delPrimary" >
+        UPDATE SOCIAL_SECURITY_ITEM SET
+        del_flag = '1'
+        WHERE ITEM_ID = #{dataId}
+    </update>
+
+</mapper>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" type="text/css" href="../sys/style/popu.css">
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/bookstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/bookstrap/css/font-awesome.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/static/template/template.js"></script>
+    <script type= "text/javascript" src="/static/js/template.js"></script>
+    <script type="text/javascript" src="../sys/js/default-template.js"></script>
+    <script type="text/javascript" src="../sys/js/data.js"></script>
+    <script type="text/javascript" src="../sys/js/google-maps.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/static/js/minoral.min.js"></script>
+    <style>
+        .dropdown-menu > li{display:block;}
+    </style>
+</head>
+<body>
+
+<div id="content" data-options="region:'west',split:true,title:'导航菜单'" style="width:200px; float:left; position:relative;">
+    <div class="navbar navbar-fixed-top" role="navigation">
+        <!-- .nav-collapse -->
+        <div class="navbar-collapse">
+            <!-- Sidebar -->
+            <ul class="nav navbar-nav side-nav" id="navigation">
+                <li class="clearfix">
+                    <!-- Branding -->
+                    <div class="navbar-header">
+                        <div class="sidebar-collapse">
+                            <a >
+                                <i class="fa fa-bars"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Branding end -->
+                </li>
+                <li class="dropdown open">
+                    <a  class="dropdown-toggle" data-toggle="dropdown" title="病人信息">
+                        <i class="fa fa-dashboard">
+                            <span class="overlay-label red"></span>
+                        </i>
+                        病人信息 <b class="fa fa-angle-left dropdown-arrow"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="active">
+                            <a  title="Overview">
+                                <i class="fa fa-eye"><span class="overlay-label red80"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-envelope"><span class="overlay-label red60"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a  class="dropdown-toggle" data-toggle="dropdown" title="病人信息">
+                        <i class="fa fa-pencil">
+                            <span class="overlay-label amethyst"></span>
+                        </i>
+                        病人信息 <b class="fa fa-angle-left dropdown-arrow"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-puzzle-piece"><span class="overlay-label amethyst80"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-font"><span class="overlay-label amethyst60"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-th"><span class="overlay-label amethyst40"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a  title="病人信息">
+                        <i class="fa fa-tint">
+                            <span class="overlay-label orange"></span>
+                        </i>
+                        病人信息
+                    </a>
+                </li>
+                <li>
+                    <a  title="病人信息">
+                        <i class="fa fa-th">
+                            <span class="overlay-label cyan"></span>
+                        </i>
+                        病人信息
+                    </a>
+                </li>
+                <li class="dropdown">
+                    <a  class="dropdown-toggle" data-toggle="dropdown" title="病人信息">
+                        <i class="fa fa-th-large">
+                            <span class="overlay-label greensea"></span>
+                        </i>
+                        病人信息 <b class="fa fa-angle-left dropdown-arrow"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-puzzle-piece"><span class="overlay-label greensea80"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-lightbulb-o"><span class="overlay-label greensea60"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a  class="dropdown-toggle" data-toggle="dropdown" title="病人信息">
+                        <i class="fa fa-desktop">
+                            <span class="overlay-label drank"></span>
+                        </i>
+                        病人信息 <b class="fa fa-angle-left dropdown-arrow"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-puzzle-piece"><span class="overlay-label drank80"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                        <li>
+                            <a  title="病人信息">
+                                <i class="fa fa-lightbulb-o"><span class="overlay-label drank60"></span></i>
+                                病人信息
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a  title="病人信息">
+                        <i class="fa fa-play-circle">
+                            <span class="overlay-label hotpink"></span>
+                        </i>
+                        病人信息
+                    </a>
+                </li>
+                <li>
+                    <a  title="病人信息">
+                        <i class="fa fa-bar-chart-o">
+                            <span class="overlay-label dutch"></span>
+                        </i>
+                        病人信息
+                    </a>
+                </li>
+            </ul>
+            <!-- Sidebar end -->
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+<!--end west -->
+
+<div id="mainContent" class="easyui-tabs" style="height: 100%; margin-left:150px;">
+
+</div>
+<script>
+
+</script>
+</body>
+</html>

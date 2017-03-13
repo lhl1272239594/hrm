@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.asepsis.dao.StaffDictDao">
+
+    <sql id="StaffDictColumns">
+        a.id AS "id",
+        a.label AS "label",
+        a.value AS "value",
+        a.type AS "type",
+        a.description AS "description",
+        a.input_code AS "inputCode",
+        a.org_id AS "orgId"
+    </sql>
+
+    <sql id="StaffDictJoins">
+    </sql>
+
+    <select id="listStaffDict" resultType="StaffDict">
+        SELECT
+        *
+        FROM staff_dict a
+    </select>
+
+
+
+    <select id="listByType" resultType="StaffDict">
+        SELECT
+        <include refid="StaffDictColumns"/>
+        FROM staff_dict a
+        <include refid="StaffDictJoins"/>
+        <where>
+            a.TYPE  = #{type}
+            <if test="orgId!=null and orgId!=''">
+                and  a.org_id = #{orgId}
+            </if>
+        </where>
+    </select>
+
+
+
+
+
+
+
+    <select id="get" resultType="StaffDict">
+        SELECT
+        <include refid="StaffDictColumns"/>
+        FROM staff_dict a
+        <include refid="StaffDictJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="StaffDict">
+        SELECT
+        <include refid="StaffDictColumns"/>
+        FROM staff_dict a
+        <include refid="StaffDictJoins"/>
+        <where>
+            a.ORG_ID = #{orgId}
+        </where>
+        <!--<choose>-->
+        <!--<when test="page !=null and page.orderBy != null and page.orderBy != ''">-->
+        <!--ORDER BY ${page.orderBy}-->
+        <!--</when>-->
+        <!--<otherwise>-->
+        <!--ORDER BY a.update_date DESC-->
+        <!--</otherwise>-->
+        <!--</choose>-->
+    </select>
+
+
+    <insert id="insert">
+        INSERT INTO staff_dict(
+        blood_type,
+        blood_type_name,
+        blood_match,
+        useful_life,
+        temperature,
+        unit,
+        stop_date,
+        sort_num,
+        id,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{bloodType},
+        #{bloodTypeName},
+        #{bloodMatch},
+        #{usefulLife},
+        #{temperature},
+        #{unit},
+        #{stopDate},
+        #{sortNum},
+        #{id},
+        #{remarks},
+        #{updateBy.id},
+        #{createBy.id},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE staff_dict SET
+        blood_type = #{bloodType},
+        blood_type_name = #{bloodTypeName},
+        blood_match = #{bloodMatch},
+        useful_life = #{usefulLife},
+        temperature = #{temperature},
+        unit = #{unit},
+        stop_date = #{stopDate},
+        sort_num = #{sortNum},
+        remarks = #{remarks},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE staff_dict SET
+        del_flag = #{DEL_FLAG_DELETE}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

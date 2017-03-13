@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.contract.dao.ContractDao">
+
+    <select id="findList" resultType="Contract">
+        select
+        c.CONTRACT_ID as "contractId",
+        c.CONTRACT_CODE as "contractCode",
+        c.CONTRACT_TYPE as "contractType",
+        c.CONTRACT_NAME as "contractName",
+        c.contract_type_des as "contractTypeDes",
+        c.remaining_time  as "remainingTime",
+        c.probation_period_times  as "probationPeriodTimes",
+        c.probation_period_id as "probationPeriodId",
+        c.remind_time  as "remindTime",
+        c.START_DATE  as "startDate",
+        c.END_DATE as "endDate",
+        c.status_type as "statusType",
+        c.contract_remind_time as "contractRemindTime",
+        c.USER_ID as "userId",
+        c.DEPT_ID as "deptId",
+        c.url as "url",
+        c.create_by as "createBy",
+        c.create_date as "createDate"
+        from CONTRACT_VIEW c
+        where  c.create_org=#{orgId}
+        and to_date(c.END_DATE, 'YYYY-MM-DD') between to_date(nvl(#{endStartDate},'1900-01-01'),'YYYY-MM-DD') and  to_date(nvl(#{endEndDate},'4000-01-01'),'YYYY-MM-DD')
+        <if test="contractCode != null and contractCode != ''">
+            and c.CONTRACT_CODE LIKE CONCAT(CONCAT('%', #{contractCode}),'%')
+        </if>
+        <if test="contractName != null and contractName != ''">
+            and c.CONTRACT_Name LIKE CONCAT(CONCAT('%', #{contractName}),'%')
+        </if>
+        <if test="contractType != null and contractType != ''">
+            and c.CONTRACT_TYPE=#{contractType}
+        </if>
+        <if test="statusType != 0">
+            and c.status_type=#{statusType}
+        </if>
+            ORDER BY c.create_date DESC
+    </select>
+
+    <select id="findContractBoolean" resultType="Contract">
+        SELECT count(*) num
+        FROM contract c
+        WHERE c.create_org=#{orgId}
+        and c.CONTRACT_NAME=#{contractName}
+        and c.DEL_FLAG='0'
+    </select>
+    <insert id="insertPrimary">
+        INSERT INTO CONTRACT(
+        CONTRACT_ID,
+        CONTRACT_CODE,
+        CONTRACT_TYPE,
+        CONTRACT_NAME,
+        PROBATION_PERIOD_ID,
+        START_DATE,
+        END_DATE,
+        USER_ID,
+        DEPT_ID,
+         URL,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG
+        ) VALUES (
+        #{contractId},
+        #{contractCode},
+        #{contractType},
+        #{contractName},
+        #{probationPeriodId},
+        to_date(#{startDate},'YYYY-MM-DD'),
+        to_date(#{endDate},'YYYY-MM-DD'),
+        #{userId},
+        #{deptId},
+        #{url},
+        #{createBy},
+        sysdate,
+        #{createOrg},
+        #{createDept},
+        '0'
+        )
+    </insert>
+    <!--判断合同编号是否已存在-->
+    <select id="findPartsame" resultType="Contract">
+        SELECT count(*) num
+        FROM CONTRACT t
+        WHERE t.create_org=#{orgId}
+        and  t.CONTRACT_CODE =#{contractCode}
+        <if test="contractId != null and contractId != ''">
+            and t.CONTRACT_ID != #{contractId}
+        </if>
+        and t.del_flag ='0'
+    </select>
+    <select id="findSignNum" resultType="Contract">
+        SELECT count(*) num
+        FROM CONTRACT t
+        WHERE t.create_org=#{orgId}
+        and  t.user_id =#{userId}
+        and t.del_flag ='0'
+    </select>
+    <update id="updatePrimary">
+        UPDATE CONTRACT SET
+        CONTRACT_CODE = #{contractCode},
+        CONTRACT_TYPE = #{contractType},
+        CONTRACT_NAME = #{contractName},
+        PROBATION_PERIOD_ID= #{probationPeriodId},
+        START_DATE=to_date(#{startDate},'YYYY-MM-DD'),
+        END_DATE=to_date(#{endDate},'YYYY-MM-DD'),
+        URL= #{url},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE CONTRACT_ID = #{contractId}
+    </update>
+
+    <update id="delPrimary" >
+        UPDATE CONTRACT SET
+        del_flag = '1'
+        WHERE CONTRACT_ID = #{dataId}
+    </update>
+
+</mapper>

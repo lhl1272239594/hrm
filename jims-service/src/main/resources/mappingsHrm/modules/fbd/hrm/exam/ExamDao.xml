@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.exam.dao.ExamDao">
+	<!--查询试题分类-->
+	<select id="itemList" resultType="QuestionItemVo">
+		select QUESTION_ITEM_ID as itemId,QUESTION_ITEM_NAME as itemName,PARENT as parent,
+		STATE as state,CREATE_ORG as orgId ,CREATE_BY as createBy,CREATE_DATE as createDate from QUESTION_ITEM
+		where CREATE_ORG=#{orgId} and DEL_FLAG='0' and STATE='1' union
+		select '123' as itemId,'试题分类' as itemName,null as parent,
+    	'1' as state,null as orgId ,null as createBy,null as createDate from dual
+	</select>
+	<!--查询试题分类-->
+	<select id="examItemList" resultType="QuestionItemVo">
+		select QUESTION_ITEM_ID as itemId,QUESTION_ITEM_NAME as itemName,PARENT as parent,
+		STATE as state,CREATE_ORG as orgId ,CREATE_BY as createBy,CREATE_DATE as createDate from QUESTION_ITEM
+		where CREATE_ORG=#{orgId} and DEL_FLAG='0'
+		and QUESTION_ITEM_ID in (${itemId}) union
+		select '123' as itemId,'试题分类' as itemName,null as parent,
+    	'1' as state,null as orgId ,null as createBy,null as createDate from dual
+
+	</select>
+	<!--按父节点查询试题分类-->
+	<select id="findItemByParent" resultType="QuestionItem">
+		select a.QUESTION_ITEM_ID as itemId,
+		a.QUESTION_ITEM_NAME as itemName,
+		a.PARENT as parent,
+		a.STATE as state,
+		a.CREATE_ORG as orgId,
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.CREATE_DATE as createDate,
+		(select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+		a.UPDATE_DATE AS updateDate
+		from QUESTION_ITEM a where a.CREATE_ORG=#{orgId} and a.DEL_FLAG='0'
+		order by a.CREATE_DATE desc
+	</select>
+	<!--查询试题-->
+	<select id="questionList" resultType="QuestionVo">
+		SELECT a.QUESTION_ID AS "queId",
+		a.QUESTION_NAME as "queName",
+		a.QUESTION_TYPE_ID AS "typeId",
+		a.QUESTION_NUMBER AS "queNum",
+		a.QUESTION_ITEM_ID AS "itemId",
+		(select b.question_item_name from question_item b where b.question_item_id=a.question_item_id) as itemName,
+		(select c.QUESTION_TYPE_NAME from QUESTION_TYPE c where c.QUESTION_TYPE_ID=a.question_type_id) as typeName,
+		QUESTION_CONTENT AS "queContent",
+		a.QUESTION_ANSWER AS "queAnswer",
+		a.STATE AS "state",
+		a.DEL_FLAG AS "delFlag",
+		a.CREATE_ORG AS "orgId",
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.CREATE_DATE AS "createDate",
+		(select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+		a.UPDATE_DATE AS "updateDate" FROM QUESTION a
+		WHERE a.CREATE_ORG = #{orgId} and a.DEL_FLAG='0'
+		<if test="itemId != null and itemId != ''">
+			and a.QUESTION_ITEM_ID=#{itemId}
+		</if>
+		<if test="state != null and state != ''">
+			<if test="state=='1'.toString()">
+				and a.STATE='1'
+			</if>
+			<if test="state=='0'.toString()">
+				and a.STATE='0'
+			</if>
+		</if>
+		<if test="typeId != null and typeId != ''">
+			and a.QUESTION_TYPE_ID=#{typeId}
+		</if>
+		order by CREATE_DATE desc
+	</select>
+	<!--查询试卷-->
+	<select id="examList" resultType="ExamVo">
+		SELECT a.EXAM_ID AS "examId",
+		a.EXAM_NAME AS "examName",
+		a.EXAM_TYPE_ID AS "typeId",
+		(select c.value from SYS_DICT c where c.id=a.EXAM_TYPE_ID) as typeName,
+		a.BY_HAND AS "byHand",
+		a.STATE AS "state",
+		a.EXAM_ITEM_ID AS "itemId",
+		(select nvl(SUM(e.score*e.num),0) from EXAM_QUESTION_TYPE e where e.exam_id=a.exam_id group by e.exam_id) as
+		selectScore,
+		a.EXAM_SCORE AS "score",
+		a.CHECK_SCORE AS "checkScore",
+		a.EXAM_TIME AS "time",
+		a.DEL_FLAG AS "delFlag",
+		a.CREATE_ORG AS "orgId",
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.CREATE_DATE AS "createDate",
+		(select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+		a.UPDATE_DATE AS "updateDate" FROM EXAM a
+		WHERE a.CREATE_ORG = #{orgId} and a.DEL_FLAG='0'
+		<if test="state != null and state != ''">
+			<if test="state=='1'.toString()">
+				and a.STATE='1'
+			</if>
+			<if test="state=='0'.toString()">
+				and a.STATE='0'
+			</if>
+		</if>
+		<if test="typeId != null and typeId != ''">
+			and a.EXAM_TYPE_ID=#{typeId}
+		</if>
+		<if test="createDept != null and createDept != ''">
+			and a.CREATE_DEPT in ( ${createDept} )
+		</if>
+		order by CREATE_DATE desc
+	</select>
+	<!--题目设置-查询题型-->
+	<select id="examQuestionType" resultType="ExamQuestionTypeVo">
+		select t.EXAM_QUESTION_TYPE_ID as examQueId,
+		t.EXAM_ID as examId,
+		t.QUESTION_TYPE_ID as typeId,
+		(select QUESTION_TYPE_NAME from QUESTION_TYPE b where b.QUESTION_TYPE_ID = t.QUESTION_TYPE_ID) as typeName,
+		t.SORT,
+		t.SCORE,
+		EXAM_METHOD_ID as methodId,
+		t.NUM,
+		decode((select count(*)  from EXAM_QUESTION b where b.exam_id=t.exam_id and b.question_type_id=t.question_type_id ),0,'0',(select count(*)  from EXAM_QUESTION b where b.exam_id=t.exam_id and b.question_type_id=t.question_type_id )) as checkedNum
+		from EXAM_QUESTION_TYPE t where t.CREATE_ORG=#{orgId} and t.EXAM_ID=#{examId}  ORDER BY t.QUESTION_TYPE_ID,t.CREATE_DATE
+	</select>
+	<!--查询试题是否存在该题型-->
+	<select id="selectQuestion" parameterType="String" resultType="ExamQuestion">
+		select  q.question_id as queId,
+		q.question_name as queName,
+		q.question_item_id as itemId,
+		q.question_type_id as typeId,
+		q.question_number as queNum,
+		q.question_content as queContent,
+		q.question_answer as queAnswer
+		from QUESTION q
+		where q.QUESTION_ID in (${queId})
+	</select>
+	<!--查询试题-->
+	<select id="queryQueType" resultType="Integer">
+		select count(*) from EXAM_QUESTION_TYPE a
+		where a.EXAM_ID=#{examId} and a.QUESTION_TYPE_ID=#{typeId}
+	</select>
+	<!--获取试题分类ID-->
+	<select id="getItem" resultType="QuestionItem">
+		select t.question_item_id as itemId from QUESTION_ITEM t
+		where t.create_org=#{orgId} and t.del_flag='0'
+		 and t.question_item_name=#{name}
+	</select>
+	<!--查看试卷是否有主观题-->
+	<select id="getByHand" resultType="Integer">
+		select count(*) from EXAM_QUESTION_TYPE a
+		where a.EXAM_ID=#{Exam.examId} and a.QUESTION_TYPE_ID='4'
+	</select>
+	<!--查看试题类型是否被占用-->
+	<select id="checkItemIsUsed" resultType="Integer">
+		select ((select count(*)
+		from EXAM a
+		where #{itemId} in (  select regexp_substr((select e.exam_item_id from EXAM e where e.exam_id=a.exam_id),'[^,]+', 1, level) from dual
+		connect by regexp_substr((select e.exam_item_id from EXAM e where e.exam_id=a.exam_id ), '[^,]+', 1, level) is not null )
+		and a.del_flag = '0') +
+		(select count(*)
+		from QUESTION q
+		where #{itemId} = q.question_item_id
+		and q.del_flag = '0'))
+		from dual
+	</select>
+	<!--查看试题是否被占用-->
+	<select id="checkQuestionIsUsed" resultType="Integer">
+		select count(*)
+		from EXAM_QUESTION q
+		where q.question_id = #{queId}
+		and (select e.del_flag from EXAM e where e.exam_id = q.exam_id) = 0
+		and (select e.state from EXAM e where e.exam_id = q.exam_id) = 0
+
+	</select>
+	<!--随机出题-->
+	<select id="randomQuestion" parameterType="String" resultType="ExamQuestion">
+		select * from(
+		select  q.question_id as queId,
+		q.question_name as queName,
+		q.question_item_id as itemId,
+		q.question_type_id as typeId,
+		q.question_number as queNum,
+		q.question_content as queContent,
+		q.question_answer as queAnswer
+		from QUESTION q
+		where  q.create_org=#{orgId}  and q.question_type_id=#{typeId}
+		and q.question_item_id in
+		(${itemId}) and q.del_flag='0'
+		and q.state='1'
+		order by dbms_random.random
+		) where  to_number(#{num1})>=rownum
+	</select>
+	<!--查询已选试题-->
+	<select id="examQuestion" resultType="ExamQuestionVo">
+		SELECT a.QUESTION_ID AS "queId",
+		a.EXAM_QUESTION_ID AS "examQueId",
+		a.QUESTION_NAME  as "queName",
+		a.QUESTION_TYPE_ID AS "typeId",
+		a.QUESTION_NUMBER AS "queNum",
+		(select c.QUESTION_TYPE_NAME from QUESTION_TYPE c  where c.QUESTION_TYPE_ID=a.QUESTION_TYPE_ID) as typeName,
+		a.QUESTION_ITEM_ID AS "itemId",
+		a.QUESTION_CONTENT AS "queContent",
+		a.QUESTION_ANSWER AS "queAnswer",
+		a.SCORE AS "score"
+		FROM EXAM_QUESTION a
+		WHERE
+		<if test="examQueTypeId != null and examQueTypeId != ''">
+			a.EXAM_QUESTION_TYPE_ID = #{examQueTypeId}
+			order by CREATE_DATE desc
+		</if>
+		<if test="examId != null and examId != ''">
+			  a.EXAM_ID=#{examId}
+			order by QUESTION_TYPE_ID
+		</if>
+
+
+	</select>
+	<!--查询未选试题-->
+	<select id="examQuestionByItem" resultType="ExamQuestionVo">
+		SELECT a.QUESTION_ID AS "queId",
+		a.QUESTION_NAME  as "queName",
+		a.QUESTION_TYPE_ID AS "typeId",
+		a.QUESTION_NUMBER AS "queNum",
+		(select c.QUESTION_TYPE_NAME from QUESTION_TYPE c  where c.QUESTION_TYPE_ID=a.QUESTION_TYPE_ID) as typeName,
+		a.QUESTION_ITEM_ID AS "itemId",
+		a.QUESTION_CONTENT AS "queContent",
+		a.QUESTION_ANSWER AS "queAnswer"
+		FROM QUESTION a
+		WHERE a.QUESTION_ITEM_ID in (${itemId}) and a.QUESTION_TYPE_ID=#{typeId}
+		and a.QUESTION_ID not in (select b.question_id from EXAM_QUESTION b where b.exam_question_type_id=#{examQueTypeId})
+		and a.STATE='1' and a.del_flag='0' order by CREATE_DATE desc
+	</select>
+
+	<!--题目设置-查询题型-->
+	<select id="getExamType" resultType="ExamQuestionTypeVo">
+		select t.EXAM_QUESTION_TYPE_ID as examQueId
+		from EXAM_QUESTION_TYPE t where  t.EXAM_ID=#{examId}
+	</select>
+	<!--获取考试人员-->
+	<select id="getPlanPerson" resultType="PersonVo">
+		select t.plan_authorize_user_id as userId from PLAN_AUTHORIZE t where t.plan_id=#{planId}
+	</select>
+	<!--查询考试计划-->
+	<select id="planList" resultType="PlanVo">
+		SELECT a.PLAN_ID AS "planId",
+		a.PLAN_NAME AS "planName",
+		a.EXAM_ID AS "examId",
+		(select b.exam_name from EXAM b where b.exam_id=a.EXAM_ID) as examName,
+		a.PLAN_TYPE_ID AS "typeId",
+		(select c.value from SYS_DICT c where c.id=a.PLAN_TYPE_ID) as typeName,
+		a.EXAM_START_TIME AS "start",
+		a.EXAM_END_TIME AS "end",
+		a.STATE AS "state",
+		a.PLAN_INFO AS "info",
+		(select d.EXAM_TIME from EXAM d where d.exam_id=a.EXAM_ID) as time,
+		decode((select count(*) from PLAN_AUTHORIZE t where t.plan_id=a.PLAN_ID ),0,'0','1') as auth,
+		a.CREATE_ORG AS "orgId",
+		a.LIMIT_START_TIME AS "limitStart",
+		a.LIMIT_SUBMIT_TIME AS "limitSubmit",
+		a.DEL_FLAG AS "delFlag",
+		(select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+		a.CREATE_DATE AS "createDate",
+		(select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+		a.UPDATE_DATE AS "updateDate" FROM EXAM_PLAN a
+		WHERE a.CREATE_ORG = #{orgId} and a.DEL_FLAG='0'
+		<if test="state=='2'.toString()">
+			and a.STATE='2'
+		</if>
+		<if test="state=='3'.toString()">
+			and a.STATE='3'
+		</if>
+		<if test="state=='1'.toString()">
+			and a.STATE='1'
+		</if>
+		<if test="state=='0'.toString()">
+			and a.STATE='0'
+		</if>
+		<if test="typeId != null and typeId != ''">
+			and a.PLAN_TYPE_ID=#{typeId}
+		</if>
+		<if test="createDept != null and createDept != ''">
+			and a.CREATE_DEPT in ( ${createDept} )
+		</if>
+		order by CREATE_DATE desc
+	</select>
+	<!--查询试题类型-->
+	<select id="testList" resultType="TestVo">
+		select p.plan_id as planId,
+		p.plan_name as planName,
+		p.exam_id as examId,
+		e.exam_name as examName,
+		e.exam_type_id as typeId,
+		(select d.value from SYS_DICT d where d.id = e.exam_type_id) as typeName,
+		e.by_hand as byHand,
+		e.exam_score as score,
+		e.check_score as checkScore,
+		p.plan_info as info,
+		e.exam_time as time,
+		p.limit_start_time as limitStart,
+		p.limit_submit_time as limitSubmit,
+		p.exam_start_time as startTime,
+		p.exam_end_time as endTime,
+		p.create_org as orgId
+		from EXAM_PLAN p, EXAM e
+		where p.exam_id = e.exam_id
+		and p.state = '1'
+		and (select count(*)
+		from PLAN_AUTHORIZE a
+		where p.plan_id = a.plan_id
+		and a.plan_authorize_user_id = #{userId}) > 0
+		and p.plan_id not in (select r.plan_id
+		from EXAM_SCORE_RESULT r
+		where p.plan_id = r.plan_id and r.USER_ID=#{userId})
+		and p.plan_id not in (select s.plan_id
+		from EXAM_SCORE s
+		where p.plan_id = s.plan_id and s.state  in (2,3,4)
+		and s.USER_ID=#{userId})
+		and sysdate >= p.exam_start_time
+		and p.exam_end_time>=sysdate
+		and p.create_org=#{orgId}
+		order by p.exam_start_time desc
+
+	</select>
+	<!--查询试题类型名称是否重复-->
+	<select id="getItemName" resultType="Integer">
+		select count(*)
+		from QUESTION_ITEM t
+		where t.CREATE_ORG =#{orgId}
+		and t.DEL_FLAG='0'
+		and t.QUESTION_ITEM_NAME =#{itemName}
+		<if test="itemId!=null and itemId !=''">
+			and t.QUESTION_ITEM_ID!=#{itemId}
+		</if>
+	</select>
+	<!--查看试卷分数-->
+	<select id="getExamScore" resultType="String">
+		select nvl(SUM(e.score*e.num),0) from EXAM_QUESTION_TYPE e where e.exam_id=#{examId}
+
+	</select>
+	<!--查看该机构是否有父节点-->
+	<select id="getParent" resultType="QuestionItem">
+		select QUESTION_ITEM_ID as itemId,QUESTION_ITEM_NAME as itemName,PARENT as parent,
+		STATE as state,CREATE_ORG as orgId ,CREATE_BY as createBy,CREATE_DATE as createDate from QUESTION_ITEM
+		where CREATE_ORG=#{orgId} and PARENT is null
+
+	</select>
+	<!--查询试题类型-->
+	<select id="questionType" resultType="QuestionType">
+		select QUESTION_TYPE_ID as sort,QUESTION_TYPE_NAME as name from QUESTION_TYPE
+	</select>
+	<!--查询出题方式-->
+	<select id="examMethod" resultType="ExamMethod">
+		select EXAM_METHOD_ID as sort,EXAM_METHOD_NAME as name from EXAM_METHOD
+	</select>
+	<!--查询试卷试题-->
+	<select id="getExamQuestionType" resultType="ExamQuestionType">
+		select t.EXAM_QUESTION_TYPE_ID as examQueId,
+		t.EXAM_ID as examId,
+		t.QUESTION_TYPE_ID as typeId,
+		(select QUESTION_TYPE_NAME from QUESTION_TYPE b where b.QUESTION_TYPE_ID = t.QUESTION_TYPE_ID) as typeName,
+		t.SORT,
+		t.num,
+		t.SCORE
+		from EXAM_QUESTION_TYPE t where  t.EXAM_ID=#{id}  ORDER BY t.sort
+
+	</select>
+	<!--查询试卷试题-->
+	<select id="getExamQuestion" resultType="ExamDetail">
+		SELECT a.QUESTION_ID AS "queId",
+		a.EXAM_QUESTION_ID AS "examQueId",
+		a.EXAM_ID AS "examId",
+		a.QUESTION_NAME  as "queName",
+		a.QUESTION_TYPE_ID AS "typeId",
+		a.QUESTION_NUMBER AS "queNum",
+		(select c.QUESTION_TYPE_NAME from QUESTION_TYPE c  where c.QUESTION_TYPE_ID=a.QUESTION_TYPE_ID) as typeName,
+		a.QUESTION_ITEM_ID AS "itemId",
+		a.QUESTION_CONTENT AS "queContent",
+		a.QUESTION_ANSWER AS "queAnswer",
+		a.EXAM_QUESTION_TYPE_ID AS "examQueTypeId",
+		a.SCORE AS "score"
+		FROM EXAM_QUESTION a
+		where a.EXAM_QUESTION_TYPE_ID=#{id}
+		order by a.QUESTION_TYPE_ID
+
+	</select>
+	<!--查询试卷名称是否唯一-->
+	<select id="getExamName" resultType="Integer">
+		SELECT
+		count(*)
+		FROM EXAM a
+		WHERE
+		a.CREATE_ORG = #{orgId} and del_flag='0'
+		<if test="examName!=null and examName !=''">
+			and a.EXAM_NAME=#{examName}
+		</if>
+		<if test="examId!=null and examId !=''">
+			and a.EXAM_ID!=#{examId}
+		</if>
+	</select>
+	<!--校验试题名称是否存在-->
+	<select id="getQueName" resultType="Integer">
+		SELECT
+		count(*)
+		FROM QUESTION a
+		WHERE
+		a.CREATE_ORG = #{orgId} and a.del_flag='0'
+		and a.QUESTION_TYPE_ID=#{typeId}
+		<if test="queName!=null and queName !=''">
+			and a.QUESTION_NAME=#{queName}
+		</if>
+		<if test="queId!=null and queId !=''">
+			and a.QUESTION_ID!=#{queId}
+		</if>
+	</select>
+	<!--查询计划名称是否唯一-->
+	<select id="getPlanName" resultType="Integer">
+		SELECT
+		count(*)
+		FROM EXAM_PLAN a
+		WHERE
+		a.CREATE_ORG = #{orgId} and del_flag='0'
+		<if test="planName!=null and planName !=''">
+			and a.PLAN_NAME=#{planName}
+		</if>
+		<if test="planId!=null and planId !=''">
+			and a.PLAN_ID!=#{planId}
+		</if>
+	</select>
+	<!--查看授权人员-->
+	<select id="getPersonById" resultType="PersonVo">
+		select PLAN_AUTHORIZE_USER_ID as userId,
+		CREATE_ORG as orgId,
+		DEPT_ID as depId
+		from PLAN_AUTHORIZE s
+		where s.PLAN_ID = #{id}
+	</select>
+	<insert id="insert">
+		INSERT INTO QUESTION_ITEM(
+		QUESTION_ITEM_ID,
+		QUESTION_ITEM_NAME,
+		PARENT,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG
+		) VALUES (
+		#{id},
+		#{itemName},
+		#{parent},
+		#{state},
+		#{createBy},
+		sysdate,
+		#{orgId}
+		)
+	</insert>
+	<insert id="insertItem" parameterType="QuestionItem">
+		INSERT INTO QUESTION_ITEM(
+		QUESTION_ITEM_ID,
+		QUESTION_ITEM_NAME,
+		PARENT,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{QuestionItem.id},
+		#{QuestionItem.itemName},
+		'123',
+		'1',
+		#{QuestionItem.createBy},
+		sysdate,
+		#{QuestionItem.orgId},
+		#{QuestionItem.createDept},
+		'0'
+		)
+	</insert>
+	<insert id="insertQuestion" parameterType="Question">
+		INSERT INTO QUESTION(
+		QUESTION_ID,
+		QUESTION_NAME,
+		QUESTION_ITEM_ID,
+		QUESTION_TYPE_ID,
+		STATE,
+		QUESTION_NUMBER,
+		QUESTION_CONTENT,
+		QUESTION_ANSWER,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{Question.queId},
+		#{Question.queName},
+		#{Question.itemId},
+		#{Question.typeId},
+		'1',
+		#{Question.queNum},
+		#{Question.queContent},
+		#{Question.queAnswer},
+		#{Question.createBy},
+		sysdate,
+		#{Question.orgId},
+		#{Question.createDept},
+		'0'
+		)
+	</insert>
+	<insert id="insertQuestions" parameterType="java.util.List">
+		INSERT INTO QUESTION(
+		QUESTION_ID,
+		QUESTION_NAME,
+		QUESTION_ITEM_ID,
+		QUESTION_TYPE_ID,
+		STATE,
+		QUESTION_NUMBER,
+		QUESTION_CONTENT,
+		QUESTION_ANSWER,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		)
+		<foreach close=")" collection="questions" item="item" index="index" open="(" separator="union all">
+			select
+			sys_guid(),
+			#{item.queName},
+			#{item.itemId},
+			#{item.typeId},
+			'1',
+			#{item.queNum},
+			#{item.queContent},
+			#{item.queAnswer},
+			#{item.createBy},
+			sysdate,
+			#{item.orgId},
+			#{item.createDept},
+			'0'
+			from dual
+		</foreach>
+
+	</insert>
+	<insert id="insertExam" parameterType="Exam">
+		INSERT INTO EXAM(
+		EXAM_ID,
+		EXAM_NAME,
+		EXAM_TYPE_ID,
+		EXAM_ITEM_ID,
+		STATE,
+		BY_HAND,
+		EXAM_SCORE,
+		CHECK_SCORE,
+		EXAM_TIME,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		DEL_FLAG
+		) VALUES (
+		#{Exam.examId},
+		#{Exam.examName},
+		#{Exam.typeId},
+		#{Exam.itemId},
+		'0',
+		'0',
+		#{Exam.score},
+		#{Exam.checkScore},
+		#{Exam.time},
+		#{Exam.createBy},
+		sysdate,
+		#{Exam.orgId},
+		#{Exam.createDept},
+		'0'
+		)
+	</insert>
+	<insert id="insertExamQueType" parameterType="ExamQuestionType">
+		INSERT INTO EXAM_QUESTION_TYPE(
+		EXAM_QUESTION_TYPE_ID,
+		EXAM_ID,
+		QUESTION_TYPE_ID,
+		EXAM_METHOD_ID,
+		SCORE,
+		NUM,
+		SORT,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		DEL_FLAG
+		) VALUES (
+		#{ExamQuestionType.examQueId},
+		#{ExamQuestionType.examId},
+		#{ExamQuestionType.typeId},
+		#{ExamQuestionType.methodId},
+		#{ExamQuestionType.score},
+		#{ExamQuestionType.num},
+		#{ExamQuestionType.typeId},
+		#{ExamQuestionType.createBy},
+		sysdate,
+		#{ExamQuestionType.orgId},
+		'0'
+		)
+	</insert>
+	<insert id="insertExamQuestion" parameterType="ExamQuestion">
+		INSERT INTO EXAM_QUESTION(
+		EXAM_QUESTION_ID,
+		EXAM_ID,
+		EXAM_QUESTION_TYPE_ID,
+		QUESTION_ID,
+		QUESTION_NAME,
+		QUESTION_ITEM_ID,
+		QUESTION_TYPE_ID,
+		QUESTION_NUMBER,
+		QUESTION_CONTENT,
+		QUESTION_ANSWER,
+		SCORE,
+		CREATE_BY,
+		CREATE_DATE
+		) VALUES (
+		#{q.examQueId},
+		#{q.examId},
+		#{q.examQueTypeId},
+		#{q.queId},
+		#{q.queName},
+		#{q.itemId},
+		#{q.typeId},
+		#{q.queNum},
+		#{q.queContent},
+		#{q.queAnswer},
+		#{q.score},
+		#{q.createBy},
+		sysdate
+		)
+	</insert>
+	<insert id="insertPlan" parameterType="Plan">
+		INSERT INTO EXAM_PLAN(
+		PLAN_ID,
+		EXAM_ID	,
+		PLAN_TYPE_ID,
+		PLAN_NAME,
+		EXAM_START_TIME,
+		EXAM_END_TIME,
+		PLAN_INFO,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_ORG,
+		CREATE_DEPT,
+		LIMIT_START_TIME,
+		LIMIT_SUBMIT_TIME,
+		DEL_FLAG
+		) VALUES (
+		#{Plan.planId},
+		#{Plan.examId},
+		#{Plan.typeId},
+		#{Plan.planName},
+		#{Plan.start},
+		#{Plan.end},
+		#{Plan.info},
+		'0',
+		#{Plan.createBy},
+		sysdate,
+		#{Plan.orgId},
+		#{Plan.createDept},
+		#{Plan.limitStart},
+		#{Plan.limitSubmit},
+		'0'
+		)
+	</insert>
+	<insert id="insertPerson" parameterType="PersonVo">
+		INSERT INTO PLAN_AUTHORIZE(
+		ID,
+		PLAN_ID,
+		PLAN_AUTHORIZE_USER_ID,
+		CREATE_ORG,
+		DEPT_ID
+		) VALUES (
+		#{PersonVo.id},
+		#{PersonVo.dataId},
+		#{PersonVo.userId},
+		#{PersonVo.orgId},
+		#{PersonVo.depId}
+		)
+	</insert>
+	<insert id="insertExamScore" parameterType="ExamScore">
+		INSERT INTO EXAM_SCORE(
+		SCORE_T_ID,
+		PLAN_ID,
+		EXAM_ID,
+		USER_ID,
+		USER_NAME,
+		SCORE,
+		STATE,
+		CREATE_BY,
+		CREATE_DATE,
+		CREATE_DEPT,
+		CREATE_ORG
+		) VALUES (
+		#{ExamScore.id},
+		#{ExamScore.planId},
+		#{ExamScore.examId},
+		#{ExamScore.userId},
+		(select t.NAME from PERSION_INFO t where t.ID=#{ExamScore.userId} and rownum=1),
+		'0',
+		'0',
+		#{ExamScore.createBy},
+		sysdate,
+		#{ExamScore.createDept},
+		#{ExamScore.orgId}
+		)
+	</insert>
+	<insert id="insertExamDetailResult" parameterType="String">
+		insert into EXAM_SCORE_DETAIL1
+		select *
+		from EXAM_SCORE_DETAIL t
+		where t.SCORE_T_ID = #{id}
+	</insert>
+	<update id="updateItem" parameterType="QuestionItem">
+		UPDATE QUESTION_ITEM SET
+		QUESTION_ITEM_NAME = #{itemName},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ITEM_ID = #{itemId}
+	</update>
+	<update id="itemState" parameterType="QuestionItem">
+		UPDATE QUESTION_ITEM SET
+		STATE = #{state},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ITEM_ID = #{itemId}
+	</update>
+	<update id="delItem" parameterType="QuestionItem">
+		UPDATE QUESTION_ITEM SET
+		DEL_FLAG = '1',
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ITEM_ID = #{itemId}
+	</update>
+
+	<update id="updateExamQueType" parameterType="ExamQuestionType">
+		UPDATE EXAM_QUESTION_TYPE SET
+		SCORE = #{ExamQuestionType.score},
+		NUM = #{ExamQuestionType.num}
+		WHERE EXAM_QUESTION_TYPE_ID = #{ExamQuestionType.examQueId}
+	</update>
+
+
+	<update id="updateExamQuestionNum" parameterType="String">
+		UPDATE EXAM_QUESTION_TYPE SET
+		<if test="type=='add'">
+			NUM=NUM+#{num}
+		</if>
+		<if test="type=='del'">
+			NUM=NUM-#{num}
+		</if>
+		WHERE EXAM_QUESTION_TYPE_ID = #{examQueId}
+	</update>
+	<!--<update id="delExamQuestionByType" parameterType="com.jims.fbd.hrm.entity.ExamQuestionType" >
+        UPDATE EXAM_QUESTION SET
+        DEL_FLAG = '1'
+        WHERE EXAM_QUESTION_TYPE_ID = #{ExamQuestionType.examQueId}
+    </update>-->
+	<update id="updateQuestion" parameterType="Question">
+		UPDATE QUESTION SET
+		QUESTION_NAME = #{Question.queName},
+		QUESTION_ITEM_ID = #{Question.itemId},
+		QUESTION_TYPE_ID = #{Question.typeId},
+		QUESTION_NUMBER = #{Question.queNum},
+		QUESTION_CONTENT = #{Question.queContent},
+		QUESTION_ANSWER = #{Question.queAnswer},
+		UPDATE_BY = #{Question.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ID = #{Question.queId}
+	</update>
+	<update id="updateExam" parameterType="Exam">
+		UPDATE EXAM SET
+		EXAM_NAME = #{Exam.examName},
+		EXAM_TYPE_ID = #{Exam.typeId},
+		EXAM_ITEM_ID = #{Exam.itemId},
+		EXAM_SCORE = #{Exam.score},
+		CHECK_SCORE = #{Exam.checkScore},
+		EXAM_TIME = #{Exam.time},
+		UPDATE_BY = #{Exam.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE EXAM_ID = #{Exam.examId}
+	</update>
+	<update id="updatePlan" parameterType="Plan">
+		UPDATE EXAM_PLAN SET
+		EXAM_ID = #{Plan.examId},
+		PLAN_TYPE_ID = #{Plan.typeId},
+		PLAN_NAME = #{Plan.planName},
+		EXAM_START_TIME = #{Plan.start},
+		EXAM_END_TIME = #{Plan.end},
+		PLAN_INFO = #{Plan.info},
+		LIMIT_START_TIME = #{Plan.limitStart},
+		LIMIT_SUBMIT_TIME = #{Plan.limitSubmit},
+		UPDATE_BY = #{Plan.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE PLAN_ID = #{Plan.planId}
+	</update>
+	<update id="questionStatus" parameterType="Question">
+		UPDATE QUESTION SET
+		STATE = #{Question.state},
+		UPDATE_BY = #{Question.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ID = #{Question.queId}
+	</update>
+	<update id="questionRemove" parameterType="Question">
+		UPDATE QUESTION SET
+		DEL_FLAG = '1',
+		UPDATE_BY = #{Question.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE QUESTION_ID = #{Question.queId}
+	</update>
+	<update id="examPublish" parameterType="Exam">
+		UPDATE EXAM SET
+		STATE = '1',
+		BY_HAND =#{Exam.byHand},
+		UPDATE_BY = #{Exam.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE EXAM_ID = #{Exam.examId}
+	</update>
+	<update id="examDelete" parameterType="Exam">
+		UPDATE EXAM SET
+		DEL_FLAG = '1',
+		UPDATE_BY = #{Exam.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE EXAM_ID = #{Exam.examId}
+	</update>
+	<update id="planPublish" parameterType="Plan">
+		UPDATE EXAM_PLAN SET
+		STATE = '1',
+		UPDATE_BY = #{Plan.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE PLAN_ID = #{Plan.planId}
+	</update>
+	<update id="planRemove" parameterType="Plan">
+		UPDATE EXAM_PLAN SET
+		DEL_FLAG = '1',
+		UPDATE_BY = #{Plan.updateBy},
+		UPDATE_DATE = sysdate
+		WHERE PLAN_ID = #{Plan.planId}
+	</update>
+	<delete id="delExamQuestionByType" parameterType="ExamQuestionType">
+		DELETE FROM EXAM_QUESTION
+		WHERE EXAM_QUESTION_TYPE_ID = #{ExamQuestionType.examQueId}
+	</delete>
+	<delete id="delExamQueType" parameterType="String">
+		DELETE FROM EXAM_QUESTION_TYPE
+		WHERE EXAM_QUESTION_TYPE_ID = #{examQueId}
+	</delete>
+	<delete id="deleteExamQuestion" parameterType="String">
+		DELETE FROM EXAM_QUESTION
+		WHERE QUESTION_ID in (${que})
+	</delete>
+	<delete id="deletePerson" parameterType="String">
+		DELETE FROM PLAN_AUTHORIZE
+		WHERE PLAN_ID = #{planId}
+	</delete>
+</mapper>

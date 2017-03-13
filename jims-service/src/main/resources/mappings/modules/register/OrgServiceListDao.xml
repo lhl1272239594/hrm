@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.register.dao.OrgServiceListDao">
+    
+	<sql id="orgServiceListColumns">
+		a.id AS "id",
+		a.service_id AS "serviceId",
+		a.service_start_date AS "serviceStartDate",
+		a.service_end_date AS "serviceEndDate",
+		a.org_id AS "orgId",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy.id",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="orgServiceListJoins">
+	</sql>
+
+    <resultMap id="serviceMap" type="OrgServiceList">
+         <id property="id" column="id"/>
+         <result property="serviceId" column="service_id"/>
+         <result property="serviceName" column="service_name"/>
+         <result property="serviceStartDate" column="service_start_date"/>
+         <result property="serviceEndDate" column="service_end_date"/>
+         <result property="serviceType" column="service_type"/>
+         <result property="serviceClass" column="service_class"/>
+         <result property="orgId" column="org_id"/>
+         <result property="remarks" column="remarks"/>
+         <result property="delFlag" column="del_flag"/>
+         <collection property="menus" ofType="com.jims.sys.entity.MenuDict">
+             <id property="id" column="menu_id"/>
+             <result property="menuName" column="menu_name"/>
+             <result property="sort" column="menu_sort"/>
+             <result property="pid" column="pid"/>
+             <result property="href" column="href"/>
+         </collection>
+    </resultMap>
+
+    <select id="findByOrgId" resultType="OrgServiceList">
+        SELECT
+        *
+        FROM org_service_list
+        WHERE 1 = 1
+        <if test=" _parameter!=null and _parameter!='' ">
+            AND org_id = #{_parameter}
+        </if>
+        AND DEL_FLAG='0'
+    </select>
+
+	<select id="get" resultType="OrgServiceList">
+		SELECT 
+			<include refid="orgServiceListColumns"/>
+		FROM org_service_list a
+		<include refid="orgServiceListJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultMap="serviceMap">
+		SELECT 
+			a.*,s.service_name,s.service_type,s.service_class,m.id menu_id,m.menu_name,v.menu_sort,m.pid,m.href
+        FROM org_service_list a ,sys_service s,service_vs_menu v ,menu_dict m
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+            and s.del_flag = '0'
+            and v.del_flag = '0'
+            and m.del_flag = '0'
+            and a.service_id = s.id
+            and s.id = v.service_id
+            and v.menu_id = m.id
+            and (a.service_end_date is null or a.service_end_date > sysdate)
+            <if test="orgId != null and orgId != ''">
+                and a.org_id = #{orgId}
+            </if>
+		</where>
+            order by s.service_name,v.menu_sort
+	</select>
+	
+	<select id="findAllList" resultType="OrgServiceList">
+		SELECT 
+			<include refid="orgServiceListColumns"/>
+		FROM org_service_list a
+		<include refid="orgServiceListJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO org_service_list(
+			id,
+			service_id,
+			service_start_date,
+			service_end_date,
+			org_id,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{serviceId},
+			#{serviceStartDate},
+			#{serviceEndDate},
+			#{orgId},
+			#{remarks},
+			#{updateBy.id},
+			#{createBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE org_service_list SET 	
+			service_id = #{serviceId},
+			service_start_date = #{serviceStartDate},
+			service_end_date = #{serviceEndDate},
+			org_id = #{orgId},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE org_service_list SET
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

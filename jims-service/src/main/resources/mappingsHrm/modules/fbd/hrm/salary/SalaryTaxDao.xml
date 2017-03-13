@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryTaxDao">
+
+
+    <!--查询个税列表-->
+    <select id="taxList" resultType="SalaryTax">
+       select
+        a.TAX_ID AS taxId,
+        a.BASE_NUM AS baseNum,
+        a.LOW_LIMIT AS lowLimit,
+        a.HIGH_LIMIT AS highLimit,
+        a.RATE AS rate,
+        a.DECUTE_NUM AS decuteNum,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_TAX a
+        <where>
+            a.DEL_FLAG is NULL
+        and a.CREATE_ORG=#{orgId}
+     </where>
+        ORDER BY a.LOW_LIMIT,a.HIGH_LIMIT
+    </select>
+
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_TAX t
+        SET t.ENABLE_FLAG = '1',
+        t.UPDATE_DATE = sysdate
+        WHERE t.TAX_ID = #{taxId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_TAX t
+        SET t.ENABLE_FLAG = '0',
+        t.UPDATE_DATE = sysdate
+        WHERE t.TAX_ID = #{taxId}
+    </update>
+    <!--启用停用-->
+    <update id="enableFlag" parameterType="SalaryTax" >
+        UPDATE SALARY_TAX SET
+        ENABLE_FLAG = #{SalaryTax.enableFlag}
+        WHERE TAX_ID = #{SalaryTax.taxId}
+    </update>
+    <!--批量删除-->
+    <update id="deleteTax" parameterType="SalaryTax">
+        UPDATE SALARY_TAX t
+        SET t.DEL_FLAG = '1'
+        WHERE t.TAX_ID = #{SalaryTax.taxId}
+    </update>
+    <!--删除个税数据-->
+    <update id="delete">
+        UPDATE SALARY_TAX t
+        SET t.DEL_FLAG = '1'
+        WHERE t.TAX_ID = #{id}
+    </update>
+    <!--判断个税数据是否已存在-->
+    <select id="findTaxsame" resultType="SalaryTax">
+        SELECT count(*) num
+        FROM SALARY_TAX t
+        WHERE t.BASE_NUM=#{baseNum}
+        and t.RATE=#{rate}
+        and t.LOW_LIMIT=#{lowLimit}
+        and t.HIGH_LIMIT=#{highLimit}
+        and t.DECUTE_NUM=#{decuteNum}
+        and t.DEL_FLAG IS NULL
+        and t.CREATE_ORG=#{orgId}
+        <if test="taxId != null and taxId != ''">
+            and t.TAX_ID != #{taxId}
+        </if>
+    </select>
+
+    <!--新增税率数据-->
+    <insert id="insert">
+        INSERT INTO SALARY_TAX(
+        TAX_ID,
+        BASE_NUM,
+        LOW_LIMIT,
+        HIGH_LIMIT,
+        RATE,
+        DECUTE_NUM,
+        ENABLE_FLAG,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT
+        ) VALUES (
+        sys_guid(),
+        #{baseNum},
+        #{lowLimit},
+        #{highLimit},
+        #{rate},
+        #{decuteNum},
+        '1',
+        #{createBy},
+        sysdate,
+        #{orgId},
+        #{createDept}
+        )
+    </insert>
+    <!--更新-->
+    <update id="update">
+        UPDATE SALARY_TAX SET
+        BASE_NUM=#{baseNum},
+        LOW_LIMIT=#{lowLimit},
+        HIGH_LIMIT=#{highLimit},
+        RATE = #{rate},
+        DECUTE_NUM = #{decuteNum},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE TAX_ID = #{taxId}
+    </update>
+    <!--统一变更 起征基数-->
+    <update id="formateBase">
+        UPDATE SALARY_TAX SET
+        BASE_NUM=#{baseNum}
+        WHERE CREATE_ORG=#{orgId}
+
+    </update>
+
+
+</mapper>

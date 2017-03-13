@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.AttendanceDataDao">
+
+
+    <select id="findAttList" resultType="AttendanceData">
+        select
+        ad.ATTENDANCE_DATA_ID as "attDataId",
+        ad.user_code as "userCode",
+        ad.user_name as "userName",
+        ad.dept_code as "deptCode",
+        ad.dept_name as "deptName",
+        ad.CHECK_DATE as "checkDate",
+        ad.CHECK_IN_TIME as "checkInTime",
+        ad.CHECK_OUT_TIME as "checkOutTime",
+        ad.CREATE_BY as "createBy",
+        ad.CREATE_DATE as "createDate",
+        ad.status_type as "statusType"
+        from ATTENDANCE_DATA ad
+        where ad.create_org = #{orgId}
+        and ad.del_flag='0'
+        <if test="userName != null and userName != ''">
+            and ad.USER_NAME LIKE CONCAT(CONCAT('%', #{userName}),'%')
+        </if>
+        ORDER BY ad.dept_name,ad.user_name,ad.CHECK_DATE
+    </select>
+
+    <select id="findDayReport" resultType="AttendanceData">
+        select
+        ar.fre_date_all as "freDate",
+        pi.name as "userName",
+        dd.dept_name as "deptName",
+        ar.status_type as "statusType",
+        ar.rule_time as "ruleTime",
+        ar.check_time as "checkTime",
+        fi.frequency_item_description as "freItemDes"
+        from attendance_report ar
+        left join PERSION_INFO pi
+        on ar.user_id = pi.id
+        left join ORG_STAFF os
+        on pi.id = os.PERSION_ID
+        left join DEPT_DICT dd
+        on os.DEPT_ID = dd.id
+        left join FREQUENCY_ITEM fi
+        on ar.fre_item_id = fi.frequency_item_id
+        where ar.create_org=#{createOrg}
+        and pi.id= #{userId}
+        order by dd.dept_name,pi.name, ar.fre_date_all, ar.rule_time
+    </select>
+    <select id="findMonthReport" resultType="AttendanceData">
+        select
+        to_char(ar.fre_date,'YYYY-MM')               as "freDate",
+        pi.name                       as "userName",
+        dd.dept_name  as "deptName",
+        nvl(t1.nums,0) as "nums1",
+        nvl(t2.nums,0) as "nums2",
+        nvl(t3.nums,0) as "nums3",
+        nvl(t4.nums,0) as "nums4",
+        nvl(t5.nums,0) as "nums5",
+        nvl(t6.nums,0) as "nums6",
+        pi.id as "userId"
+        from attendance_report ar
+        left join PERSION_INFO pi
+        on ar.user_id = pi.id
+        left join ORG_STAFF os
+        on pi.id = os.PERSION_ID
+        left join DEPT_DICT dd
+        on os.DEPT_ID = dd.id
+        left join FREQUENCY_ITEM fi
+        on ar.fre_item_id = fi.frequency_item_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='正常'group by ar.user_id) t1
+        on ar.user_id=t1.user_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='请假'group by ar.user_id) t2
+        on ar.user_id=t2.user_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='旷工'group by ar.user_id) t3
+        on ar.user_id=t3.user_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='迟到'group by ar.user_id) t4
+        on ar.user_id=t4.user_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='早退'group by ar.user_id) t5
+        on ar.user_id=t5.user_id
+        left join (select ar.user_id user_id,count(*) nums from attendance_report ar where ar.status_type='休息'group by ar.user_id) t6
+        on ar.user_id=t6.user_id
+        where ar.create_org=#{createOrg}
+        <if test="userName != null and userName != ''">
+            and pi.name LIKE CONCAT(CONCAT('%', #{userName}),'%')
+        </if>
+        <if test="attMonth != null and attMonth != ''">
+            and  to_char(ar.fre_date,'YYYY-MM') = #{attMonth}
+        </if>
+        <if test="attMonth == null and attMonth == ''">
+            and  to_char(ar.fre_date,'YYYY-MM') = to_char(sysdate,'YYYY-MM')
+        </if>
+        group by dd.dept_name,
+        pi.name,
+        pi.id,
+        to_char(ar.fre_date, 'YYYY-MM'),
+        nvl(t1.nums, 0),
+        nvl(t2.nums, 0),
+        nvl(t3.nums, 0),
+        nvl(t4.nums, 0),
+        nvl(t5.nums, 0),
+        nvl(t6.nums, 0)
+    </select>
+    <insert id="insertPrimary">
+		INSERT INTO ATTENDANCE_DATA(
+		attendance_data_id,
+		CHECK_DATE,
+		CHECK_IN_TIME,
+		CHECK_OUT_TIME,
+		dept_name,
+		user_name,
+		dept_code,
+		user_code,
+        create_by,
+        create_dept,
+        create_org,
+        create_date,
+		del_flag
+		) VALUES (
+		#{attDataId},
+		to_date(#{checkDate},'YYYY-MM-DD'),
+		#{checkInTime},
+		#{checkOutTime},
+		#{deptName},
+		#{userName},
+		#{deptCode},
+		#{userCode},
+		#{createBy},
+		#{createDept},
+		#{createOrg},
+		sysdate,
+		'0'
+		)
+	</insert>
+
+    <update id="del" parameterType="AttendanceData">
+		UPDATE ATTENDANCE_DATA t
+		SET t.DEL_FLAG = '1'
+		WHERE t.attendance_data_id = #{AttendanceData.attDataId}
+	</update>
+
+    <select id="findOccupy" resultType="Integer" parameterType="AttendanceData">
+		SELECT count(*) num
+		FROM ATTENDANCE_DATA t
+		where t.create_org = #{AttendanceData.orgId}
+		and t.USER_CODE = #{AttendanceData.userCode}
+		and t.DEPT_CODE = #{AttendanceData.deptCode}
+		and t.del_flag='0'
+		and t.CHECK_DATE = to_date(#{AttendanceData.checkDate},'YYYY-MM-DD')
+
+	</select>
+</mapper>

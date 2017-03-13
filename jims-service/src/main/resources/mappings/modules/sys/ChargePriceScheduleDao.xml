@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.ChargePriceScheduleDao">
+    
+	<sql id="chargePriceScheduleColumns">
+		a.id AS "id",
+		a.hosId AS "hosId",
+		a.charge_type AS "chargeType",
+		a.price_coeff_numerator AS "priceCoeffNumerator",
+		a.price_coeff_denominator AS "priceCoeffDenominator",
+		a.charge_special_indicator AS "chargeSpecialIndicator",
+		a.numerator_outp AS "numeratorOutp",
+		a.denominator_outp AS "denominatorOutp",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="chargePriceScheduleJoins">
+	</sql>
+    
+	<select id="get" resultType="ChargePriceSchedule">
+		SELECT 
+			<include refid="chargePriceScheduleColumns"/>
+		FROM charge_price_schedule a
+		<include refid="chargePriceScheduleJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="ChargePriceSchedule">
+		SELECT 
+			<include refid="chargePriceScheduleColumns"/>
+		FROM charge_price_schedule a
+		<include refid="chargePriceScheduleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="ChargePriceSchedule">
+		SELECT 
+			<include refid="chargePriceScheduleColumns"/>
+		FROM charge_price_schedule a
+		<include refid="chargePriceScheduleJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO charge_price_schedule(
+			id,
+			hosid,
+			charge_type,
+			price_coeff_numerator,
+			price_coeff_denominator,
+			charge_special_indicator,
+			numerator_outp,
+			denominator_outp,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			remarks
+		) VALUES (
+			#{id},
+			#{hosId},
+			#{chargeType},
+			#{priceCoeffNumerator},
+			#{priceCoeffDenominator},
+			#{chargeSpecialIndicator},
+			#{numeratorOutp},
+			#{denominatorOutp},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{delFlag},
+			#{remarks}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE charge_price_schedule SET 	
+			hosid = #{hosId},
+			charge_type = #{chargeType},
+			price_coeff_numerator = #{priceCoeffNumerator},
+			price_coeff_denominator = #{priceCoeffDenominator},
+			charge_special_indicator = #{chargeSpecialIndicator},
+			numerator_outp = #{numeratorOutp},
+			denominator_outp = #{denominatorOutp},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE charge_price_schedule SET 
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

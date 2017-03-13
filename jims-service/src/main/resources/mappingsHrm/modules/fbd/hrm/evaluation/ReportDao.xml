@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.ReportDao">
+    <!--查询科系得分-->
+    <select id="getReport" resultType="EvaluationReportData">
+		select
+		t.id,
+		t.system_name as systemName,
+		t.self_avg as selfAvg,
+		t.avg as avg
+  		from EVALUATION_REPORT_DATA t
+ 		where (select r.report_date
+          from evaluation_report r
+         where r.id = t.report_id) =
+       to_char(add_months(sysdate, -1), 'yyyy-MM') and t.type='1'
+       order by length(SORT),SORT
+	</select>
+	<!--查询已发布报表-->
+	<select id="getPublishReport" resultType="EvaluationReportData">
+		select
+		t.id,
+		t.system_name as systemName,
+		t.self_avg as selfAvg,
+		t.avg as avg
+		from EVALUATION_REPORT_DATA t
+		where (select r.report_date
+		from evaluation_report r
+		where r.id = t.report_id and r.state='2') =
+		<if test="month != null and month == ''">
+			to_char(add_months(sysdate, -1), 'yyyy-MM')
+		</if>
+		<if test="month != null and month != ''">
+			#{month}
+		</if>
+		 and t.type='1'
+		order by length(SORT),SORT
+	</select>
+    <!--查询报表是否生成-->
+    <select id="checkReport" resultType="EvaluationReport">
+		select id ,
+		name,
+		report_date as reportDate,
+		nvl(SELF_AVG,0) as selfAvg,
+		nvl(AVG,0) as avg,
+		state as state
+  		from EVALUATION_REPORT
+ 		where report_date =
+       to_char(add_months(sysdate, -1), 'yyyy-MM')
+	</select>
+	<!--获取报表标题-->
+	<select id="getReportTitle" resultType="EvaluationReport">
+		select id ,
+		name,
+		report_date as reportDate,
+		nvl(SELF_AVG,0) as selfAvg,
+		nvl(AVG,0) as avg,
+		state as state
+		from EVALUATION_REPORT
+		where report_date =
+		<if test="month != null and month == ''">
+			to_char(add_months(sysdate, -1), 'yyyy-MM')
+		</if>
+		<if test="month != null and month != ''">
+			#{month}
+		</if>
+		and state='2'
+	</select>
+    <!--根据科系ID查询该科系下科室得分-->
+    <select id="getReportData" resultType="EvaluationReportData">
+		select id as id,
+			   t.system_name as systemName,
+			   t.dept_name as deptName,
+			   nvl(t.score,0) as score,
+			   nvl(t.total_score,0) as totalScore,
+			   nvl(t.rate,0) as rate,
+			   nvl(t.rate_avg,0) as rateAvg,
+			   t.state
+		  from EVALUATION_REPORT_DATA t
+		 where type='2' and t.pid=#{pid}
+
+	</select>
+    <!--获取所有科系-->
+    <select id="getSystem" resultType="DeptConfig">
+		select id as id,
+		name as name
+		from dept_config t
+		where t.type = '1'
+		order by CREATE_DATE desc
+	</select>
+    <!--根据科系ID获取该科系下的考评科室-->
+    <select id="getDept" resultType="DeptConfig">
+		select s.dept_id as id,
+		  (select dd.dept_name
+			 from dept_dict dd
+			where dd.id = s.dept_id) as deptName
+		 from evaluation_socre_result s
+		where (select p.type
+				 from evaluation_plan p
+				where p.evaluation_plan_id =
+					  s.evaluation_plan_id) = '2'
+		  and to_char((select p.evaluation_plan_state_time
+						from evaluation_plan p
+					   where p.evaluation_plan_id =
+							 s.evaluation_plan_id),
+					  'yyyy-MM') = to_char(sysdate, 'yyyy-MM')
+		and (select p.del_flag
+		from evaluation_plan p
+		where p.evaluation_plan_id =
+		s.evaluation_plan_id) = '0'
+		<if test="id != null and id != ''">
+			and s.dept_id in (select id
+			from dept_config c
+			where c.type = '2'
+			and c.pid = #{id})
+		</if>
+		<if test="id == ''">
+			and s.dept_id not in (select id
+			from dept_config c
+			where c.type = '2')
+		</if>
+		group by s.dept_id
+	</select>
+    <!--获取科系考评平均达标率-->
+    <select id="getAvg" resultType="String">
+		select nvl(trunc(avg(trunc(nvl(score,0) / total_score, 4) * 100),2),0)
+		from (select min(s.score) as score,
+		min(s.total_score) as total_score,
+		s.dept_id
+		 from evaluation_socre_result s
+		where (select p.type
+				 from evaluation_plan p
+				where p.evaluation_plan_id =
+					  s.evaluation_plan_id) = '2'
+		  and to_char((select p.evaluation_plan_state_time
+						from evaluation_plan p
+					   where p.evaluation_plan_id =
+							 s.evaluation_plan_id),
+					  'yyyy-MM') = to_char(sysdate, 'yyyy-MM')
+		and (select p.del_flag
+		from evaluation_plan p
+		where p.evaluation_plan_id =
+		s.evaluation_plan_id) = '0'
+		  and s.obj != '4'
+		  and s.total_score is not null
+		  and s.total_score != 0
+		  <if test="id != null and id != '' and id!='all' and id!='other'">
+			  and s.dept_id in (select id
+			  from dept_config c
+			  where c.type = '2'
+			  and c.pid = #{id})
+		  </if>
+		  <if test="id != null and id != '' and id!='all' and id=='other'">
+			  and s.dept_id not in (select id
+			  from dept_config c
+			  where c.type = '2')
+		  </if>
+		group by s.dept_id)
+	</select>
+    <!--获取科系自评平均达标率-->
+    <select id="getSelfAvg" resultType="String">
+		select nvl(trunc(avg(trunc(nvl(score,0) / total_score, 4) * 100),2),0)
+		from (select min(s.score) as score,
+		min(s.total_score) as total_score,
+		s.dept_id from evaluation_socre_result s
+			where (select p.type
+			from evaluation_plan p
+			where p.evaluation_plan_id =
+			s.evaluation_plan_id) = '1'
+			and to_char((select p.evaluation_plan_state_time
+			from evaluation_plan p
+			where p.evaluation_plan_id =
+			s.evaluation_plan_id),
+			'yyyy-MM') = to_char(add_months(sysdate, -1), 'yyyy-MM')
+			and (select p.del_flag
+			from evaluation_plan p
+			where p.evaluation_plan_id =
+			s.evaluation_plan_id) = '0'
+			and s.obj = '1'
+			and s.state='2'
+			and s.total_score is not null
+			and s.total_score != 0
+			<if test="id != null and id != '' and id!='all' and id!='other'">
+				and s.dept_id in (select id
+				from dept_config c
+				where c.type = '2'
+				and c.pid = #{id})
+			</if>
+			<if test="id != null and id != '' and id!='all' and id=='other'">
+				and s.dept_id not in (select id
+				from dept_config c
+				where c.type = '2')
+			</if>
+		group by s.dept_id)
+	</select>
+    <!--获取科室评分数据-->
+    <select id="getDeptData" resultType="EvaluationReportData">
+		    select * from (select score,
+           s.total_score as totalScore,
+           nvl(trunc(nvl(s.score,0) / s.total_score, 4) * 100,0) as rate,
+           nvl(trunc(trunc(nvl(s.score,0) / s.total_score, 4) * 100 /#{avg}, 4)*100,0) as rateAvg,
+           obj
+      from evaluation_socre_result s
+     where (select p.type
+              from evaluation_plan p
+             where p.evaluation_plan_id = s.evaluation_plan_id) = '2'
+       and to_char((select p.evaluation_plan_state_time
+                     from evaluation_plan p
+                    where p.evaluation_plan_id = s.evaluation_plan_id),
+                   'yyyy-MM') = to_char(sysdate, 'yyyy-MM')
+                    and s.total_score is not null
+                    and s.total_score != 0
+                    and (select p.del_flag
+		from evaluation_plan p
+		where p.evaluation_plan_id =
+		s.evaluation_plan_id) = '0'
+       and s.dept_id = #{id}) where rownum=1
+
+	</select>
+	<!--插入报表-->
+	<insert id="insertReport">
+		INSERT INTO EVALUATION_REPORT(
+		ID,
+		NAME,
+		REPORT_DATE,
+		SELF_AVG,
+		AVG,
+		STATE
+		) VALUES (
+		#{id},
+		to_char(add_months(sysdate, -1), 'yyyy-MM')||'质量考评结果',
+		to_char(add_months(sysdate, -1), 'yyyy-MM'),
+		#{selfAvg},
+		#{avg},
+		'1'
+		)
+	</insert>
+	<!--插入报表科系头表-->
+	<insert id="insertReportSystem">
+		INSERT INTO EVALUATION_REPORT_DATA(
+		ID,
+		REPORT_ID,
+		SYSTEM_NAME,
+		SELF_AVG,
+		AVG,
+		TYPE,
+		SORT
+		) VALUES (
+		#{id},
+		#{reportId},
+		#{systemName},
+		#{selfAvg},
+		#{avg},
+		'1',
+		#{sort}
+		)
+	</insert>
+	<!--插入报表科系行表-->
+	<insert id="insertReportDept">
+		INSERT INTO EVALUATION_REPORT_DATA(
+		ID,
+		REPORT_ID,
+		SYSTEM_NAME,
+		DEPT_NAME,
+		SCORE,
+		TOTAL_SCORE,
+		RATE,
+		RATE_AVG,
+		TYPE,
+		STATE,
+		PID
+		) VALUES (
+		#{id},
+		#{reportId},
+		#{systemName},
+		#{deptName},
+		#{score},
+		#{totalScore},
+		#{rate},
+		#{rateAvg},
+		#{type},
+		#{state},
+		#{pid}
+		)
+	</insert>
+	<!--修改科室平均达标率-->
+	<update id="editRateAvg">
+		UPDATE EVALUATION_REPORT_DATA t SET
+		RATE_AVG=#{rateAvg},
+		UPDATE_BY=#{updateBy},
+		UPDATE_DATE=sysdate
+		where t.id=#{id}
+	</update>
+	<!--发布报表-->
+	<update id="publishReport">
+		UPDATE EVALUATION_REPORT t SET
+		STATE='2'
+		where report_date =
+       to_char(add_months(sysdate, -1), 'yyyy-MM')
+	</update>
+	<!--删除报表-->
+    <delete id="delReport">
+		  delete evaluation_report r
+		  where r.report_date=to_char(add_months(sysdate, -1), 'yyyy-MM') and r.state='1'
+	</delete>
+	<!--删除报表数据-->
+    <delete id="delReportData">
+		   delete EVALUATION_REPORT_DATA d
+			where d.report_id not in
+			(select r.id
+			   from EVALUATION_REPORT r
+			  )
+	</delete>
+</mapper>

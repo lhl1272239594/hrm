@@ -1,0 +1,10 @@
+.combox_width {
+    width: 140px;
+}
+.fitem  {
+    padding: 10px 40px 10px 40px;
+    line-height:27px;
+}
+.score {
+    color: red;
+}

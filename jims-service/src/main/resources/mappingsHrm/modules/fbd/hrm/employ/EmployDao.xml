@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.employ.dao.EmployDao">
+
+
+    <!--招聘发布查询-->
+    <select id="employList" resultType="Employ">
+       select
+        a.EMPLOY_ID AS employId,
+        a.NAME AS name,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.EMPLOY_DEPT_ID AS deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.EMPLOY_DEPT_ID and rownum=1) AS deptName,
+        a.EMPLOY_POST AS post,
+        a.EMPLOY_PROPERTY AS property,
+        a.EDUCATION_REQUIRE AS education,
+        a.WORK_EXPERIENCE AS experience,
+        a.SALARY AS salary,
+        a.WORK_PLACE AS address1,
+        a.PROVINCE||a.CITY||a.COUNTY||a.WORK_PLACE AS address,
+        a.TEL AS tel,
+        a.EMAIL AS email,
+        a.WORK_REQUIRE AS required,
+        a.TIME_UNTIL AS until,
+        a.STATE AS state,
+        a.PROVINCE AS province,
+        a.CITY AS city,
+        a.COUNTY AS county,
+        a.CREATE_ORG AS orgId,
+        a.DEL_FLAG AS delFlag,
+        (select NAME FROM PERSION_INFO t where t.ID = a.CREATE_BY and rownum =1) AS createBy,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        a.CREATE_DATE AS createDate,
+        (select NAME FROM PERSION_INFO t where t.ID = a.UPDATE_BY and rownum =1) AS updateBy,
+        a.UPDATE_DATE AS updateDate,
+        (select NAME FROM PERSION_INFO t where t.ID = a.PUBLISH_BY and rownum =1) AS publishBy,
+        a.PUBLISH_DATE AS publishDate
+        FROM EMPLOY_INFORMATION a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="name != null and name != ''">
+            and a.NAME like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.EMPLOY_DEPT_ID = #{deptId}
+        </if>
+        <if test="post != null and post != '' " >
+            and a.EMPLOY_POST = #{post}
+        </if>
+        <if test="state != null and state != '' ">
+            and a.STATE = #{state}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.CREATE_DEPT in ( ${deptIds} )
+        </if>
+            ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--招聘信息查询-->
+    <select id="employSearch" resultType="Employ">
+        select
+        a.EMPLOY_ID AS employId,
+        a.NAME AS name,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        a.EMPLOY_DEPT_ID AS deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.EMPLOY_DEPT_ID and rownum=1) AS deptName,
+        a.EMPLOY_POST AS post,
+        a.EMPLOY_PROPERTY AS property,
+        a.EDUCATION_REQUIRE AS education,
+        a.WORK_EXPERIENCE AS experience,
+        a.SALARY AS salary,
+        a.WORK_PLACE AS address1,
+        a.PROVINCE||a.CITY||a.COUNTY||a.WORK_PLACE AS address,
+        a.TEL AS tel,
+        a.EMAIL AS email,
+        a.WORK_REQUIRE AS required,
+        a.TIME_UNTIL AS until,
+        a.STATE AS state,
+        a.PROVINCE AS province,
+        a.CITY AS city,
+        a.COUNTY AS county,
+        a.CREATE_ORG AS orgId,
+        a.DEL_FLAG AS delFlag,
+        (select NAME FROM PERSION_INFO t where t.ID = a.CREATE_BY and rownum =1) AS createBy,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        a.CREATE_DATE AS createDate,
+        (select NAME FROM PERSION_INFO t where t.ID = a.UPDATE_BY and rownum =1) AS updateBy,
+        a.UPDATE_DATE AS updateDate,
+        (select NAME FROM PERSION_INFO t where t.ID = a.PUBLISH_BY and rownum =1) AS publishBy,
+        a.PUBLISH_DATE AS publishDate
+        FROM EMPLOY_INFORMATION a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId} and a.STATE = '1'
+        </where>
+        <if test="name != null and name != ''">
+            and a.NAME like CONCAT('%',CONCAT(#{name},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and a.EMPLOY_DEPT_ID = #{deptId}
+        </if>
+        <if test="post != null and post != '' " >
+            and a.EMPLOY_POST = #{post}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and a.CREATE_DEPT in ( ${deptIds} )
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--批量删除-->
+    <update id="deleteEmploy" parameterType="Employ">
+        UPDATE EMPLOY_INFORMATION t
+        SET t.DEL_FLAG = '1'
+        WHERE t.EMPLOY_ID = #{Employ.employId}
+    </update>
+
+    <!--发布招聘-->
+    <update id="publish_employ" parameterType="Employ">
+        UPDATE EMPLOY_INFORMATION t
+        SET t.state = '1',
+        t.publish_by = #{userName},
+        t.publish_date = sysdate
+        WHERE t.EMPLOY_ID = #{Employ.employId}
+    </update>
+    <!--结束招聘-->
+    <update id="end_employ" parameterType="Employ">
+        UPDATE EMPLOY_INFORMATION t
+        SET t.state = '2'
+        WHERE t.EMPLOY_ID = #{Employ.employId}
+    </update>
+    <!--重新发布-->
+    <update id="redeal" parameterType="Employ">
+        UPDATE EMPLOY_INFORMATION t
+        SET t.state = '1',
+        t.publish_by = #{userName},
+        t.publish_date = sysdate,
+        t.time_until = to_date(#{Employ.until},'yyyy-MM-dd')
+        WHERE t.EMPLOY_ID = #{Employ.employId}
+    </update>
+    <!--判断是否已存在-->
+    <select id="findEmploysame" resultType="Employ">
+        SELECT count(*) num
+        FROM EMPLOY_INFORMATION t
+        WHERE t.create_org=#{orgId}
+        and  t.name =#{name}
+        and t.del_flag is NULL
+    </select>
+    <!--新增-->
+    <insert id="insertEmploy">
+        INSERT INTO EMPLOY_INFORMATION(
+        EMPLOY_ID,
+        NAME,
+        EMPLOY_DEPT_ID,
+        EMPLOY_POST,
+        EMPLOY_PROPERTY,
+        EDUCATION_REQUIRE,
+        WORK_EXPERIENCE,
+        SALARY,
+        WORK_PLACE,
+        TEL,
+        EMAIL,
+        WORK_REQUIRE,
+        TIME_UNTIL,
+        STATE,
+        PROVINCE,
+        CITY,
+        COUNTY,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{Employ.name},
+        #{Employ.deptId},
+        #{Employ.post},
+        #{Employ.property},
+        #{Employ.education},
+        #{Employ.experience},
+        #{Employ.salary},
+        #{Employ.address},
+        #{Employ.tel},
+        #{Employ.email},
+        #{Employ.required},
+        to_date(#{Employ.until},'yyyy-MM-dd'),
+        '0',
+        #{Employ.province},
+        #{Employ.city},
+        #{Employ.county},
+        #{Employ.orgId},
+        #{Employ.createDept},
+        #{Employ.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateEmploy">
+        UPDATE EMPLOY_INFORMATION SET
+        NAME=#{Employ.name},
+        EMPLOY_DEPT_ID=#{Employ.deptId},
+        EMPLOY_POST=#{Employ.post},
+        EMPLOY_PROPERTY=#{Employ.property},
+        EDUCATION_REQUIRE=#{Employ.education},
+        WORK_EXPERIENCE=#{Employ.experience},
+        SALARY=#{Employ.salary},
+        WORK_PLACE=#{Employ.address},
+        TEL=#{Employ.tel},
+        EMAIL=#{Employ.email},
+        WORK_REQUIRE=#{Employ.required},
+        TIME_UNTIL=to_date(#{Employ.until},'yyyy-MM-dd'),
+        PROVINCE=#{Employ.province},
+        CITY=#{Employ.city},
+        COUNTY=#{Employ.county},
+        UPDATE_BY = #{Employ.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE EMPLOY_ID = #{Employ.employId}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>挂号欢迎页</title>
+		<!-- metas -->
+		<meta charset="utf-8">
+		<meta name="author" content="http://themeforest.net/user/CreativeWS/portfolio">
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=8,IE=9,IE=10" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+		<style>
+		ul 
+		{
+			margin: 0px;
+			padding: 0px;
+			list-style: none;
+		}
+		.paddt-50
+		{
+			padding-top:50px;
+		}
+		.hl-flow-main
+		{
+			position:relative;
+			width:694px;
+			margin:0 auto;
+			margin-top:80px;
+
+		}
+		.hl-alink
+		{
+			position:absolute;
+
+		}
+		.hl-alink ul li
+		{
+			display:inline-block;
+		}
+		.hl-alink ul li:first-child
+		{
+		
+		}
+		.hl-alink ul li:nth-child(2),.hl-alink ul li:nth-child(3)
+		{
+			padding-left:23%;
+		}
+		.hl-alink ul li:nth-child(4),.hl-alink ul li:nth-child(5)
+		{
+			padding-top:15px;
+			
+		}
+		.hl-alink ul li:nth-child(4)
+		{
+			padding-left:132px;
+		}
+		.hl-alink ul li:nth-child(5)
+		{
+			padding-left:185px;
+		}
+		.hl-alink ul li a
+		{
+			display:inline-block;
+			width:115px;
+			height:140px;
+		}
+		</style>
+	</head>
+<body>
+<div class="hl-flow-main">
+	<div class="hl-alink">
+		<ul>
+            <li><a  onclick="parent.addTabs('1','号类定义','/modules/register/registerType.html',this)" title="号类定义"></a></li>
+            <li><a  onclick="parent.addTabs('2','号别录入','/modules/register/registerTypeInput.html',this)" title="号别录入"></a></li>
+            <li><a  onclick="parent.addTabs('3','安排录入','/modules/register/registerWeek.html',this)" title="安排录入"></a></li>
+            <li><a  onclick="parent.addTabs('4','号表生成','/modules/register/registerGenerate.html',this)" title="号表生成"></a></li>
+            <li><a  onclick="parent.addTabs('5','号表调整','/modules/register/registerAdjust.html',this)" title="号表调整"></a></li>
+		</ul>
+	</div>
+	<img src="/static/images/index/hl-flow.png"/>
+</div>
+
+</body>
+</html>

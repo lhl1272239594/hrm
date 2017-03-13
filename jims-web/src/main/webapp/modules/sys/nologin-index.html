@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+ <head> 
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <title>权限不足</title>
+  <style>
+	body
+	{
+		margin:0;
+	}
+	.nodata-wrap
+	{
+		position:absolute;
+		top:50%;
+		left:50%;
+		margin-left:-550px;
+		margin-top:-200px;
+	}
+	.nodata-text
+	{
+		background:url(images/nologin-sign.png) no-repeat;
+		width:700px;
+		height:103px;
+		font-size:15px;
+		padding-top:215px;
+		padding-left:400px;
+		line-height:25px;
+		color:#666;
+
+	}
+	.back-alink
+	{
+		padding:3px 20px;
+		display:inline-block;
+		background:#2db7f5;
+		border-radius:5px;
+		color:#fff;
+		text-decoration:none;
+		margin-left:10px;
+	}
+  </style>
+ </head> 
+ <body> 
+
+	<div class="nodata-wrap">
+		<div class="nodata-text">
+		没有访问权限，返回登陆页面登陆
+		<a href="#" class="back-alink" onClick="javascript:history.back(-1);">返回</a>
+		</div>
+	</div>
+ 
+ </body>
+
+</html>

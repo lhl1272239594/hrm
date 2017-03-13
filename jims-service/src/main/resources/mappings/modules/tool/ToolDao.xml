@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.tool.dao.ToolDao">
+    <select id="listByType" resultType="Tool">
+        SELECT *
+        FROM sys_dict a
+        WHERE a.type = #{type}
+        <if test="value != null and value != ''">
+            and a.value=#{value}
+        </if>
+    </select>
+    <select id="findStaffById" resultType="OrgStaff">
+		SELECT
+		a.id AS "id",
+		a.dept_id AS "deptId",
+		a.org_id AS "orgId",
+		a.persion_id AS "persionId"
+		FROM org_staff a
+
+		WHERE a.id = #{staffId}
+	</select>
+    <select id="findPersonList" resultType="Tool">
+        SELECT
+        a.orgId,
+        a.orgName,
+        a.deptId,
+        a.deptName,
+        a.userId,
+        a.userName
+        from user_info a
+        where a.delFlag='0'
+		and a.orgId=#{orgId}
+        <if test="userId != null and userId != ''">
+            and a.userId=#{userId}
+        </if>
+		<if test="staffId != null and staffId != ''">
+			and a.orgStaffId=#{staffId}
+		</if>
+    </select>
+
+
+
+    <select id="findOrgName" resultType="Tool">
+		select t.org_name as "orgName"
+        from SYS_COMPANY t
+         where t.id=#{orgId}
+
+	</select>
+
+    <select id="findDeptList" resultType="Tool">
+		select max(a.des) as "deptName"
+		from (select replace(WMSYS.wm_concat(t.des) over(order by t.flag desc), ',', '-') des,pid
+		from (select "ID", "PID", "DES", '1' groupflag, tree_type,level flag
+		from vw_1
+		where tree_type != '3'
+		start with id=#{deptId}
+		CONNECT BY  ID = PRIOR PID) t) a
+	</select>
+
+	<select id="getStaffId" resultType="String">
+		select id
+		from ORG_STAFF t
+		where t.org_id = '88f9a9b427ee47fbaf5f2e7444bde563'
+		and t.persion_id =#{persionId}
+	</select>
+    <select id="findUserTree" resultType="Tool">
+
+           select ID as "treeId",
+           PID as "parentId",
+           DES as "treeDes",
+           del_flag as "delFlag",
+           tree_type as "treeType"
+           from vw_1
+           where del_flag='0'
+           start with id = '123'
+           CONNECT BY PRIOR ID=PID
+	</select>
+    <select id="getRole" resultType="OrgRole">
+        select oo.id,oo.role_name from staff_vs_role ss,org_role oo,org_staff o where ss.staff_id=o.id and
+        ss.role_id=oo.id
+        <if test='staffId!=null || staffId!=""'>
+            and staff_id=#{staffId}
+        </if>
+        <if test='orgId!=null || orgId!=""'>
+            and oo.org_Id=#{orgId}
+        </if>
+    </select>
+    <select id="getMenu" resultType="OrgSelfServiceVsMenu">
+		SELECT sv.id              AS "id",
+		sv.self_service_id AS "selfServiceId",
+		sv.menu_id         AS "menuId",
+		orvs.menu_operate  AS "menuOperate",
+		sv.menu_sort       AS "menuSort",
+		sv.pid             AS "pid",
+		sv.menu_end_date   AS "menuEndDate",
+		sv.create_by       AS "createBy",
+		sv.remarks         AS "remarks",
+		sv.update_by       AS "updateBy.id",
+		sv.update_date     AS "updateDate",
+		sv.del_flag        AS "delFlag",
+		sv.create_date     AS "createDate",
+		md.menu_name,
+		md.href
+		FROM staff_vs_role svr,
+		org_role_vs_service orvs,
+		org_self_service_vs_menu sv,
+		menu_dict md
+		WHERE orvs.service_id = #{0}
+		AND svr.staff_id = #{1}
+		AND orvs.role_id = #{2}
+		AND orvs.role_id = svr.role_id
+		AND sv.menu_id = orvs.menu_id
+		AND orvs.service_id = sv.self_service_id
+		AND sv.menu_id = md.id
+		AND orvs.menu_id = md.id
+		AND svr.del_flag = '0'
+		AND orvs.del_flag = '0'
+		AND sv.del_flag = '0'
+		AND md.del_flag = '0'
+		AND (orvs.menu_operate = '0' OR orvs.menu_operate = '1')
+		order by md.sort
+	</select>
+</mapper>

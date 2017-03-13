@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>云his工作平台</title>
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="../sys/js/drugDispensProperty.js"></script>
+</head>
+<body onload="onloadMethod()">
+
+<table id="list_data" width="100%"  cellspacing="0" cellpadding="0">
+
+</table>
+<div id="dlg" class="easyui-dialog" style="width: 30%; height: 53%; padding: 10px 20px;"
+     closed="true" buttons="#dlg-buttons">
+    <form id="drugDispensPropertyForm" method="post">
+        <input name="id"  type="hidden" name="id"/>
+        <div class="fitem fitem_pop">
+            <label>
+                医院：
+            </label>
+            <input name="hosId" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                调配药房：
+            </label>
+            <input name="dispensary" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                药品代码：
+            </label>
+            <input name="drugCode" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                摆药类别：
+            </label>
+            <input name="dispensingProperty" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                药品规格：
+            </label>
+            <input name="drugSpec" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                摆药累积：
+            </label>
+            <input name="dispensingCumulate" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                可分割否：
+            </label>
+            <input name="separable" class="easyui-validatebox" required="true" />
+        </div>
+        <div class="fitem fitem_pop">
+            <label>
+                虚拟药柜：
+            </label>
+            <input name="virtualCabinet" class="easyui-validatebox" required="true" />
+        </div>
+    </form>
+
+
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="saveDict()" iconcls="icon-save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#dlg').dialog('close')"
+           iconcls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

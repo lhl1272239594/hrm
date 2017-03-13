@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.exam.dao.ExamResultDao">
+	<!--查询试题分类-->
+	<select id="resultList" resultType="ExamResultVo">
+		select r.result_id as resultId,
+		r.plan_id as planId,
+		(select p.plan_name from EXAM_PLAN p where p.plan_id = r.plan_id) as planName,
+		r.exam_id as examId,
+		r.exam_type_id as typeId,
+		(select c.value from SYS_DICT c where c.id=(select e.exam_type_id from exam e where e.exam_id=r.exam_id)) as typeName,
+		r.user_id as userId,
+		(select NAME from PERSION_INFO t where t.ID=r.user_id and rownum=1) as userName,
+		r.exam_end_time as endTime,
+		r.score as score,
+		(select trunc(r.exam_time/3600) || '小时' || to_char(to_date(mod(r.exam_time,3600),'sssss'),'fmmi"分"ss"秒"') from dual) as time,
+		r.state as state
+		from EXAM_SCORE_RESULT r
+		where r.CREATE_ORG = #{orgId} and r.state in ('3','4')
+
+		<if test="typeId != null and typeId != ''">
+			and (select e.exam_type_id from exam e where e.exam_id=r.exam_id)=#{typeId}
+		</if>
+		<if test="planName != null and planName != ''">
+			and (select p.plan_name from EXAM_PLAN p where p.plan_id = r.plan_id) like CONCAT(CONCAT('%', #{planName}),'%')
+		</if>
+		<if test="userName != null and userName != ''">
+			and r.user_id in (select t.id from PERSION_INFO t where t.name LIKE CONCAT(CONCAT('%', #{userName}),'%'))
+		</if>
+		<if test="createDept != null and createDept != ''">
+			and r.CREATE_DEPT in ( ${createDept} )
+		</if>
+		order by r.CREATE_DATE desc
+	</select>
+	<!--查询试题分类 我的考试-->
+	<select id="getmyexam" resultType="ExamResultVo">
+		select r.result_id as resultId,
+		r.plan_id as planId,
+		(select p.plan_name from EXAM_PLAN p where p.plan_id = r.plan_id) as planName,
+		r.exam_id as examId,
+		r.exam_type_id as typeId,
+		(select c.value from SYS_DICT c where c.id=(select e.exam_type_id from exam e where e.exam_id=r.exam_id)) as typeName,
+		r.user_id as userId,
+		(select NAME from PERSION_INFO t where t.ID=r.user_id and rownum=1) as userName,
+		r.exam_end_time as endTime,
+		r.score as score,
+		(select trunc(r.exam_time/3600) || '小时' || to_char(to_date(mod(r.exam_time,3600),'sssss'),'fmmi"分"ss"秒"') from dual) as time,
+		r.state as state
+		from EXAM_SCORE_RESULT r
+		where r.CREATE_ORG = #{orgId} and r.state in ('3','4')
+		and r.user_id= #{depId}
+		<if test="typeId != null and typeId != ''">
+			and (select e.exam_type_id from exam e where e.exam_id=r.exam_id)=#{typeId}
+		</if>
+		<if test="planName != null and planName != ''">
+			and (select p.plan_name from EXAM_PLAN p where p.plan_id = r.plan_id) like CONCAT(CONCAT('%', #{planName}),'%')
+		</if>
+		<if test="time != null and time != ''">
+			and r.plan_id in
+			(select v.plan_id from EXAM_PLAN v
+			where  to_char(v.EXAM_START_TIME,'yyyy-MM')=#{time} or
+			to_char(v.EXAM_END_TIME,'yyyy-MM')=#{time})
+		</if>
+		order by r.CREATE_DATE desc
+	</select>
+</mapper>

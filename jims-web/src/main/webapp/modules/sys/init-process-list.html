@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>库存限量报警</title>
+    <link rel="stylesheet" href="/static/easyui/css/color.css">
+    <link rel="stylesheet" href="/static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/easyui/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+
+    <script type="text/javascript" src="/modules/sys/js/init-process-list.js"></script>
+
+</head>
+<body class="easyui-layout">
+
+<div id="cc"  class="easyui-layout" style="width: 100%;height: 100%">
+    <div region="north" style="padding:5px;height:38px" >
+        <!--<a  id="searchBtn" class="easyui-linkbutton" iconCls="icon-search">查询</a>-->
+        <a  id="delBtn" class="easyui-linkbutton" iconCls="icon-save">删除</a>
+        <a  id="addBtn" class="easyui-linkbutton" iconCls="icon-add">新增</a>
+        <a  id="saveBtn" class="easyui-linkbutton" iconCls="icon-save">保存</a>
+    </div>
+
+    <div region="center" >
+        <div id="menuList" class="easyui-datagrid" style="height: 100%"></div>
+    </div>
+</div>
+
+</body>
+</html>

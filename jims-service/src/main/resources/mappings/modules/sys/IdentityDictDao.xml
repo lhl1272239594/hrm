@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.IdentityDictDao">
+
+    <sql id="identityDictColumns">
+		a.id AS "id",
+		a.identity_code AS "identityCode",
+		a.identity_name AS "identityName",
+		a.input_code AS "inputCode",
+		a.priority_indicator AS "priorityIndicator",
+		a.military_indicator AS "militaryIndicator",
+		a.input_code_wb AS "inputCodeWb",
+		a.org_id AS "orgId"
+	</sql>
+
+    <sql id="identityDictJoins">
+    </sql>
+
+
+    <select id="get" resultType="IdentityDict">
+        SELECT
+        *
+        FROM identity_dict a
+
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="IdentityDict">
+        SELECT
+        <include refid="identityDictColumns"/>
+        FROM identity_dict a
+        WHERE a.org_id = #{orgId}
+    </select>
+
+    <select id="findAllList" resultType="IdentityDict">
+        SELECT
+        <include refid="identityDictColumns"/>
+        FROM identity_dict a
+    </select>
+
+    <select id="search" resultType="IdentityDict">
+        SELECT
+        <include refid="identityDictColumns"/>
+        FROM identity_dict a
+        WHERE a.identity_name LIKE '%' || #{0} || '%'
+        AND a.org_id = #{1}
+    </select>
+
+    <insert id="insert">
+		INSERT INTO identity_dict(
+			id,
+			identity_code,
+			identity_name,
+			input_code,
+			priority_indicator,
+			military_indicator,
+			input_code_wb,
+			org_id
+		) VALUES (
+			#{id},
+			#{identityCode},
+			#{identityName},
+			#{inputCode},
+			#{priorityIndicator},
+			#{militaryIndicator},
+			#{inputCodeWb},
+			#{orgId}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE identity_dict SET
+			identity_code = #{identityCode},
+			identity_name = #{identityName},
+			input_code = #{inputCode},
+			priority_indicator = #{priorityIndicator},
+			military_indicator = #{militaryIndicator},
+			input_code_wb=#{inputCodeWb}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		DELETE
+		FROM identity_dict
+		WHERE id = #{id}
+	</update>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.contract.dao.ContractTypeDao">
+
+    <select id="findList" resultType="ContractType">
+        select
+        ct.contract_type_id as "contractTypeId",
+        ct.contract_remind_time as "contractRemindTime",
+        ct.contract_type_des as "contractTypeDes",
+        ct.contract_type_id as "value",
+        ct.contract_type_des as "label",
+        ct.create_by as "createBy",
+        ct.create_date as "createDate"
+        from contract_type ct
+        where ct.del_flag = '0'
+        ORDER BY ct.create_date DESC
+    </select>
+    <select id="findAllList" resultType="ContractType">
+        select
+         ct.contract_type_id as "value",
+        ct.contract_type_des as "label"
+        from contract_type ct
+        where ct.del_flag = '0'
+        ORDER BY ct.create_date DESC
+    </select>
+    <!--判断合同类型名称是否已存在-->
+    <select id="findBoolean" resultType="ContractType">
+        SELECT count(*) num
+        FROM contract_type ct
+        WHERE ct.create_org=#{createOrg}
+        and ct.contract_type_des=#{contractTypeDes}
+        <if test="contractTypeId != '999'">
+        and ct.contract_type_id !=#{contractTypeId}
+        </if>
+        and ct.DEL_FLAG='0'
+    </select>
+    <insert id="insertPrimary">
+        INSERT INTO contract_type(
+        contract_type_id,
+        contract_remind_time,
+        contract_type_des,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG
+        ) VALUES (
+        #{contractTypeId},
+        #{contractRemindTime},
+        #{contractTypeDes},
+        #{createBy},
+        sysdate,
+        #{createOrg},
+        #{createDept},
+        '0'
+        )
+    </insert>
+
+    <update id="updatePrimary">
+        UPDATE contract_type SET
+        contract_type_des = #{contractTypeDes},
+        contract_remind_time = #{contractRemindTime},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE contract_type_id = #{contractTypeId}
+    </update>
+
+    <update id="delPrimary" >
+        UPDATE contract_type SET
+        del_flag = '1'
+        WHERE contract_type_id = #{dataId}
+    </update>
+
+</mapper>

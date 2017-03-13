@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.AdministrationDictDao">
+	<select id="get" resultType="AdministrationDict">
+		SELECT 
+			* 
+		FROM administration_dict
+		WHERE id = #{id}
+	</select>
+
+    <select id="list" resultType="AdministrationDict">
+        SELECT *
+        FROM administration_dict a
+        WHERE a.del_flag = '0'
+        AND a.input_code  like UPPER(#{inputCode}) || '%'
+        ORDER BY a.update_date DESC
+    </select>
+
+	<select id="findList" resultType="AdministrationDict">
+    SELECT
+    *
+    FROM administration_dict a
+    WHERE a.del_flag = '0'
+
+    ORDER BY a.update_date DESC
+</select>
+	
+	<select id="findAllList" resultType="AdministrationDict">
+		SELECT 
+			* 
+		FROM administration_dict
+		WHERE del_flag = '0'
+		ORDER BY update_date DESC
+	</select>
+
+    <select id="listAdministrationByInpOrOutpFlag" resultType="AdministrationDict">
+        SELECT
+        *
+        FROM administration_dict a
+        WHERE a.del_flag = '0'
+        <if test='inpOutpFlag=="0"'>
+            AND inp_outp_flag =#{inpOutpFlag} OR inp_outp_flag='9'
+        </if>
+        <if test='inpOutpFlag=="1"'>
+            AND inp_outp_flag =#{inpOutpFlag} OR inp_outp_flag='9'
+        </if>
+        ORDER BY a.update_date DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO administration_dict(
+        id,
+        administration_code,
+        administration_name,
+        input_code,
+        inp_outp_flag,
+        create_by,
+        create_date,
+        update_by,
+        update_date,
+        remarks,
+        del_flag
+        ) VALUES (
+        #{id},
+        #{administrationCode},
+        #{administrationName},
+        #{inputCode},
+        #{inpOutpFlag},
+        #{createBy.id},
+        #{createDate},
+        #{updateBy.id},
+        #{updateDate},
+        #{remarks},
+        #{delFlag}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE administration_dict SET
+        administration_code =  #{administrationCode},
+        administration_name = #{administrationName},
+        input_code =  #{inputCode},
+        inp_outp_flag =#{inpOutpFlag},
+        update_by = #{updateBy.id},
+        update_date = #{updateDate},
+        remarks = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE administration_dict SET
+        del_flag = '1'
+        WHERE id = #{id}
+    </update>
+
+    <select id="findByParams" resultType="com.jims.common.web.impl.BaseDto">
+        select * from v_administration_dict
+        WHERE 1=1
+        and (STD_INDICATOR = 1)
+        <if test="id!=null and id!=''">
+            and (id = #{id})
+        </if>
+        <if test="orgId!=null and orgId!=''">
+            and (org_id = #{orgId})
+        </if>
+
+    </select>
+
+    <select id="mzViewList" resultType="AdministrationDict">
+        SELECT
+                    *
+                FROM v_administration_mz
+    </select>
+
+</mapper>

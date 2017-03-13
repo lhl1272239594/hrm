@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.ButtonDictDao">
+    <select id="getALLbut" resultType="MENU_DICT_BUTTON">
+        SELECT
+        ID AS zid,MENU_DICT_ID AS mdid,BUTTON_DESCRIBE AS db,BUTTON_NAME AS bn
+        FROM MENU_DICT_BUTTON a
+        WHERE a.menu_dict_id = #{mid} and del_flag != '1'
+    </select>
+
+    <select id="findList" resultType="ButtonDict">
+        SELECT
+        *
+        FROM menu_dict a
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="ButtonDict">
+        SELECT
+        (select LISTAGG(t.button_name, ',') WITHIN GROUP(ORDER BY t.button_name) AS employees from MENU_DICT_BUTTON t
+        where t.menu_dict_id=a.id and del_flag != '1') PERMISSION,a.id,a.menu_name,a.href,a.icon,a.sort,a.target,a.pid,a.menu_level
+        FROM menu_dict a   WHERE a.del_flag = '0' order by a.pid,a.sort
+    </select>
+
+    <insert id="insert">
+        INSERT INTO menu_dict(
+        id,
+        menu_name,
+        href,
+        icon,
+        sort,
+        target,
+        pid,
+        menu_level,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{menuName},
+        #{href},
+        #{icon},
+        #{sort},
+        #{target},
+        #{pid},
+        #{menuLevel},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <insert id="insertReturnObject"  >
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE" >
+            select sys_guid() as id from dual
+        </selectKey>
+        INSERT INTO MENU_DICT_BUTTON(
+        id,
+        MENU_DICT_ID,
+        BUTTON_DESCRIBE,
+        BUTTON_NAME,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{pid},
+        #{permission},
+        #{menuName},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE menu_dict SET
+        menu_name = #{menuName},
+        href = #{href},
+        icon = #{icon},
+        sort = #{sort},
+        target = #{target},
+        pid = #{pid},
+        menu_level = #{menuLevel},
+        remarks = #{remarks},
+        permission= #{permission},
+        update_by = #{updateBy},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateReturnObject" keyProperty="id" >
+        UPDATE menu_dict SET
+        menu_name = #{menuName},
+        href = #{href},
+        icon = #{icon},
+        sort = #{sort},
+        target = #{target},
+        pid = #{pid},
+        menu_level = #{menuLevel},
+        remarks = #{remarks},
+        permission= #{permission},
+        update_by = #{updateBy},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delbt">
+        UPDATE MENU_DICT_BUTTON SET
+        del_flag = '1'
+        WHERE id = #{id}
+    </update>
+    <select id="findSelfServiceId" resultType="OrgSelfServiceVsMenu">
+        select
+        a.menu_id,
+        a.menu_name,
+        a.pid,
+        nvl(r.id,sys_guid()) id,
+        ((select LISTAGG(t.button_name, ',') WITHIN GROUP(ORDER BY t.button_name) ||'#' || LISTAGG(t.btstate, ',') WITHIN GROUP(ORDER BY t.button_name) AS aa
+        from (select n.*,
+        nvl((select e.btstate
+        from MENU_BUTTON_ROLE e
+        where e.menuid = n.menu_dict_id
+        and e.btname = n.button_name and  e.orgid=#{2}),
+        'false') as btstate
+        from MENU_DICT_BUTTON n
+        where del_flag != '1') t where t.menu_dict_id=a.menu_id)) menuOperate,
+        a.menu_sort
+
+        from (
+        select o.*, d.menu_name
+        from  org_self_service_vs_menu o,menu_dict d
+        where d.id=o.menu_id and  o.self_service_id = #{0}) a ,
+        (select *
+        from org_role_vs_service
+        where service_id = #{0}
+        and role_id=#{1}
+        ) r where a.menu_id = r.menu_id(+)
+        order by a.menu_sort
+    </select>
+    <select id="getscmbr" resultType="int">
+        select count(*) from MENU_BUTTON_ROLE t where t.orgid=#{0} and t.roleid=#{1} and t.serviceid=#{2}  and t.menuid=#{3} and t.btname=#{4}
+    </select>
+    <insert id="inscmbr">
+
+        INSERT INTO MENU_BUTTON_ROLE(
+        id,
+        ORGID,
+        ROLEID,
+        ROLENAME,
+        SERVICEID,
+        SERVICENAME,
+        MENUID,
+        BTNAME,
+        BTSTATE
+        ) VALUES (
+        sys_guid(),
+        #{0},
+        #{1},
+        #{2},
+        #{3},
+        #{4},
+        #{5},
+        #{6},
+        #{7}
+        )
+    </insert>
+    <update id="upscmbr">
+        UPDATE MENU_BUTTON_ROLE t set BTSTATE=#{5}  where  t.orgid=#{0} and t.roleid=#{1} and t.serviceid=#{2}  and t.menuid=#{3} and t.btname=#{4}
+    </update>
+    <select id="findAllData" resultType="DeptDict">
+        SELECT ct.id,ct.parent_id,ct.dept_name,ct.dept_code,ct.dept_propertity,ct.org_id,ct.input_code,
+        (select count(*) from MENU_DATA_ROLE t where t.orgid=#{0} and t.roleid=#{1} and t.serviceid=#{2} and t.menuid=#{3} and t.depid=ct.id) as remarks FROM dept_dict ct  WHERE ct.del_flag = '0' and ct.org_id=#{0}
+    </select>
+    <select id="findProperty" resultType="OrgDeptPropertyDict">
+        select property_type,sum(sort) as sort from org_dept_property_dict  where org_id=#{orgId}
+        group by property_type  order by sort
+    </select>
+    <select id="findByCondition" resultType="OrgDeptPropertyDict">
+        SELECT
+        *
+        FROM ORG_DEPT_PROPERTY_DICT
+        <where>
+            org_id=#{orgId}
+            <if test="propertyType!=null and propertyType!='' ">
+                and property_type =#{propertyType}
+            </if>
+            <if test="propertyName!= null and propertyName!= '' ">
+                AND property_name = #{propertyName}
+            </if>
+            <if test="propertyValue!=null and propertyValue!= '' ">
+                AND property_value = #{propertyValue}
+            </if>
+        </where>
+    </select>
+    <insert id="upmdata" parameterType="buttonDict">
+        INSERT INTO MENU_DATA_ROLE(
+        id,
+        ORGID,
+        ROLEID,
+        ROLENAME,
+        SERVICEID,
+        SERVICENAME,
+        MENUID,
+        DEPID
+        ) VALUES (
+        sys_guid(),
+        #{buttonDict.menuName},
+        #{buttonDict.pid},
+        #{buttonDict.permission},
+        #{buttonDict.menuLevel},
+        #{buttonDict.target},
+        #{buttonDict.id},
+        #{buttonDict.href}
+        )
+    </insert>
+    <delete id="delmdata" parameterType="buttonDict">
+        DELETE MENU_DATA_ROLE t where  t.orgid=#{buttonDict.menuName} and t.roleid= #{buttonDict.pid} and t.serviceid=#{buttonDict.menuLevel}  and t.menuid=#{buttonDict.id}
+    </delete>
+    <select id="findSelfbtns" resultType="OrgSelfServiceVsMenu">
+        select n.button_describe id,n.button_name menu_name,nvl((select t.btstate from MENU_BUTTON_ROLE t where t.orgid=#{2} and t.roleid=#{1} and t.serviceid=#{0} and t.menuid=#{3} and n.button_name = t.btname),'false') menuOperate from MENU_DICT_BUTTON n where n.del_flag  != '1' and n.menu_dict_id=#{3}
+    </select>
+</mapper>

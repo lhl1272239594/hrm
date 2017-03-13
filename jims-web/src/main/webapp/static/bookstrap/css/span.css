@@ -1,0 +1,20 @@
+
+.span-class
+{
+    color:#515151;
+    padding: 4px 7px;
+    border:1px solid #cccccc;
+    cursor: pointer;
+}
+
+.span-class2
+{
+    color:#515151;
+    padding: 4px 7px;
+    border:2px solid #F57645;
+    cursor: pointer;
+    background-image: url("/static/bookstrap/images/icon-57.png");
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+

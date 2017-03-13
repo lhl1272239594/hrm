@@ -1,0 +1,171 @@
+body {
+    font-family:verdana,helvetica,arial,sans-serif;
+    font-size:12px;
+    margin:0;
+}
+h2 {
+    font-size:18px;
+    font-weight:bold;
+    margin:0;
+    margin-bottom:15px;
+}
+ul 
+{
+	margin:0;
+	padding:0;
+	list-style:none;
+}
+a,a:hover,a:focus
+{
+	text-decoration:none;
+}
+
+.demo-info{
+	padding:0 0 12px 0;
+}
+.demo-tip{
+	display:none;
+}
+.fd-left
+{
+	float:left;
+}
+.fd-right
+{
+	float:right;
+}
+.font-red
+{
+	color:#f00;
+}
+.font-gray
+{
+	color:#aaa;
+}
+.font-green
+{
+	color:#0a0
+}
+.font-primary
+{
+	color:#25b8c9;
+}
+.lineh-35
+{
+	line-height:35px;
+}
+.padd50-top
+{
+	padding-top:50px;
+}
+.padd10-top
+{
+	padding-top:10px;
+}
+.padd10-left
+{
+	padding-left:10px;
+}
+.padd10-bot
+{
+	padding-bottom:10px;
+}
+.borb-none
+{
+	border-bottom:none !important;
+}
+/**表单**/
+
+.form-horizontal {
+	margin: 10px
+}
+
+.form-horizontal .control-group {
+	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px dotted #ddd;
+}
+@media (max-width:1023px) and (min-width:748px)
+{
+	.form-horizontal .control-label {
+		float: left;
+		width: 160px;
+	}
+	.form-horizontal .controls
+	{
+		margin-left: 180px;
+	}
+}
+@media (min-width:1024px)
+{
+	.form-horizontal .control-label {
+		float: left;
+		width: 160px;
+	}
+	.form-horizontal .controls
+	{
+		margin-left: 180px;
+	}
+}
+@media (max-width:747px)
+{
+	.form-horizontal .control-label {
+		
+	}
+	.form-horizontal .controls input.form-control,.form-horizontal .controls select.form-control,.form-horizontal .controls textarea.form-control
+	{
+		width:100%;
+	}
+}
+.form-horizontal .control-label {
+	padding-top: 3px;
+	text-align: right;
+}
+
+.form-horizontal .controls {
+	text-align: left;
+	overflow-x: auto;
+	overflow-y: hidden;
+	
+}
+.form-horizontal .controls .form-short
+{
+	width:50%;
+}
+.form-horizontal .controls .form-long
+{
+	width:80%;
+}
+
+.form-horizontal .controls label.error {
+	background-position: 0 2px
+}
+
+.form-horizontal .table-form {
+	width: 100%;
+	border-color: #ddd
+}
+
+.form-horizontal .table-form,.form-horizontal .table-form td {
+	border: 1px solid #ddd;
+	background-color: #fdfdfd;
+	padding: 4px;
+}
+
+.form-horizontal .table-form td.tit {
+	background: #fafafa;
+	text-align: center;
+	padding-right: 8px;
+	white-space: nowrap
+}
+
+.form-horizontal .form-actions {
+	margin-bottom: 0
+}
+
+.form-horizontal fieldset .row-fluid {
+	margin-bottom: 10px
+}
+
+/****/
+

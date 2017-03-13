@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>角色模板维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+</head>
+<body class="easyui-layout">
+<style type="text/css" rel="stylesheet">
+    .fitem label {
+        width: 60px;
+    }
+</style>
+
+<div id="master" data-options="region:'west'" style="padding:1px;background:#eee;width: 400px;">
+    <table id="templateMaster" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="classft" style="margin:5px;">
+    区域：<input class="easyui-combotree" id="area" style="width:120px">
+    <a  id="addMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a  id="saveMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a  id="removeMasterBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+<div id="role" data-options="region:'center',fit:true" style="padding:1px;background:#eee;">
+    <table id="orgRole" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="ft" style="margin:5px;">
+    <a  id="addRoleBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+    <a  id="saveRoleBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a  id="removeRoleBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除</a>
+</div>
+
+
+
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/static/js/area.js"></script>
+
+<script type="text/javascript" src="/modules/template/js/org_role_template.js"></script>
+<!--<script type="text/javascript" src="/static/js/head.js"></script>-->
+
+
+</body>
+</html>

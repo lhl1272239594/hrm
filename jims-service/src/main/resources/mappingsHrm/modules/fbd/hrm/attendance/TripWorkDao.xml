@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.TripWorkDao">
+
+    <select id="findList" resultType="TripWork">
+        select
+        tw.user_id as "userId",
+        tw.trip_work_id as "tripWorkId",
+        tw.trip_work_reason as "tripWorkReason",
+        tw.trip_work_destination as "tripWorkDestination",
+        tw.trip_work_place as "tripWorkPlace",
+        to_char(tw.start_date, 'YYYY-MM-DD HH24:MI') as "startDate",
+        to_char(tw.end_date, 'YYYY-MM-DD HH24:MI') as "endDate",
+        tw.approve_status as "approveStatus",
+        tw.approve_person_id as "approvePersonId",
+        tw.APPROVE_DATE as "approveDate",
+        tw.org_id  as "orgId",
+        tw.dept_id  as "deptId",
+        tw.create_by as "createBy",
+        tw.create_date as "createDate",
+        tw.update_date as "updateDate"
+        from TRIP_WORK tw
+        where tw.del_flag = '0'
+        and tw.create_org = #{orgId}
+        <if test="userId != null and userId != ''">
+            and tw.user_id in (select t.id from PERSION_INFO t where t.name LIKE CONCAT(CONCAT('%', #{userId}),'%'))
+        </if>
+
+        <if test="tripWorkId != null and tripWorkId != ''">
+            and tw.trip_work_id=#{tripWorkId}
+        </if>
+        <if test="approveStatus != null and approveStatus != ''">
+            and tw.approve_status=#{approveStatus}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and tw.dept_id in ( ${deptId} )
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and
+            (to_char(tw.start_date,'yyyy-MM')=#{startDate} or
+            to_char(tw.end_date,'yyyy-MM')=#{startDate})
+        </if>
+        order by tw.UPDATE_DATE desc
+    </select>
+    <select id="mytrip" resultType="TripWork">
+        select
+        tw.user_id as "userId",
+        tw.trip_work_id as "tripWorkId",
+        tw.trip_work_reason as "tripWorkReason",
+        tw.trip_work_destination as "tripWorkDestination",
+        tw.trip_work_place as "tripWorkPlace",
+        to_char(tw.start_date, 'YYYY-MM-DD') as "startDate",
+        to_char(tw.end_date, 'YYYY-MM-DD') as "endDate",
+        tw.approve_status as "approveStatus",
+        tw.approve_person_id as "approvePersonId",
+        tw.APPROVE_DATE as "approveDate",
+        tw.org_id  as "orgId",
+        tw.dept_id  as "deptId",
+        tw.create_by as "createBy",
+        tw.create_date as "createDate",
+        tw.update_date as "updateDate"
+        from TRIP_WORK tw
+        where tw.del_flag = '0'
+        and tw.create_org = #{orgId}
+        and tw.user_id= #{userId}
+        <if test="approveStatus != null and approveStatus != ''">
+            and tw.approve_status=#{approveStatus}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and
+            (to_char(tw.start_date,'yyyy-MM')=#{startDate} or
+            to_char(tw.end_date,'yyyy-MM')=#{startDate})
+        </if>
+        order by tw.UPDATE_DATE desc
+    </select>
+    <insert id="insertPrimary">
+        INSERT INTO TRIP_WORK(
+        trip_work_id,
+        trip_work_reason,
+        trip_work_destination,
+        trip_work_place,
+        START_DATE,
+        END_DATE,
+        USER_ID,
+        APPROVE_STATUS,
+        APPROVE_PERSON_ID,
+        CREATE_BY,
+        CREATE_DATE,
+        UPDATE_BY,
+        UPDATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG,
+        org_id,
+        dept_id
+        ) VALUES (
+        #{tripWorkId},
+        #{tripWorkReason},
+        #{tripWorkDestination},
+        #{tripWorkPlace},
+        to_date(#{startDate},'YYYY-MM-DD HH24:mi:ss'),
+        to_date(#{endDate},'YYYY-MM-DD HH24:mi:ss'),
+        #{userId},
+        '1',
+        '',
+        #{createBy},
+        sysdate,
+        #{updateBy},
+        sysdate,
+        #{orgId},
+        #{createDept},
+        '0',
+        #{orgId},
+        #{deptId}
+        )
+    </insert>
+
+    <update id="updatePrimary">
+        UPDATE TRIP_WORK SET
+        trip_work_reason = #{tripWorkReason},
+        trip_work_destination = #{tripWorkDestination},
+        trip_work_place = #{tripWorkPlace},
+        START_DATE = to_date(#{startDate},'YYYY-MM-DD HH24:mi:ss'),
+        END_DATE = to_date(#{endDate},'YYYY-MM-DD HH24:mi:ss'),
+        APPROVE_STATUS='1',
+        dept_id=#{deptId},
+        USER_ID=#{userId},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate,
+        CREATE_ORG = #{orgId}
+        WHERE trip_work_id = #{tripWorkId}
+    </update>
+
+    <update id="delPrimary" >
+        UPDATE TRIP_WORK SET
+        del_flag = '1'
+        WHERE trip_work_id = #{dataId}
+    </update>
+
+</mapper>

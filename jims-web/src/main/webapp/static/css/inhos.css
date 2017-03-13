@@ -1,0 +1,73 @@
+/***/
+.bg-green
+{
+	background:#0a0; 
+	color:#fff;
+}
+.bg-orange
+{
+	background:#ff8400; 
+	color:#fff;
+}
+.bg-red
+{
+	background:#f00; 
+	color:#fff;
+}
+/***/
+.search-standard
+{
+	padding:10px;
+	background:#f8f8f8;
+	border-bottom:1px solid #ccc;
+}
+.search-standard.search-new ul li
+{
+	width:18%;
+}
+.search-standard ul li
+{
+	float:left;
+	width:25%;
+	font-size:12px;
+	height:35px;
+}
+
+.search-standard ul li input,.search-standard ul li select
+{
+	display:inline-block;
+}	
+/**患者图形列表**/
+.iso-thumbnail {
+    float: left;
+    display: inline-block;
+    margin: 0px 20px 0px 0px;
+    position: relative;
+    text-align: center;
+}
+.list-view {
+    display: block;
+    border: 1px solid #E8E8E8;
+    padding: 15px;
+    background: #FCFCFD;
+}
+.docinf_text {
+    margin-top: 10px;
+    border-top: 1px dashed #CCC;
+    width: 100%;
+	padding-top:10px;
+}
+.cusl-info ul li
+{
+	display:inline-block;
+	width:48%;
+	line-height:23px;
+}
+.cusl-info ul li span.bg-color
+{
+	padding:2px;
+}
+.vdbox{
+    display: none;
+}
+/**患者图形列表结束**/

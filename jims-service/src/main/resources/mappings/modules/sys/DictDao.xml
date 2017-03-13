@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.DictDao">
+	<select id="get" resultType="Dict">
+		SELECT 
+			* 
+		FROM sys_dict 
+		WHERE id = #{id}
+	</select>
+
+	<select id="getLabel" resultType="java.lang.String">
+		SELECT
+		a.label
+		FROM sys_dict a
+		WHERE a.type = #{type}
+		AND a.value = #{value}
+		AND a.del_flag='0'
+	</select>
+
+	<select id="getDictLabel" resultType="Dict">
+		SELECT
+		a.label
+		FROM sys_dict a
+		WHERE a.type = #{type}
+		AND a.value = #{value}
+		AND a.del_flag='0'
+	</select>
+
+    <select id="listByType" resultType="Dict">
+      SELECT *
+      FROM sys_dict a
+      WHERE a.type = #{type}
+		AND a.del_flag='0'
+      <if test="inputCode != null and inputCode != ''">
+          AND UPPER(a.input_code) like UPPER(#{inputCode}) || '%'
+      </if>
+		ORDER BY a.sort
+    </select>
+	<select id="listByType1" resultType="Dict">
+		select '全部' as label,'ALL' as value from dual
+		union all
+		select AA.label,AA.value from (SELECT * FROM sys_dict a WHERE a.type = #{type} AND a.del_flag='0' ORDER BY a.sort)AA
+	</select>
+
+    <select id="getValue" resultType="java.lang.String">
+        SELECT
+        a.value
+        FROM sys_dict a
+        WHERE  1=1
+        <if test="type!=null and type!=''">
+           AND  a.type = #{type}
+        </if>
+        <if test="label!=null and label!=''">
+            AND  a.label = #{label}
+        </if>
+         AND a.del_flag='0'
+    </select>
+
+
+    <select id="leftList" resultType="Dict">
+      SELECT
+      s.type,s.description
+      FROM sys_dict s
+      WHERE s.del_flag = '0'
+      GROUP BY s.type,s.description
+    </select>
+
+    <select id="rightList" resultType="Dict">
+      SELECT
+      id,label,value,sort,create_by,create_date,update_by,update_date,remarks,input_code
+      FROM sys_dict
+      WHERE del_flag = '0'
+      AND type = #{type}
+        <if test="q != null and q != ''">
+            AND upper(input_code) like upper((#{q})||'%')
+        </if>
+		ORDER by sort
+    </select>
+
+    <select id="select" resultType="Dict">
+        SELECT
+        t.type AS "type",t.description AS "description"
+        FROM sys_dict t
+        WHERE t.del_flag = '0'
+            AND (upper(t.type) LIKE upper(CONCAT(CONCAT('%', #{0}), '%'))
+            or upper(t.description) LIKE upper(CONCAT(CONCAT('%', #{1}), '%')))
+        GROUP BY t.type,t.description
+    </select>
+	
+	<select id="findList" resultType="Dict">
+		SELECT
+        *
+		FROM sys_dict a
+		WHERE a.del_flag = '0'
+		<if test="type != null and type != ''">
+			AND upper(a.type) = upper(#{type})
+		</if>
+        <if test="value != null and value != ''">
+            AND a.value = #{value}
+        </if>
+		<if test="description != null and description != ''">
+			AND a.description LIKE
+					<if test="dbName == 'oracle'">'%'||#{description}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{description}+'%'</if>
+					<if test="dbName == 'mysql'">CONCAT('%', #{description}, '%')</if>
+		</if>
+        <if test="q != null and q != ''">
+            AND upper(input_code) like upper((#{q})||'%')
+        </if>
+		ORDER BY a.type, a.sort, a.update_date DESC
+	</select>
+	
+	<select id="findAllList" resultType="Dict">
+		SELECT 
+			* 
+		FROM sys_dict 
+		WHERE del_flag = #{DEL_FLAG_NORMAL} 
+		ORDER BY type, sort, update_date DESC
+	</select>
+	
+	<select id="findTypeList" resultType="string">
+		SELECT 
+			type 
+		FROM sys_dict 
+		WHERE del_flag = #{DEL_FLAG_NORMAL} 
+		GROUP BY type
+		ORDER BY type
+	</select>
+
+
+    <select id="findListType" resultType="Dict">
+        SELECT *
+        FROM sys_dict t
+        WHERE t.type = #{type}
+        ORDER BY t.value
+
+    </select>
+	
+	<insert id="insert">
+		INSERT INTO sys_dict(
+			id, 
+			value, 
+			label, 
+			type, 
+			description, 
+			sort, 
+			create_by, 
+			create_date, 
+			update_by, 
+			update_date, 
+			remarks, 
+			del_flag,
+			input_code
+		) VALUES (
+			#{id}, 
+			#{value}, 
+			#{label}, 
+			#{type}, 
+			#{description}, 
+			#{sort}, 
+			#{createBy.id}, 
+			#{createDate}, 
+			#{updateBy.id}, 
+			#{updateDate}, 
+			#{remarks}, 
+			#{delFlag},
+			#{inputCode}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE sys_dict SET 
+			value = #{value}, 
+			label = #{label}, 
+			type = #{type}, 
+			description = #{description}, 
+			sort = #{sort}, 
+			update_by = #{updateBy.id}, 
+			update_date = #{updateDate}, 
+			remarks = #{remarks},
+			input_code = #{inputCode}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE sys_dict SET 
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+
+    <select id="findAreaData" resultType="Dict">
+        SELECT *
+        FROM sys_dict a
+        WHERE a.del_flag = '0'
+        AND upper(a.type) = 'AREA_DICT'
+        and a.value like substr(#{area} || '__0000',1,6)
+        and a.value != substr(#{area} || '000000',1,6)
+        ORDER BY a.sort
+    </select>
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.DeptVsWardDao">
+    
+	<sql id="deptVsWardColumns">
+		a.id AS "id",
+		a.hosId AS "hosId",
+		a.dept_code AS "deptCode",
+		a.ward_code AS "wardCode",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.del_flag AS "delFlag",
+		a.remarks AS "remarks"
+	</sql>
+	
+	<sql id="deptVsWardJoins">
+	</sql>
+    
+	<select id="get" resultType="DeptVsWard">
+		SELECT 
+			<include refid="deptVsWardColumns"/>
+		FROM dept_vs_ward a
+		<include refid="deptVsWardJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="DeptVsWard">
+		SELECT 
+			<include refid="deptVsWardColumns"/>
+		FROM dept_vs_ward a
+		<include refid="deptVsWardJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="DeptVsWard">
+		SELECT 
+			<include refid="deptVsWardColumns"/>
+		FROM dept_vs_ward a
+		<include refid="deptVsWardJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO dept_vs_ward(
+			id,
+			hosId,
+			dept_code,
+			ward_code,
+			update_by,
+			update_date,
+			create_by,
+			create_date,
+			del_flag,
+			remarks
+		) VALUES (
+			#{id},
+			#{hosId},
+			#{deptCode},
+			#{wardCode},
+			#{updateBy.id},
+			#{updateDate},
+			#{createBy.id},
+			#{createDate},
+			#{delFlag},
+			#{remarks}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE dept_vs_ward SET 	
+			hosId = #{hosId},
+			dept_code = #{deptCode},
+			ward_code = #{wardCode},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE dept_vs_ward SET 
+			del_flag = '1'
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

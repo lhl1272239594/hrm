@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.StaffGroupDictDao">
+    <sql id="staffGroupDictColumns">
+        a.id AS "id",
+        a.group_code AS "groupCode",
+        a.group_name AS "groupName",
+        a.input_code AS "inputCode",
+        a.dept_code AS "deptCode",
+        a.dept_name AS "deptName",
+        a.group_class_id AS "groupClassId",
+        a.group_manager AS "groupManager",
+    </sql>
+
+    <sql id="staffGroupDictJoins">
+    </sql>
+
+    <select id="findListGroupDict" resultType="StaffGroupDict">
+        SELECT
+        *
+        FROM staff_group_dict a
+        <where>
+            a.del_flag='0'
+            and a.group_class_id=#{id}
+            <if test="q !=null and q!=''">
+                and (a.group_name like '%'||#{q}||'%' OR a.input_code LIKE UPPER ('%'||#{q}||'%'))
+            </if>
+        </where>
+    </select>
+
+
+    <select id="get" resultType="StaffGroupDict">
+        SELECT
+        <include refid="staffGroupDictColumns"/>
+        FROM staff_group_dict a
+        <include refid="staffGroupDictJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+
+    <select id="findList" resultType="StaffGroupDict">
+        SELECT
+        <include refid="staffGroupDictColumns"/>
+        FROM staff_group_dict a
+        <include refid="staffGroupDictJoins"/>
+        <where>
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="StaffGroupDict">
+        SELECT
+        <include refid="staffGroupDictColumns"/>
+        FROM staff_group_dict a
+        <include refid="staffGroupDictJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO staff_group_dict(
+        id,
+        group_code,
+        group_name,
+        input_code,
+        dept_code,
+        dept_id,
+        dept_name,
+        group_class_id,
+        group_manager,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{groupCode},
+        #{groupName},
+        #{inputCode},
+        #{deptCode},
+        #{deptId},
+        #{deptName},
+        #{groupClassId},
+        #{groupManager},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE staff_group_dict SET
+        group_code = #{groupCode},
+        group_name  =  #{groupName},
+        input_code = #{inputCode},
+        dept_id = #{deptId},
+        dept_code  =   #{deptCode},
+        dept_name  =   #{deptName},
+        group_class_id =   #{groupClassId},
+        group_manager  = #{groupManager},
+        remarks = #{remarks},
+        update_by = #{updateBy},
+        update_date = #{updateDate}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        delete from  staff_group_dict
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

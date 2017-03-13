@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html class="panel-fit"><head>
+    <meta charset="UTF-8">
+    <title>预约确认</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/modules/register/js/bespeakConfirm.js"></script>
+    <script type="text/javascript" src="/static/data/data_register_day_time.js"></script>
+    <script type="text/javascript" src="/static/data/data_clinic_dept.js"></script>
+    <script type="text/javascript" src="/static/data/data_dict_sex.js"></script>
+    <script type="text/javascript" src="/static/data/data_charge_type.js"></script>
+    <script type="text/javascript" src="/static/data/data_dict_charge_type.js"></script>
+    <script type="text/javascript" src="/static/data/data_identity_dict.js"></script>
+    <script type="text/javascript" src="/static/data/data_unit_contract.js"></script>
+</head>
+<body>
+<div  class="easyui-layout" style="width:100%;height:100%;">
+    <div id="tb" style="padding: 5px;">
+        就诊日期：<input type="text" class="easyui-datebox" id="visitDate"  style="width: 150px;" disabled="true" />
+        身份证：<input class="easyui-validatebox" id="idNo" style="width: 150px;" data-options="validType:'length[0,18]'"/>
+        姓名：<input   id="name" style="width: 80px;" class="easyui-validatebox" data-options="validType:'length[0,4]'"/>
+        <button class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="searchConfirm();">查询</button>
+        <button onclick="confirmAppoint('chargeId','预约结果');" class="easyui-linkbutton" data-options="iconCls:'icon-add'">F1确认</button>
+        <a  onclick="saveAppointInfo();" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+        <a  onclick="deleteAppoint();" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">F4退约</a>
+        <!--<a  onclick="editAppoint();" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">修改</a>-->
+    </div>
+
+    <table id="confirm_data"   cellspacing="0" cellpadding="0">
+
+    </table>
+
+    <div data-options="region:'east',iconCls:'icon-ok'"  style="width:23%;">
+        <form id="patIndex" method="post">
+            <input type="hidden" name="id">
+        <div class="rego-right">
+            <table>
+                <tr>
+                    <td style="float: right">姓名：</td>
+                    <td><input  class="easyui-validatebox" style="width: 100%"  required="true" data-options="validType:'length[0,4]'"   id="nameId" name="name"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">性别：</td>
+                    <td><input type="text" class="easyui-combobox"  id="setId" name="sex" editable="fasle" required="true" ></td>
+                </tr>
+                <tr>
+                    <td style="float: right">出生日期：</td>
+                    <td><input type="text" class="easyui-datebox" editable="fasle" id="birthDate" name="dateOfBirth" required="true" ></td>
+                </tr>
+                <tr>
+                    <td style="float: right">费别：</td>
+                    <td><input type="text" class="easyui-combobox" editable="fasle" id="chargeTypeId" name="chargeType" required="true" ></td>
+                </tr>
+                <tr>
+                    <td style="float: right">身份：</td>
+                    <td><input type="text" class="easyui-combobox" editable="fasle" id="identityId" name="identity"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">诊别：</td>
+                    <td><input type="text" class="easyui-combobox" editable="fasle" id="clinicTypeId" name="visitIndicator"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">科室：</td>
+                    <td><input type="text" class="easyui-combobox" editable="fasle" id="visitDeptId" name="visitDept"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">合同单位：</td>
+                    <td><input type="text" class="easyui-combobox" editable="fasle" id="companyId" name="unitInContract"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">身份证号：</td>
+                    <td><input  class="easyui-validatebox" style="width: 100%"  data-options="validType:'length[0,18]'"  validType="idcard" required="true" name="idNo"></td>
+                </tr>
+                <tr>
+                    <td style="float: right">就诊日期：</td>
+                    <td><input type="text" class="easyui-datebox" style="width: 100%"   required="true" name="visitDateAppted"></td>
+                </tr>
+
+
+            </table>
+        </div>
+            <div id="chargeId" class="easyui-dialog" style="width:30%;height:80%"   closed="true">
+                <div style="height: 70%">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="reg-price" id="clinicLabe">
+
+                    </table>
+                </div>
+                <h1 class="pay-tile">
+                    现金支付
+                </h1>
+                <br>
+                <div>
+                    实收：<input type="text"  id="receiptsId" onchange="onchangeInput()" class="easyui-validatebox validatebox-text-sm" >&nbsp;
+                    <input type="hidden" id="receiptsHiddenId">
+                    找零：<input  type="text" id="changeReceiptsId" readonly="true" class="easyui-validatebox validatebox-text-sm">
+                </div>
+                <br>
+                <div style="text-align:right;">
+                    <a  class="easyui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-save'"  onclick="saveAppointReg()">保存</a>&nbsp;
+                    <button  class="easyui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-cancel'" onclick="closeDialog('chargeId')">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

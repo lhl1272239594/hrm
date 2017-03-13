@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<meta HTTP-EQUIV="pragma" CONTENT="no-cache">
+<meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate">
+<meta HTTP-EQUIV="expires" CONTENT="0">
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+<link rel="stylesheet" type="text/css" href="/static/easyui/css/icon.css">
+<link rel="stylesheet" type="text/css" href="/static/css/minoral.css" />
+<link rel="stylesheet" type="text/css" href="/static/css/index.css" />
+<link rel="stylesheet" type="text/css" href="/static/circularNav/css/component2.css" />
+<link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+<link rel="stylesheet" type="text/css" href="/modules/fbd/hrm/css/public.css">
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/static/easyui/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/static/js/tool.js"></script>
+<script type="text/javascript" src="/static/js/formSubmit.js"></script>
+<script type="text/javascript">
+    basePath=getRootPath()+"/service";
+    function getRootPath(){
+        //获取当前网址，如： http://localhost:8083/uimcardprj/share/meun.jsp
+        var curWwwPath=window.document.location.href;
+        //获取主机地址之后的目录，如： uimcardprj/share/meun.jsp
+        var pathName=window.document.location.pathname;
+        var pos=curWwwPath.indexOf(pathName);
+        //获取主机地址，如： http://localhost:8083
+        var localhostPaht=curWwwPath.substring(0,pos);
+        return(localhostPaht);
+    }
+    var inputParamVos=new Array();
+    var InputParamVo1={};
+    InputParamVo1.colName='rownum';
+    InputParamVo1.colValue='20';
+    InputParamVo1.operateMethod='<';
+    inputParamVos.push(InputParamVo1);
+
+
+    var data = parent.zbuts;
+    if(typeof(data)!="undefined"){
+        $.each(data, function (index, item) {
+            var oid = '#'+item.id;
+            if(oid)
+            {
+                if(item.menuOperate == 'false')
+                {
+                    $(oid).hide();
+                }
+            }
+        });
+    }
+
+    var orgids = parent.orgids;//所有的部门ID  sql in ( orgids )111 ;
+</script>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.socialSecurity.dao.SocialSecurityInsureDao">
+
+    <select id="findList" resultType="SocialSecurityInsure">
+        select
+        ssi.INSURE_ID as "ssInsureId",
+        ssi.user_id as "personId",
+        (select NAME from PERSION_INFO t where t.ID=ssi.user_id and rownum=1) AS personName,
+        (select dept_id from ORG_STAFF os where os.persion_id=ssi.user_id and rownum=1)as deptId,
+        ssi.PLAN_ID as "ssPlanId",
+        ssp.PLAN_DESCRIPTION as "ssPlanDes",
+        ssi.INSURE_TYPE_ID as "ssInsureTypeId",
+        ssi.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=ssi.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=ssi.create_by and rownum=1) AS createBy,
+        ssi.create_date as "createDate",
+        (select NAME from PERSION_INFO t where t.ID=ssi.UPDATE_BY and rownum=1) AS updateBy,
+        ssi.UPDATE_DATE AS updateDate
+        from SOCIAL_SECURITY_INSURE ssi,SOCIAL_SECURITY_PLAN ssp
+        where ssi.del_flag = '0'
+        and ssi.CREATE_ORG=#{orgId}
+        and ssi.PLAN_ID=ssp.PLAN_ID
+        <if test="userId != null and userId != ''">
+            and (select NAME
+            from PERSION_INFO t
+            where t.ID = ssi.user_id
+            and rownum = 1) like CONCAT('%',CONCAT(#{userId},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and (select DEPT_ID
+            from ORG_STAFF t
+            where t.PERSION_ID = ssi.user_id
+            and rownum = 1) = #{deptId}
+        </if>
+        order by ssi.create_date desc
+    </select>
+
+
+    <!--新增之前先删除-->
+    <delete id="deletePrimary" parameterType="SocialSecurityInsurePerson" >
+        delete from SOCIAL_SECURITY_INSURE where CREATE_ORG = #{SocialSecurityInsurePerson.orgId}
+        and USER_ID=#{SocialSecurityInsurePerson.userId}
+    </delete>
+    <insert id="insertPrimary">
+        INSERT INTO SOCIAL_SECURITY_INSURE(
+        INSURE_ID,
+        PLAN_ID,
+        INSURE_TYPE_ID,
+        USER_ID,
+        DEPT_ID,
+        ORG_ID,
+        CREATE_BY,
+        CREATE_DATE,
+        CREATE_ORG,
+        CREATE_DEPT,
+        DEL_FLAG
+        ) VALUES (
+        #{ssInsureId},
+        #{ssPlanId},
+        #{ssInsureTypeId},
+        #{userId},
+        #{deptId},
+        #{orgId},
+        #{createBy},
+        sysdate,
+        #{orgId},
+        #{createDept},
+        '0'
+        )
+    </insert>
+
+    <update id="updatePrimary">
+        UPDATE SOCIAL_SECURITY_INSURE SET
+        PLAN_ID = #{ssPlanId},
+        INSURE_TYPE_ID = #{ssInsureTypeId},
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE INSURE_ID = #{ssInsureId}
+    </update>
+
+    <update id="delPrimary" >
+        UPDATE SOCIAL_SECURITY_INSURE SET
+        del_flag = '1'
+        WHERE INSURE_ID = #{SocialSecurityInsure.ssInsureId}
+    </update>
+
+</mapper>

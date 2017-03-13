@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.ServiceSelfVsSysDao">
+
+    <sql id="serviceSelfVsSysColumns">
+        a.ID as id,
+        a.SELF_SERVICE_ID as selfServiceId,
+        a.SYS_SERVICE_ID as sysServiceId
+    </sql>
+
+    <select id="get" resultType="ServiceSelfVsSys">
+        SELECT
+        <include refid="serviceSelfVsSysColumns"/>
+        FROM SERVICE_SELF_VS_SYS a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="ServiceSelfVsSys">
+        SELECT
+        <include refid="serviceSelfVsSysColumns"/>
+        FROM SERVICE_SELF_VS_SYS a
+        <where> 1=1
+            <if test="selfServiceId!=null and selfServiceId != ''">
+                and a.self_service_id =  #{selfServiceId}
+            </if>
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="ServiceSelfVsSys">
+        SELECT
+        <include refid="serviceSelfVsSysColumns"/>
+        FROM SERVICE_SELF_VS_SYS a
+    </select>
+
+    <insert id="insert">
+        INSERT INTO SERVICE_SELF_VS_SYS(
+            ID,
+            SELF_SERVICE_ID,
+            SYS_SERVICE_ID
+        ) VALUES (
+            #{id},
+            #{selfServiceId},
+            #{sysServiceId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE SERVICE_SELF_VS_SYS SET
+            SELF_SERVICE_ID = #{selfServiceId},
+            SYS_SERVICE_ID = #{sysServiceId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM SERVICE_SELF_VS_SYS
+        WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBySelfServiceId">
+        DELETE FROM SERVICE_SELF_VS_SYS
+        WHERE self_service_id = #{selfServiceId}
+    </delete>
+</mapper>

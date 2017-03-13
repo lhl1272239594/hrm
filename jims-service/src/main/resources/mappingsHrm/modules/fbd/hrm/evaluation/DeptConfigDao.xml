@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.evaluation.dao.DeptConfigDao">
+	<!--查询科系-->
+	<select id="getParent" resultType="DeptConfig">
+		select id as id,
+		name as name
+		from dept_config t
+		where t.type = '1'
+		order by CREATE_DATE desc
+	</select>
+	<!--查询已选科室-->
+	<select id="getDeptById" resultType="DeptConfig">
+		select id as id,
+		(select d.DEPT_NAME from dept_dict d where d.id =t.id) as deptName
+		from dept_config t
+		where t.type = '2'
+		and t.pid=#{id}
+	</select>
+	<!--查询科系-->
+	<select id="findListByPid" resultType="DeptConfig">
+		select id as id,
+       pid as pid,
+       (select d.DEPT_NAME from dept_dict d where d.id =t.id) as deptName,
+       name as name
+	  from DEPT_CONFIG t
+	 where type = '2'
+		<if test="id!=null and id !=''">
+			and t.pid=#{id}
+		</if>
+	 order by pid
+	</select>
+	<!--查询项目名称是否重复-->
+	<select id="getDeptName" resultType="Integer">
+		select count(*)
+		from dept_config t
+		where  t.type='1'
+		and t.name=#{name}
+		<if test="id!=null and id !=''">
+			and t.id!=#{id}
+		</if>
+	</select>
+	<!--查询科室是否已存在-->
+	<select id="checkDept" resultType="Integer">
+		select count(*)
+		from dept_config t
+		where  t.type='2'
+		and  t.id=#{id}
+	</select>
+	<insert id="insertDept" parameterType="DeptConfig">
+		INSERT INTO dept_config(
+		id,
+		pid,
+		name,
+		type,
+		CREATE_BY,
+		CREATE_DATE
+		) VALUES (
+		#{id},
+		#{pid},
+		#{name},
+		#{type},
+		#{createBy},
+		sysdate
+		)
+	</insert>
+
+
+	<update id="updateDept" parameterType="DeptConfig" >
+		UPDATE dept_config t SET
+		name=#{name}
+		where t.id=#{id}
+	</update>
+
+	<delete id="delDept" parameterType="DeptConfig" >
+		delete dept_config t
+		where t.id=#{id} or t.pid=#{id}
+
+	</delete>
+	<delete id="remove" parameterType="DeptConfig" >
+		delete dept_config t
+		where t.id=#{id} and t.pid=#{pid}
+
+	</delete>
+
+</mapper>

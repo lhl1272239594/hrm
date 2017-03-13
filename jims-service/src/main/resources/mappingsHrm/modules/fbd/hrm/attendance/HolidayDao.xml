@@ -1,0 +1,113 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.HolidayDao">
+
+
+    <select id="findList" resultType="Holiday">
+       select
+	   h.holiday_id as "holId",
+	   h.holiday_description as "holDes",
+	   h.holiday_pay_type_id as "holPayTypeId",
+	   h.holiday_pay_type_id as "holDate",
+       h.status_type as "statusType",
+		(select NAME from PERSION_INFO t where t.ID=h.CREATE_BY and rownum=1) AS createBy,
+       h.CREATE_DATE as "createDate"
+          from HOLIDAY h
+        where h.del_flag='0'
+          and h.create_org=#{orgId}
+       <if test="holDes!='999'">
+		  and h.holiday_description=#{holDes}
+		</if>
+		<if test="holPayTypeId!='999'">
+		  and h.holiday_pay_type_id=#{holPayTypeId}
+		</if>
+		order by h.CREATE_DATE desc
+	</select>
+
+	<select id="findAllList" resultType="Holiday">
+		select
+		h.holiday_id as "holId",
+		h.holiday_description as "holDes",
+		h.holiday_id as "value",
+		h.holiday_description as "label",
+		h.CREATE_BY as "createBy",
+		h.CREATE_DATE as "createDate"
+		from HOLIDAY h
+		where h.del_flag='0'
+		and h.create_org=#{orgId}
+		<if test="value != null and value != ''">
+			and h.holiday_pay_type_id=#{value}
+		</if>
+		<if test="dataId != null and dataId != ''">
+		and h.holiday_id=#{dataId}
+		</if>
+	</select>
+
+	<select id="findHolBoolean" resultType="Holiday">
+		SELECT count(*) num
+		FROM HOLIDAY f
+		WHERE f.create_org=#{orgId}
+		and f.del_flag='0'
+		and f.holiday_description=#{holDes}
+	</select>
+	<!--查询名称是否重复-->
+	<select id="checkName" resultType="Integer">
+		SELECT count(*) num
+		FROM HOLIDAY f
+		WHERE f.create_org=#{orgId}
+		and f.del_flag='0'
+		<if test="name!=null and name !=''">
+			and f.HOLIDAY_DESCRIPTION=#{name}
+		</if>
+		<if test="holId!='999'">
+			and f.HOLIDAY_ID!=#{holId}
+		</if>
+	</select>
+	<!--查看假日是否占用-->
+	<select id="checkUsed" resultType="Integer">
+		    select (SELECT count(*) num
+			FROM adjust_day a
+			WHERE a.del_flag='0' and a.holiday_type=#{id})+(SELECT count(*) num
+			FROM off_work o
+			WHERE o.del_flag='0' and o.holiday_id=#{id}) from dual
+	</select>
+    <insert id="insertPrimary">
+		INSERT INTO HOLIDAY(
+			holiday_id,
+			holiday_description,
+			holiday_pay_type_id,
+			status_type,
+			CREATE_BY,
+			CREATE_DATE,
+			CREATE_ORG,
+			DEL_FLAG
+		) VALUES (
+			#{holId},
+			#{holDes},
+			#{holPayTypeId},
+			'1',
+			#{createBy},
+			sysdate,
+			#{orgId},
+			'0'
+		)
+	</insert>
+
+	<update id="updatePrimary">
+	UPDATE HOLIDAY SET
+			holiday_description = #{holDes},
+			holiday_pay_type_id = #{holPayTypeId},
+			UPDATE_BY = #{updateBy},
+			UPDATE_DATE = sysdate,
+			CREATE_ORG = #{orgId}
+		WHERE holiday_id = #{holId}
+	</update>
+
+    <update id="delPrimary" parameterType="String" >
+		UPDATE HOLIDAY SET
+			del_flag = '1'
+		WHERE holiday_id = #{holId}
+	</update>
+
+
+
+</mapper>

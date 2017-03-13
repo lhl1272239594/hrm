@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryDao">
+
+    <!--工资级别列表-->
+    <select id="levelList" resultType="Salary">
+       select
+        a.LEVEL_NAME AS levelName,
+        a.LEVEL_ID AS levelId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.TYPE_ID AS typeId,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_LEVEL a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="levelName != null and levelName != ''">
+            and a.LEVEL_NAME like CONCAT('%',CONCAT(#{levelName},'%'))
+        </if>
+        <if test="typeId != null and typeId != '' and typeId!='请选择'">
+            and a.TYPE_ID =#{typeId}
+        </if>
+            ORDER BY a.CREATE_DATE DESC
+
+    </select>
+
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_LEVEL t
+            SET t.ENABLE_FLAG = '1',
+            t.UPDATE_DATE = sysdate
+        WHERE t.LEVEL_ID = #{levelId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_LEVEL t
+            SET t.ENABLE_FLAG = '0',
+            t.UPDATE_DATE = sysdate
+        WHERE t.LEVEL_ID = #{levelId}
+    </update>
+    <!--删除工资级别-->
+    <update id="delete">
+        UPDATE SALARY_LEVEL t
+        SET t.DEL_FLAG = '1'
+        WHERE t.LEVEL_ID = #{id}
+    </update>
+    <!--判断工资级别是否已存在-->
+    <select id="findLevelsame" resultType="Salary">
+        SELECT count(*) num
+        FROM SALARY_LEVEL t
+        WHERE t.create_org=#{orgId}
+        and t.TYPE_ID=#{typeId}
+        and t.LEVEL_NAME=#{levelName}
+
+        and t.DEL_FLAG IS NULL
+    </select>
+
+    <!--工资级别名称下拉框带回-->
+    <select id="levelDownlist" resultType="Salary">
+        SELECT t.level_id as levelId,t.level_name as levelName
+        FROM SALARY_LEVEL t
+        WHERE t.create_org=#{orgId}
+    </select>
+    <!--新增工资级别-->
+    <insert id="insert">
+        INSERT INTO SALARY_LEVEL(
+        LEVEL_ID,
+        LEVEL_NAME,
+        TYPE_ID,
+        ENABLE_FLAG,
+        CREATE_ORG,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{levelName},
+        #{typeId},
+        '1',
+        #{orgId},
+        #{createBy},
+        sysdate
+        )
+    </insert>
+    <!--更新工资级别-->
+    <update id="update">
+        UPDATE SALARY_LEVEL SET
+        LEVEL_NAME = #{levelName},
+        TYPE_ID = #{typeId},
+
+        UPDATE_BY = #{updateBy},
+        UPDATE_DATE = sysdate
+        WHERE LEVEL_ID = #{levelId}
+    </update>
+
+    <!--查询工资级别项目金额关系列表-->
+    <select id="findlpsList" resultType="Salary">
+        SELECT
+        a.LPID AS Lpid,
+        a.id AS id,
+        a.MONEY AS Money,
+        a.COEFFICIENT AS Coefficient,
+        a.ENABLE_FLAG AS enableFlag,
+        a.CREATE_BY AS createBy,
+        a.CREATE_DATE AS createDate,
+        a.UPDATE_BY AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM LEVEL_PROJECT_SUM a
+        <where>
+            a.DEL_FLAG is NULL
+        </where>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--删除工资级别项目金额关系-->
+    <update id="deletelps">
+        UPDATE LEVEL_PROJECT_SUM t
+        SET t.DEL_FLAG = '1'
+        WHERE t.id = #{id}
+    </update>
+    <!--新增工资级别项目金额关系-->
+    <insert id="insertlps">
+        INSERT INTO LEVEL_PROJECT_SUM(
+        id,
+        LPID,
+        MONEY,
+        COEFFICIENT,
+        ENABLE_FLAG,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{Lpid},
+        #{Money},
+        #{Coefficient},
+        #{enableFlag},
+        #{createBy.id},
+        sysdate
+        )
+    </insert>
+    <!--更新工资级别项目金额关系-->
+    <update id="updatelps">
+        UPDATE LEVEL_PROJECT_SUM SET
+        LPID = #{Lpid},
+        MONEY = #{Money},
+        COEFFICIENT = #{Coefficient},
+        ENABLE_FLAG = #{enableFlag},
+        UPDATE_BY = #{updateBy.id},
+        UPDATE_DATE = sysdate
+        WHERE id = #{id}
+    </update>
+
+</mapper>

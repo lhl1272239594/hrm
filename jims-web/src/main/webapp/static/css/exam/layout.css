@@ -1,0 +1,10 @@
+.container {    position: relative;
+
+
+    width: 100%;
+    height: auto;
+    margin: 0px auto; }
+
+
+
+#footer {background:url(images/footer-bg.gif) left top repeat-x #717171;}

@@ -1,0 +1,611 @@
+
+
+/*queContent*/
+#queContent {
+    width: 100% !important;
+
+    background: #fafafa;
+    border-bottom: 1px solid #ccc;
+    z-index: 1;
+    position: fixed;
+    top: 0;
+}
+
+.container .section {
+    visibility: visible;
+    height: auto;
+    overflow: hidden;
+    width: 1000px;
+    margin: 20px auto;
+    height: auto;
+}
+.container .answer_section .lefts{
+    visibility: visible;
+    float: left;
+    height: auto;
+    overflow: hidden;
+    width: 600px;
+    margin: 10px auto;
+    height: auto;
+}
+.answer_mode_lefts{
+    margin-bottom: 30px !important;
+}
+.container .answer_section .rights{
+    visibility: visible;
+    float: right;
+    height: auto;
+    overflow: hidden;
+    width: 600px;
+    margin: 10px auto;
+    height: auto;
+}
+.container .answer_section {
+    visibility: visible;
+    height: auto;
+    overflow: hidden;
+    width: 1200px;
+    margin: 10px auto;
+    height: auto;
+}
+.container .section-button {
+    visibility: visible;
+    height: auto;
+    overflow: hidden;
+    width: 1000px;
+    margin: 20px auto;
+    height: auto;
+}
+
+.leftButton {
+    font-size: 14px;
+    color: #fff;
+    font-weight: bolder;
+    background-color: #00C1DE;
+    width: 100px;
+    height: 40px;
+    padding: 5px;
+    margin-left: 300px;
+
+}
+.rightButton {
+    font-size: 14px;
+    color: #fff;
+    font-weight: bolder;
+    background-color: #00C1DE;
+    width: 100px;
+    height: 40px;
+    padding: 5px;
+    margin-right: 300px;
+    float: right;
+}
+#queContent .button {
+    background: url(images/button-bg.gif) left top repeat-x;
+    display: block;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+#queContent .button em {
+    display: block;
+    font-style: normal;
+    background: url(images/button-left.gif) no-repeat left top;
+}
+
+#queContent .button em b {
+    display: block;
+    height: 35px;
+    line-height: 35px;
+    background: url(images/button-right.gif) no-repeat right top;
+    cursor: pointer;
+}
+
+#queContent .button:hover {
+    color: #000;
+}
+
+#queContent .button1 {
+    background: url(images/button1-bg.gif) left top repeat-x;
+    width: 160px;
+    MARGIN-RIGHT: auto;
+    MARGIN-LEFT: auto;
+    display: block;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+#queContent .button1 em {
+    display: block;
+    font-style: normal;
+    background: url(images/button1-left.gif) no-repeat left top;
+}
+
+#queContent .button1 em b {
+    display: block;
+    height: 35px;
+    line-height: 35px;
+    background: url(images/button1-right.gif) no-repeat right top;
+    cursor: pointer;
+}
+
+#queContent .button1:hover {
+    color: #000;
+}
+
+#queContent .button2 {
+    background: url(images/button2-bg.gif) left top repeat-x;
+    display: block;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+#queContent .button2 em {
+    display: block;
+    font-style: normal;
+    background: url(images/button2-left.gif) no-repeat left top;
+}
+
+#queContent .button2 em b {
+    display: block;
+    height: 35px;
+    line-height: 35px;
+    background: url(images/button2-right.gif) no-repeat right top;
+    cursor: pointer;
+}
+
+#queContent .button2:hover {
+    color: #000;
+}
+
+#queContent .button3 {
+    background: url(images/button3-bg.gif) left top repeat-x;
+    display: block;
+    text-align: center;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+#queContent .button3 em {
+    display: block;
+    font-style: normal;
+    background: url(images/button3-left.gif) no-repeat left top;
+}
+
+#queContent .button3 em b {
+    display: block;
+    height: 35px;
+    line-height: 35px;
+    background: url(images/button3-right.gif) no-repeat right top;
+    cursor: pointer;
+}
+
+#queContent .button3:hover {
+    color: #000;
+}
+
+.main-banner-big {
+    background: url(images/main-banner-big.jpg) no-repeat left top;
+    width: 950px;
+    height: 303px;
+    margin-bottom: 20px;
+}
+
+.main-banner-big .inner {
+    padding: 70px 0 0 52px;
+}
+
+.main-banner-big .button {
+    background: url(images/button.jpg) no-repeat left top !important;
+    width: 170px;
+    height: 36px;
+    line-height: 32px;
+    float: left;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-size: 1.75em;
+    text-align: center;
+    color: #fff;
+    text-decoration: none;
+    text-transform: none !important;
+}
+
+.main-banner-big .button:hover {
+    color: #000;
+}
+
+.main-banner-small {
+    background: #4d4d4d;
+    width: 100%;
+    height: 40px;
+}
+
+.main-banner-small .inner {
+    margin: 0 auto;
+    width: 100%;
+}
+
+.main-banner-small h1 {
+    font-size: 16px;
+    width: 100%;
+    text-align: center;
+    line-height: 40px;
+    color: #fff;
+}
+
+.test-submitBtn {
+    font-size: 14px;
+    float: right;
+    padding: 0 30px;
+    background: #2B79AD;
+    color: #fff;
+    text-decoration: none
+}
+
+.question-card {
+    background: #fff;
+    width: 100%;
+    margin: 0 auto 100px auto;
+}
+
+.subtitle_line {
+    float: left;
+    width: 1px;
+    height: 18px;
+    background: #ccc;
+    margin: 10px 0 0 12px;
+}
+
+.question-card-title {
+    float: left;
+    width: 100%;
+}
+
+.question-card-title ul {
+    padding-left: 24px;
+}
+
+.question-card-title ul li {
+    float: left;
+
+    padding: 0 0 0 20px;
+    list-style: none;
+}
+
+.question-card-title ul li a {
+    float: left;
+    color: #333;
+    height: 34px;
+    line-height: 34px;
+    margin-top: 2px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.question-card-title ul li a:hover {
+    color: #2b79ad;
+    height: 34px;
+    border-bottom: 2px solid #2b79ad;
+}
+
+.question-card-title_checked {
+    color: #2b79ad;
+    height: 34px;
+    border-bottom: 2px solid #2b79ad;
+}
+
+.question-card-detail {
+    padding-left: 24px;
+    float: left;
+    width: 100%;
+    padding: 5px 0 0;
+    border-top: 1px solid #ccc;
+    background: #fafafa;
+
+}
+
+.question-card-detail_index {
+    padding-left: 24px;
+}
+
+.question-card-detail a {
+    float: left;
+    width: 40px;
+    height: 24px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    margin-right: 2px;
+    line-height: 24px;
+    text-align: center;
+    color: #565656;
+    border: 1px solid #ccc;
+    display: inline;
+}
+
+.test-submitBtn:hover {
+    background: #035084;
+}
+
+/*questions*/
+.question_type {
+    background: #fff none repeat scroll 0 0;
+    border-bottom: 2px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+    color: #2679ad;
+    display: inline;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 40px;
+    margin-bottom: 30px;
+    padding: 2px 15px;
+    width: 968px;
+}
+
+.question_mode {
+    float: left;
+    width: 968px;
+    height: auto;
+    min-height: 55px;
+    margin-bottom: 30px;
+    padding: 10px 15px 5px 15px;
+    background: #fff;
+    border-top: 1px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+    border-bottom: 2px solid #e2e2e2;
+    position: relative; /*--IE6--*/
+    _z-index: 10;
+}
+.answer_type {
+    background: #fff none repeat scroll 0 0;
+    border-bottom: 2px solid #e2e2e2;
+    border-top: 1px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+    color: #2679ad;
+    display: inline;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 40px;
+    margin-bottom: 10px;
+    padding: 2px 15px;
+    width: 560px;
+}
+
+.answer_mode {
+    float: left;
+    width: 570px;
+    height: auto;
+    min-height: 55px;
+    margin-bottom: 10px;
+    padding: 10px 5px 5px 15px;
+    background: #fff;
+    border-top: 1px solid #e2e2e2;
+    border-left: 1px solid #e2e2e2;
+    border-right: 1px solid #e2e2e2;
+    border-bottom: 2px solid #e2e2e2;
+    position: relative; /*--IE6--*/
+    _z-index: 10;
+}
+.question_number, .question_mergernumber {
+    float: left;
+    line-height: 24px;
+    padding: 5px 10px 5px 0;
+}
+
+.question_border {
+    width: 860px;
+    float: left;
+    height: auto;
+    margin-right: 13px;
+    margin-left: 20px;
+}
+.answer_border {
+    width: 520px;
+    float: left;
+    height: auto;
+    margin-right: 3px;
+    margin-left: 5px;
+}
+.question_number {
+    float: left;
+    width: auto;
+    height: auto;
+    line-height: 26px;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.question-name_text_border {
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #CCCCCC !important;
+}
+
+.question-title {
+    display: block;
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+    line-height: 24px;
+    font-size: 14px;
+}
+
+.answer-score {
+    display: block;
+    padding: 5px 0;
+    font-weight: bold;
+    line-height: 24px;
+    font-size: 14px;
+}
+.multipleChoice-block_body_options,
+.singleAnswer-block_body_options,
+.binaryChoice-block_body_options {
+    cursor: pointer;
+    margin-left: 30px;
+    font-weight: normal !important;
+    font-size: 14px !important;
+}
+
+.shortAnswer-block_body_options {
+    cursor: pointer;
+    height: 190px;
+    font-weight: normal !important;
+    font-size: 14px !important;
+}
+
+.singleAnswer-block_mode_options {
+    cursor: pointer;
+    position: relative;
+    padding: 2px 5px 0 0;
+    margin: 0 0 10px 0;
+    display: list-item;
+    list-style-type: upper-alpha;
+    background: #fff;
+}
+
+.singleAnswer-form_border_option {
+    position: absolute;
+    padding: 7px 3px 0 9px;
+    margin: 0;
+    display: inline;
+}
+
+.singleAnswer-text_border_synopsis {
+    display: block;
+    padding: 5px 0 5px 25px;
+    line-height: 1.5;
+    letter-spacing: 1px;
+
+}
+
+.multipleChoice-block_mode_options {
+    cursor: pointer;
+    position: relative;
+    padding: 2px 5px 0 0;
+    margin: 0 0 10px 0;
+    display: list-item;
+    list-style-type: upper-alpha;
+    background: #fff;
+}
+
+.multipleChoice-form_border_option {
+    position: absolute;
+    padding: 7px 3px 0 9px;
+    margin: 0;
+    display: inline;
+}
+
+.multipleChoice-text_border_synopsis {
+    display: block;
+    padding: 5px 0 5px 25px;
+    line-height: 1.5;
+    letter-spacing: 1px;
+
+}
+
+.binaryChoice-block_mode_options {
+    cursor: pointer;
+    position: relative;
+    padding: 2px 5px 0 0;
+    margin: 0 0 10px 0;
+    display: list-item;
+    list-style-type: upper-alpha;
+    background: #fff;
+}
+
+.binaryChoice-form_border_option {
+    position: absolute;
+    padding: 7px 3px 0 9px;
+    margin: 0;
+    display: inline;
+}
+
+.binaryChoice-text_border_synopsis {
+    display: block;
+    padding: 5px 0 5px 25px;
+    line-height: 1.5;
+    letter-spacing: 1px;
+
+}
+
+.shortAnswer-block_mode_options {
+    cursor: pointer;
+    position: relative;
+    padding: 2px 5px 0 0;
+    margin: 0 0 10px 0;
+    display: list-item;
+    list-style-type: upper-alpha;
+    background: #fff;
+}
+
+.shortAnswer-form_border_option {
+    position: absolute;
+    padding: 7px 3px 0 6px;
+    margin: 0;
+    display: inline;
+}
+
+.shortAnswer-text_border_synopsis {
+    display: block;
+    padding: 5px 0 5px 25px;
+    line-height: 1.5;
+    letter-spacing: 1px;
+
+}
+
+.question-mouseon_color {
+    background-color: #ECECEC;
+}
+
+.questionAnswered {
+    background-color: rgba(32, 204, 0, 0.69);
+}
+
+
+.ddf-testWrap_table {
+    margin: 0 auto;
+    width: 95%;
+}
+/*footer*/
+#footer {
+    color: #fff;
+    padding: 27px 0 30px 0;
+}
+
+#footer .nav {
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+#footer .nav li {
+    display: inline;
+}
+
+#footer .nav li a {
+    color: #fff;
+    padding: 0 52px 0 49px;
+}
+
+#footer .fleft {
+    padding: 0 0 0 44px;
+}
+
+#footer .fright {
+    padding: 0 44px 0 0;
+}
+
+/*==========================================*/

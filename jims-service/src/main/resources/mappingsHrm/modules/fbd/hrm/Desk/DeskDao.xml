@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.desk.dao.DeskDao">
+    <!--查询代办-->
+    <select id="getSchedule" resultType="Schedule">
+        select (
+        (select count(*)
+        from EXAM_PLAN p, EXAM e
+        where p.exam_id = e.exam_id
+        and p.state = '1'
+        and (select count(*)
+        from PLAN_AUTHORIZE a
+        where p.plan_id = a.plan_id
+        and a.plan_authorize_user_id = #{persionId}) > 0
+        and p.plan_id not in (select r.plan_id
+        from EXAM_SCORE_RESULT r
+        where p.plan_id = r.plan_id and r.USER_ID=#{persionId})
+        and p.plan_id not in (select s.plan_id
+        from EXAM_SCORE s
+        where p.plan_id = s.plan_id and s.state  in (2,3,4)
+        and s.USER_ID=#{persionId})
+        and sysdate>= p.exam_start_time
+        and p.create_org=#{orgId}
+        and p.exam_end_time>=sysdate)) as exam ,
+
+        (select count(*)
+        from EXAM_PLAN p,EXAM e
+        where p.exam_id = e.exam_id
+        and p.state = '2'
+        and (select count(*)
+        from PLAN_AUTHORIZE a
+        where p.plan_id = a.plan_id ) > 0
+        and e.by_hand='1'
+        and (select count(*)
+        from EXAM_SCORE s
+        where p.plan_id = s.plan_id and s.state ='2')> 0
+        and sysdate > p.exam_end_time
+        and p.create_org=#{orgId}
+        <if test="examGrade != null and examGrade != ''">
+            and p.create_dept in ( ${examGrade} )
+        </if>
+        ) as examGrade,
+        (select count(*)
+        from EVALUATION_PLAN tt
+        where tt.state = '1'
+        and tt.del_flag='0'
+        and tt.create_org = #{orgId}
+        and sysdate >= tt.EVALUATION_PLAN_STATE_TIME
+        and tt.EVALUATION_PLAN_END_TIME >= sysdate
+        and (((#{persionId} in (select e.grade_by
+        from EVALUATION_SOCRE e
+        where e.evaluation_model_id = tt.evaluation_model_id
+        and e.evaluation_plan_id=tt.evaluation_plan_id)) and tt.type='3')
+        or ((#{persionId} in (select a.user_id from evaluation_authorize a
+        where a.evaluation_model_id = tt.evaluation_model_id)) and tt.type='1')
+        or ((#{persionId} in (select a.user_id from evaluation_authorize a
+        where a.evaluation_model_id = tt.evaluation_model_id
+        and a.type=3)) and
+        ((select o.dept_id from org_staff o where o.persion_id=#{persionId})
+        not in (select s.dept_id
+        from EVALUATION_SOCRE s
+        where s.evaluation_model_id = tt.evaluation_model_id
+        and s.evaluation_plan_id=tt.evaluation_plan_id))
+        and tt.type='2' and
+        (select count(*) from EVALUATION_SOCRE s
+        where s.evaluation_plan_id = tt.evaluation_plan_id and s.obj='1')>0 )
+        )
+        ) as evaluation,
+        (select count(*)
+        from train_notice tn
+        where tn.del_flag = '0'
+        and tn.CREATE_ORG=#{orgId}
+        and tn.state ='1'
+        and #{persionId} in (select pp.user_id from train_notice_to_person pp
+        where pp.train_notice_id=tn.train_notice_id)
+        and sysdate >= tn.START_DATE
+        and tn.END_DATE >= sysdate
+        ) as train,
+        (select count(*)
+        from contract_view ct
+        where ct.STATUS_TYPE = 2
+        and ct.create_org=#{orgId}
+        <if test="contract != null and contract != ''">
+            and ct.create_dept in ( ${contract} )
+        </if>
+        ) as contract,
+        (select count(*)
+        from evaluation_plan ep
+        where to_char(sysdate, 'yyyy-mm-dd') >= to_char(ep.evaluation_plan_end_time, 'yyyy-mm-dd')
+        and ep.create_org=#{orgId}
+        and ep.state='2'
+        and ep.del_flag='0'
+        <if test="createDept != null and createDept != ''">
+            and ep.create_dept in ( ${createDept} )
+        </if>
+        ) as evaluationGrade
+        from dual
+    </select>
+
+    <!--快捷方式-->
+    <select id="getShortCut" resultType="ShortCut">
+        select p.menu_name as menuName,
+        p.icon_url as iconUrl
+          from MENU_PERSON p
+         where p.person_id = #{persionId}
+           and p.create_org = #{orgId}
+    </select>
+    <!--快捷方式-->
+    <select id="getDefaultShortCut" resultType="ShortCut">
+        select p.menu_name as menuName,
+        p.icon_url as iconUrl
+        from MENU_PERSON p
+        where p.person_id is null
+        and p.create_org is null
+    </select>
+    <!--查询请假时长-->
+    <select id="getLeaveTime" resultType="String">
+        select (select nvl(sum(ROUND(TO_NUMBER(END_DATE - START_DATE) * 24)),0)
+        from off_work
+        where approve_status = '2' and CREATE_ORG=#{orgId}
+        and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm') and user_id=#{persionId}) as leave_time from dual
+    </select>
+    <!--查询请假次数-->
+    <select id="getLeaveNums" resultType="String">
+     select   (select count(*)
+              from off_work
+             where approve_status = '2'
+               and CREATE_ORG=#{orgId}
+               and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm')
+               and user_id = #{persionId}) as leave_nums
+      from dual
+    </select>
+    <!--加班时长-->
+    <select id="getOverTime" resultType="String">
+        select (select nvl(sum(ROUND(TO_NUMBER(END_DATE - START_DATE) * 24)),0)
+        from over_time
+        where approve_status = '2' and CREATE_ORG=#{orgId}
+        and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm') and user_id=#{persionId}) as overtime_time from dual
+    </select>
+    <!--加班次数-->
+    <select id="getOverNums" resultType="String">
+     select   (select count(*)
+              from over_time
+             where approve_status = '2'
+               and CREATE_ORG=#{orgId}
+               and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm')
+               and user_id = #{persionId}) as overtime_nums
+      from dual
+    </select>
+    <!--查询调休时长-->
+    <select id="getLieuTime" resultType="String">
+        select (select nvl(sum(ROUND(TO_NUMBER(END_DATE - START_DATE) * 24)),0)
+        from adjust_day
+        where approve_status = '2' and CREATE_ORG=#{orgId}
+        and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm') and user_id=#{persionId}) as lieu_time from dual
+    </select>
+    <!--查询调休次数-->
+    <select id="getLieuNums" resultType="String">
+     select   (select count(*)
+              from adjust_day
+             where approve_status = '2'
+               and CREATE_ORG=#{orgId}
+               and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm')
+               and user_id = #{persionId}) as lieu_nums
+      from dual
+</select>
+    <!--查询公出时长-->
+    <select id="getTripTime" resultType="String">
+        select (select nvl(sum(ROUND(TO_NUMBER(END_DATE - START_DATE) * 24)),0)
+        from trip_work
+        where approve_status = '2' and CREATE_ORG=#{orgId}
+        and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm') and user_id=#{persionId}) as trip_time from dual
+    </select>
+    <!--查询公出次数-->
+    <select id="getTripNums" resultType="String">
+     select   (select count(*)
+              from trip_work
+             where approve_status = '2'
+               and CREATE_ORG=#{orgId}
+                   and to_char(create_date, 'yyyy-mm') = to_char(sysdate, 'yyyy-mm')
+                   and user_id = #{persionId}) as trip_nums
+          from dual
+    </select>
+    <!--查询工资-->
+    <select id="getSalary" resultType="String">
+         select (select nvl((select decode(sign(a.SHIFA), -1, 0, MIN(to_number(a.SHIFA)))
+                 from SALARY_HISTORY t
+                where t.tmp_id = a.tmp_id),
+               0) AS salary
+          FROM SALARY_HISTORY a
+         where SALARY_MONTH =
+               to_char(sysdate, 'YYYY') || '-' || to_char(sysdate, 'MM')
+           and a.CREATE_ORG = #{orgId}
+           and a.PERSON_ID = #{persionId}) as salary from dual
+    </select>
+    <!--查询公告-->
+    <select id="getNotice" resultType="Notice">
+        select t.notice_id as noticeId,t.notice_title as name,
+        d.person_id as personId,
+        t.publish_by as publishBy,
+        to_char(t.publish_date,'yyyy-MM-dd hh:mm:ss') as publishDate,
+        t.create_org as orgId,
+        t.receive_person as man
+        from NOTICE_HISTORY t,NOTICE_TO_PERSON d
+        where t.notice_id = d.notice_id
+        and t.state = '1'
+        and t.del_flag is null
+        and d.person_id = #{persionId}
+        and t.CREATE_ORG = #{orgId}
+        order by t.PUBLISH_DATE desc
+    </select>
+    <!--查询公告-->
+    <select id="getNoticeById" resultType="Notice">
+        select t.notice_id      as noticeId,
+       t.notice_title   as name,
+       t.notice_content as content,
+       t.publish_by     as publishBy,
+       t.publish_date   as publishDate,
+       t.create_org     as orgId,
+       t.receive_person as man
+      from NOTICE_HISTORY t
+        where t.notice_id=#{id}
+    </select>
+</mapper>

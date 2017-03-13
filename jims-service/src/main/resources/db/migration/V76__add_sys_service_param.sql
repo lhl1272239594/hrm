@@ -1,0 +1,17 @@
+--添加服务参数
+
+
+insert into SYS_SERVICE_PARAM (ID, PARAM_NAME, PARAM_VALUE, SERVICE_ID, VALUE_RANGE, PARAM_DESP, SERVICE_TYPE)
+values ('b467a9175cca47d9a6b1ee39e3d351bd', 'currentStorage', null, 'fcbdfdceda8447d894322d5654055ee9', ' SELECT STORAGE_CODE VALUE, STORAGE_NAME LABEL   FROM DRUG_STORAGE_DEPT  WHERE STORAGE_TYPE = ''1''    AND ORG_ID = ''#{orgId}''', '当前库房', null);
+
+  update SYS_SERVICE_PARAM set VALUE_RANGE = substr(VALUE_RANGE,0,length(VALUE_RANGE)-9)||'$'||substr(VALUE_RANGE,length(VALUE_RANGE)-7,length(VALUE_RANGE))
+ where id='bc03e860bc3241ccbc610996464296da' or id='b467a9175cca47d9a6b1ee39e3d351bd';
+ 
+--创建去护理单元视图
+CREATE OR REPLACE VIEW hospital_ward_dept AS
+SELECT ID, DEPT_CODE, DEPT_NAME,org_id ,input_code
+  FROM DEPT_DICT
+ WHERE (OUTP_OR_INP = 1)
+   AND (CLINIC_ATTR = 2)
+ ORDER BY DEPT_CODE;
+

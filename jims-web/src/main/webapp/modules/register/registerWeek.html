@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html class="panel-fit"><head>
+	<meta charset="UTF-8">
+	<title>门诊安排-周</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="/modules/register/js/registerWeek.js"></script>
+    <script type="text/javascript" src="/static/data/data_clinic_dept.js"></script>
+    <script type="text/javascript" src="/static/data/data_page_doctor.js"></script>
+</head>
+
+<body>
+<div class="easyui-layout" style="width:100%;height:100%;">
+<div data-options="region:'center',split:true">
+    <div id="lookListData">
+        科室：<input class="easyui-combobox" id="deptNameId" style="width:100px;"/>
+        号别名称：<input class="validatebox-text vt-text-percent" id="clinicTypeNameId" style="width:100px;"/><br>
+        医生：<input type="text" class="easyui-combobox" id="doctorNameId" style="width:200px;"/>
+        <button class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="searchClinicIndex();">查 询</button>
+    </div>
+    <table id="list_data"   cellspacing="0" cellpadding="0">
+
+    </table>
+</div>
+<div data-options="region:'east',iconCls:'icon-ok'"  style="width:65%;">
+    <div>
+        <button class="easyui-linkbutton" iconCls="icon-add"onclick="saveClinicWeek()">保存</button>
+    </div>
+    <table id="listWeek" cellpadding="0" cellspacing="0" width="98%" class="tab-rlist">
+        <thead>
+        <tr>
+            <td></td>
+            <th colspan="3">星期一</th>
+            <th colspan="3">星期二</th>
+            <th colspan="3">星期三</th>
+            <th colspan="3">星期四</th>
+            <th colspan="3">星期五</th>
+            <th colspan="3">星期六</th>
+            <th colspan="3">星期日</th>
+        </tr>
+        </thead>
+        <tbody id="weekTbodyId">
+        <tr>
+            <td></td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+            <td>出诊</td>
+            <td>限号数</td>
+            <td>限约号数</td>
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</div>
+
+
+
+
+</body>
+
+
+</html>

@@ -1,0 +1,35 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云his工作平台</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../static/easyui/css/icon.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="js/data-range.js"></script>
+</head>
+<body class="easyui-layout">
+
+<div data-options="region:'west'"  style="width:75%;">
+
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true,border:false,collapsible:false"title="选择角色" style="width:30%">
+            <table id="roleId"></table>
+
+        </div>
+        <div data-options="region:'center',split:true,border:false,collapsible:false" title="选择服务" style="width:25%">
+            <table id="serviceId"></table>
+        </div>
+        <div data-options="region:'east',split:true,border:false,collapsible:false" title="选择菜单" style="width:30%">
+            <table id="tt"></table>
+        </div>
+    </div>
+</div>
+
+
+<div data-options="region:'east',collapsible:false" title="选择组织机构" style="width:25%;">
+    <table id="staff"></table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryTimeDao">
+
+
+    <!--查询工资结算日期-->
+    <select id="timeList" resultType="SalaryTime">
+       select
+        a.TIME_ID AS timeId,
+        a.TIME AS time,
+        a.CREATE_ORG AS orgId,
+        a.DEPT_ID AS deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptName,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_Time a
+        <where>
+           a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="deptId != null and deptId != ''">
+            and a.DEPT_ID = #{deptId}
+        </if>
+        ORDER by a.CREATE_DATE DESC
+    </select>
+
+    <!--判断是否已存在-->
+    <select id="findTimesame" resultType="SalaryTime">
+        SELECT count(*) num
+        FROM SALARY_TIME t
+        WHERE t.create_org=#{orgId}
+
+    </select>
+    <!--新增-->
+    <insert id="insertTime">
+        INSERT INTO SALARY_TIME(
+        TIME_ID,
+        TIME,
+        DEPT_ID,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{SalaryTime.time},
+        #{SalaryTime.deptId},
+        #{SalaryTime.orgId},
+        #{SalaryTime.createDept},
+        #{SalaryTime.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateTime">
+        UPDATE SALARY_TIME SET
+        TIME = #{SalaryTime.time},
+        UPDATE_BY = #{SalaryTime.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE TIME_ID = #{SalaryTime.timeId}
+    </update>
+
+
+</mapper>

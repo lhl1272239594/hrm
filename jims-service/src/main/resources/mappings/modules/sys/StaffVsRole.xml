@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.StaffVsRoleDao">
+
+    <sql id="staffVsRoleColumns">
+		a.id AS "id",
+		a.staff_id AS "staffId",
+		a.role_id AS "roleId",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy.id",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+
+    <sql id="staffVsRoleJoins">
+    </sql>
+
+
+    <select id="get" resultType="StaffVsRole">
+        SELECT
+        *
+        FROM staff_vs_role a
+
+        WHERE a.id = #{id}
+</select>
+    <select id="findRole" resultType="StaffVsRole">
+        SELECT
+        *
+        FROM staff_vs_role a
+
+        WHERE a.staff_id = #{staffId}
+    </select>
+
+    <select id="getRole" resultType="OrgRole">
+        select oo.id,oo.role_name from staff_vs_role ss,org_role oo,org_staff o where ss.staff_id=o.id and ss.role_id=oo.id
+        <if test='staffId!=null || staffId!=""'>
+            and staff_id=#{staffId}
+        </if>
+
+    </select>
+    <select id="findAllList" resultType="StaffVsRole">
+        SELECT
+        <include refid="staffVsRoleColumns"/>
+        FROM staff_vs_role a
+        <include refid="staffVsRoleJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findServiceId" resultType="OrgRoleVsService">
+        SELECT
+        DISTINCT org_role_vs_service.service_id,org_role_vs_service.id
+        FROM staff_vs_role,org_role_vs_service
+        WHERE staff_vs_role.role_id = org_role_vs_service.role_id
+        AND staff_vs_role.del_flag = '0' AND org_role_vs_service.del_flag = '0'
+        AND staff_vs_role.staff_id = #{staffId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO staff_vs_role(
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select sys_guid() as id from dual
+        </selectKey>
+        id,
+        staff_id,
+        role_id,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{staffId},
+        #{roleId},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+		UPDATE staff_vs_role SET
+			staff_id = #{staffId},
+			role_id = #{roleId},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		Delete  FROM staff_vs_role
+		WHERE staff_id = #{id}
+	</update>
+
+    <update id="deleteStaffRole">
+        Delete  FROM staff_vs_role
+        WHERE id = #{id}
+    </update>
+
+</mapper>

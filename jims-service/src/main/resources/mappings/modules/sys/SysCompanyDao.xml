@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.jims.sys.dao.SysCompanyDao">
+    <!--  parameterType="SysCompany" useGeneratedKeys="true" keyProperty="id"-->
+    <insert id="insert">
+            INSERT INTO sys_company(
+            id,
+            parent_id,
+            org_name,
+            org_code,
+            zip_code,
+            link_man,
+            link_phone_num,
+            apply_status,
+            address,
+            email,
+            create_by,
+            update_by,
+            update_date,
+            del_flag,
+            owner,
+            remarks,
+            create_date
+            ) VALUES (
+            #{id},
+            #{parentId},
+            #{orgName},
+            #{orgCode},
+            #{zipCode},
+            #{linkMan},
+            #{linkPhoneNum},
+            #{applyStatus},
+            #{address},
+            #{email},
+            #{createBy},
+            #{updateBy},
+            #{updateDate},
+            #{delFlag},
+            #{owner},
+            #{remarks},
+            #{createDate}
+            )
+    </insert>
+    <insert id="insertReturnId" >
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select sys_guid() as id from dual
+        </selectKey>
+        INSERT INTO sys_company(
+        id,
+        parent_id,
+        org_name,
+        org_code,
+        zip_code,
+        link_man,
+        link_phone_num,
+        apply_status,
+        address,
+        email,
+        create_by,
+        update_by,
+        update_date,
+        del_flag,
+        owner,
+        remarks,
+        create_date
+        ) VALUES (
+        #{id},
+        #{parentId},
+        #{orgName},
+        #{orgCode},
+        #{zipCode},
+        #{linkMan},
+        #{linkPhoneNum},
+        #{applyStatus},
+        #{address},
+        #{email},
+        #{createBy.loginName},
+        #{updateBy.loginName},
+        #{updateDate},
+        #{delFlag},
+        #{owner},
+        #{remarks},
+        #{createDate}
+        )
+    </insert>
+
+    <resultMap id="sysCompanyMap" type="sysCompany">
+        <!--<id property="id" column="id"/>-->
+        <result property="orgName" column="org_name"/>
+        <result property="orgCode" column="org_code"/>
+        <result property="zipCode" column="zip_code"/>
+        <collection property="sysServiceList" ofType="com.jims.sys.entity.SysService">
+            <id property="id" column="id"/>
+            <result property="serviceName" column="service_name"/>
+            <result property="startDate" column="startDate"/>
+            <result property="endDate" column="endDate"/>
+            <result property="serviceImage" column="service_image"/>
+            <result property="serviceDescription" column="service_description"/>
+            <collection property="sysServicePriceList" ofType="com.jims.sys.entity.SysServicePrice">
+                <result property="servicePrice" column="service_price"/>
+                <result property="serviceTimeLimit" column="service_time_limit"/>
+            </collection>
+        </collection>
+    </resultMap>
+    <update id="update">
+        UPDATE sys_company SET
+        parent_id = #{parentId},
+        org_name = #{orgName},
+        org_code = #{orgCode},
+        zip_code = #{zipCode},
+        link_man = #{linkMan},
+        link_phone_num = #{linkPhoneNum},
+        apply_status = #{applyStatus},
+        address = #{address},
+        email = #{email},
+        update_by = #{updateBy},
+        update_date = #{updateDate},
+        owner = #{owner},
+        remarks = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+    <select id="findListByName" resultType="SysCompany">
+        SELECT id, org_name FROM  sys_company  where owner=#{persionId} and apply_status='2'
+    </select>
+
+    <select id="findListByApplyStatus" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE 1 = 1
+        <if test=" _parameter!=null and _parameter!='' ">
+            AND apply_status = #{_parameter}
+        </if>
+        AND DEL_FLAG='0'
+    </select>
+
+    <select id="findListByParentId" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE 1 = 1
+        AND (id=#{0} or parent_id = #{0})
+        AND DEL_FLAG='0'
+        AND apply_status='2'
+    </select>
+
+    <select id="findAllByOwner" resultMap="sysCompanyMap">
+        select sc.id zip_code,sc.org_name,sc.org_code,ss.id,ss.service_name,ss.service_image,ss.service_description,
+        to_char(osl.service_start_date,'yyyy-mm-dd') startDate,to_char(osl.service_end_date,'yyyy-mm-dd') endDate,ssp.service_price,ssp.service_time_limit
+        from sys_company sc,sys_service ss,org_service_list osl,Sys_Service_Price ssp
+        where 1=1 and sc.id = osl.org_id and osl.service_id=ss.id(+) and osl.service_end_date is not null
+        and sc.owner = #{0}
+        <!-- SELECT * FROM sys_company WHERE 1 = 1 AND owner = #{0} AND DEL_FLAG='0'-->
+    </select>
+
+
+    <select id="get" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE id=#{id} and DEL_FLAG='0'
+    </select>
+
+    <select id="getOrgName" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE org_name=#{orgName} and DEL_FLAG='0'
+    </select>
+    <select id="findIsNoByOwner" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE DEL_FLAG='0'
+        <if test="owner != null and owner != ''">
+            and owner=#{owner}
+        </if>
+        <if test="orgName != null and orgName != ''">
+            and org_name=#{orgName}
+        </if>
+        <if test="orgCode != null and orgCode != ''">
+            and orgCode=#{orgCode}
+        </if>
+        <if test="applyStatus != null and applyStatus != ''">
+            and apply_status=#{applyStatus}
+        </if>
+    </select>
+
+    <select id="findByName" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE org_name=#{orgName} and DEL_FLAG='0'
+    </select>
+
+    <select id="findNameByOwner" resultType="SysCompany">
+        SELECT
+        org_name
+        FROM sys_company
+        WHERE owner=#{owner} and DEL_FLAG='0'
+    </select>
+
+    <select id="findList" resultType="SysCompany">
+        SELECT
+        *
+        FROM sys_company
+        WHERE DEL_FLAG='0'
+        <if test="owner != null and owner != ''">
+            and owner=#{owner}
+        </if>
+        <if test="orgName != null and orgName != ''">
+            and org_name=#{orgName}
+        </if>
+        <if test="orgCode != null and orgCode != ''">
+            and orgCode=#{orgCode}
+        </if>
+        <if test="applyStatus != null and applyStatus != ''">
+            and apply_status=#{applyStatus}
+        </if>
+    </select>
+</mapper>

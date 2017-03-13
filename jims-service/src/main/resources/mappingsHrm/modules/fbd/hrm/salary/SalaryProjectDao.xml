@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryProjectDao">
+
+
+    <!--查询工资项目列表-->
+    <select id="projectList" resultType="SalaryProject">
+       select
+        a.PROJECT_ID AS projectId,
+        a.PROJECT_NAME AS projectName,
+        a.CREATE_ORG AS orgId,
+        a.ENABLE_FLAG AS enableFlag,
+        a.DEL_FLAG AS delFlag,
+        a.create_dept as createDept,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.create_dept and rownum=1) AS createDeptname,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate
+        FROM SALARY_PROJECT a
+        <where>
+            a.DEL_FLAG is NULL
+            and a.CREATE_ORG=#{orgId}
+        </where>
+        <if test="projectName != null and projectName != ''">
+            and a.PROJECT_NAME like CONCAT('%',CONCAT(#{projectName},'%'))
+        </if>
+            ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--启用-->
+    <update id="changeup" parameterType="String">
+        UPDATE SALARY_PROJECT t
+        SET t.ENABLE_FLAG = '1',
+        t.UPDATE_DATE = sysdate
+        WHERE t.PROJECT_ID = #{projectId}
+    </update>
+    <!--停用-->
+    <update id="changedown" parameterType="String">
+        UPDATE SALARY_PROJECT t
+        SET t.ENABLE_FLAG = '0',
+        t.UPDATE_DATE = sysdate
+        WHERE t.PROJECT_ID = #{projectId}
+    </update>
+    <!--启用停用-->
+    <update id="enableFlag" parameterType="SalaryProject" >
+        UPDATE SALARY_PROJECT SET
+        ENABLE_FLAG = #{SalaryProject.enableFlag}
+        WHERE PROJECT_ID = #{SalaryProject.projectId}
+    </update>
+    <!--批量删除-->
+    <update id="deleteProject" parameterType="SalaryProject">
+        UPDATE SALARY_PROJECT t
+        SET t.DEL_FLAG = '1'
+        WHERE t.PROJECT_ID = #{SalaryProject.projectId}
+    </update>
+    <!--判断是否已存在-->
+    <select id="findProjectsame" resultType="SalaryProject">
+        SELECT count(*) num
+        FROM SALARY_PROJECT t
+        WHERE t.create_org=#{orgId}
+        and  t.project_name =#{projectName}
+        and t.del_flag is NULL
+        <if test="projectId != null and projectId != ''">
+            and t.PROJECT_ID != #{projectId}
+        </if>
+    </select>
+
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="SalaryProject">
+        SELECT count(*) num
+        FROM SALARY_PROJECT_MONEY t
+        WHERE t.create_org=#{SalaryProject.orgId}
+        and  t.project_id =#{SalaryProject.projectId}
+        and t.del_flag is NULL
+    </select>
+    <!--新增-->
+    <insert id="insertProject">
+        INSERT INTO SALARY_PROJECT(
+        PROJECT_ID,
+        PROJECT_NAME,
+        ENABLE_FLAG,
+        CREATE_ORG,
+        CREATE_DEPT,
+        CREATE_BY,
+        CREATE_DATE
+        ) VALUES (
+        sys_guid(),
+        #{salaryProject.projectName},
+        '1',
+        #{salaryProject.orgId},
+        #{salaryProject.createDept},
+        #{salaryProject.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改-->
+    <update id="updateProject">
+        UPDATE SALARY_PROJECT SET
+        PROJECT_NAME = #{salaryProject.projectName},
+        UPDATE_BY = #{salaryProject.updateBy},
+        UPDATE_DATE = sysdate
+        WHERE PROJECT_ID = #{salaryProject.projectId}
+    </update>
+
+
+</mapper>

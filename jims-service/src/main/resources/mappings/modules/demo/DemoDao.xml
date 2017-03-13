@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.jims.demo.dao.SayHelloDao">
+    <insert id="sayHello">
+         INSERT INTO DEMO_USER(user_name,pass_word) VALUES (#{userName},#{password})
+    </insert>
+        <select id="findAllList" resultType="DemoUser">
+        select user_name as userName,pass_word as password from DEMO_USER
+    </select>
+
+
+
+</mapper>

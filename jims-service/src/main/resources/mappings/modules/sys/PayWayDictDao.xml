@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.PayWayDictDao">
+
+    <sql id="payWayDictColumns">
+        a.id AS "id",
+        a.pay_way_code AS "payWayCode",
+        a.pay_way_name AS "payWayName",
+        a.accting_indicator AS "acctingIndicator",
+        a.outp_indicator AS "outpIndicator",
+        a.inp_indicator AS "inpIndicator",
+        a.input_code AS "inputCode",
+        a.regist_indicator AS "registIndicator",
+        a.charge_type AS "chargeType",
+        a.org_id AS "orgId"
+    </sql>
+
+    <sql id="payWayDictJoins">
+    </sql>
+
+    <select id="get" resultType="PayWayDict">
+        SELECT
+        *
+        FROM pay_way_dict a
+
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getByInpIndicator" resultType="PayWayDict">
+        SELECT *
+        FROM pay_way_dict a
+        WHERE a.org_id = #{0}
+        AND a.inp_indicator = #{1}
+    </select>
+
+    <select id="findList" resultType="PayWayDict">
+        SELECT
+            <include refid="payWayDictColumns"/>,b.charge_type_name AS "chargeTypeName"
+        FROM pay_way_dict a,charge_type_dict b
+        WHERE a.org_id = #{orgId}
+        AND a.charge_type = b.charge_type_code
+        AND a.org_id = b.org_id
+    </select>
+
+    <select id="listByNullChargeType" resultType="PayWayDict">
+        SELECT
+            <include refid="payWayDictColumns"/>
+        FROM pay_way_dict a
+        WHERE a.org_id = #{orgId} AND a.charge_type IS NULL
+    </select>
+
+    <select id="findAllList" resultType="PayWayDict">
+        SELECT
+        <include refid="payWayDictColumns"/>
+        FROM pay_way_dict a
+    </select>
+
+    <select id="search" resultType="PayWayDict">
+        SELECT
+        <include refid="payWayDictColumns"/>
+        FROM pay_way_dict a
+        WHERE a.pay_way_name LIKE '%' || #{0} || '%'
+        AND a.org_id = #{1}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO pay_way_dict(
+        id,
+        pay_way_code,
+        pay_way_name,
+        accting_indicator,
+        outp_indicator,
+        inp_indicator,
+        input_code,
+        regist_indicator,
+        charge_type,
+        org_id
+        ) VALUES (
+        #{id},
+        #{payWayCode},
+        #{payWayName},
+        #{acctingIndicator},
+        #{outpIndicator},
+        #{inpIndicator},
+        UPPER (#{inputCode}),
+        #{registIndicator},
+        #{chargeType},
+        #{orgId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE pay_way_dict SET
+        pay_way_code = #{payWayCode},
+        pay_way_name = #{payWayName},
+        accting_indicator = #{acctingIndicator},
+        outp_indicator = #{outpIndicator},
+        inp_indicator = #{inpIndicator},
+        input_code = #{inputCode},
+        regist_indicator = #{registIndicator},
+        charge_type = #{chargeType}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        DELETE
+        FROM pay_way_dict
+        WHERE id = #{id}
+    </update>
+</mapper>

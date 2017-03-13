@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.salary.dao.SalaryDataDao">
+
+
+    <!--查询人员-->
+    <select id="findListByVo" resultType="OrgStaffVo">
+    SELECT
+    p.id,p.name,p.sex,p.card_no,p.phone_num,p.email,p.nick_name,p.nation,o.title,o.id as staffId
+    FROM org_staff o,persion_info p
+    WHERE o.persion_id=p.id
+    <if test="deptId != null and deptId != ''">
+        and ((o.dept_id=#{deptId}) OR ((select parent_id from DEPT_DICT where id = o.dept_id)=#{deptId} ))
+    </if>
+    and o.org_id=#{orgId}
+    and o.persion_id=p.id and o.del_flag='0' and p.del_flag='0'
+    </select>
+
+    <!--查询薪资档案数据-->
+    <select id="dataList" resultType="SalaryData">
+
+        select AA.id AS personId,AA.NAME AS personName,AA.CARD_NO as cardNo,
+        (select t.label from sys_dict t where t.type='SEX_DICT' and t.value = AA.SEX and rownum = 1)AS sex,
+        AA.DEPT_ID AS deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=AA.DEPT_ID and rownum=1) AS deptName,
+        (select TYPE_NAME from SALARY_HUMAN_TYPE t where t.TYPE_ID=AA.HUMAN_TYPE_ID and rownum=1) AS typeId,
+        AA.STATE AS state,
+        AA.CREATE_ORG AS CREATE_ORG,(select NAME from PERSION_INFO a where a.ID=AA.UPDATE_BY and rownum=1) AS updateBy,
+        AA.UPDATE_DATE as updateDate,AA.del_flag as del_flag from
+        (select distinct(nvl(p.id,''))as id, nvl(p.name,'')as name,o.dept_id as dept_id,nvl(s.human_type_id,'')as human_type_id,
+        s.state as state,s.CREATE_ORG,s.update_by,s.update_date,s.del_flag,p.CARD_NO,p.SEX
+        from org_staff o,persion_info p,salary_data s
+        where o.persion_id=p.id and p.id = s.person_id and s.person_id = o.persion_id and o.del_flag='0' and p.del_flag='0'
+        union all
+        select distinct(nvl(p.id,''))as id, nvl(p.name,'')as name,o.dept_id as dept_id,''as human_type_id,'' as state,o.ORG_ID AS CREATE_ORG,
+        '' as update_by,null as update_date,'' as del_flag,p.CARD_NO,p.SEX
+        from org_staff o,persion_info p
+        where o.persion_id=p.id and o.dept_id is not null and o.del_flag='0' and p.del_flag='0'
+        and o.persion_id not in (select d.person_id from salary_data d)) AA
+        <where>
+             AA.CREATE_ORG=#{orgId}
+        </where>
+        <if test="personName != null and personName != ''">
+            and (select NAME from PERSION_INFO t where t.ID=AA.ID and rownum=1) like CONCAT('%',CONCAT(#{personName},'%'))
+        </if>
+        <if test="sex != null and sex != ''">
+            and (select SEX from PERSION_INFO t where t.ID=AA.ID and rownum=1) = #{sex}
+        </if>
+        <if test="card != null and card != ''">
+            and (select CARD_NO from PERSION_INFO t where t.ID=AA.ID and rownum=1) like CONCAT('%',CONCAT(#{card},'%'))
+        </if>
+        <if test="state != null and state != ''">
+            and AA.STATE = #{state}
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and ((AA.DEPT_ID = #{deptId})  OR ((select parent_id from DEPT_DICT where id = AA.DEPT_ID)=#{deptId} ))
+        </if>
+        <if test="typeId != null and typeId != '' ">
+            and AA.HUMAN_TYPE_ID = #{typeId}
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and AA.DEPT_ID in ( ${deptIds} )
+        </if>
+        ORDER BY AA.DEPT_ID
+    </select>
+    <!--查询职业信息数据(本机构)-->
+    <select id="careerList" resultType="SalaryData">
+        select a.CAREER_ID AS careerId,a.PERSON_ID AS personId,a.DEPT_ID AS deptId,a.IN_DATE AS inDate,a.OUT_DATE AS outDate,
+        a.DEL_FLAG AS delFlag,a.REMARK as remark,a.CREATE_ORG AS orgId,a.TITLE as title1,a.TITLE_LEVEL as titleLevel1,
+        (select t.label from sys_dict t where t.type='TITLE_DICT' and t.value = a.TITLE and rownum = 1)AS title,
+        (select t.label from sys_dict t where t.type='TITLE_LEVEL' and t.value = a.TITLE_LEVEL and rownum = 1)AS titleLevel,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptName,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate FROM CAREER_INFO a
+        <where>
+            a.CREATE_ORG=#{orgId} AND a.DEL_FLAG is NULL
+        </where>
+        <if test="personId != null and personId != ''">
+            and a.PERSON_ID=#{personId}
+        </if>
+        ORDER BY a.IN_DATE
+    </select>
+
+    <!--查询职业变动报表-->
+    <select id="careerSearch" resultType="SalaryData">
+        select AA.id AS personId,AA.NAME AS personName,AA.CARD_NO as cardNo,
+        (select t.label from sys_dict t where t.type='SEX_DICT' and t.value = AA.SEX and rownum = 1)AS sex,
+        AA.DEPT_ID AS deptId,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=AA.DEPT_ID and rownum=1) AS deptName,
+        BB.In_Date,BB.out_date,BB.Remark,BB.Del_Flag,BB.TITLE as title1,BB.TITLE_LEVEL as titleLevel1,
+        (select t.label from sys_dict t where t.type='TITLE_DICT' and t.value = BB.TITLE and rownum = 1)AS title,
+        (select t.label from sys_dict t where t.type='TITLE_LEVEL' and t.value = BB.TITLE_LEVEL and rownum = 1)AS titleLevel,
+        (select NAME from PERSION_INFO t where t.ID=BB.CREATE_BY and rownum=1) AS createBy,
+        BB.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=BB.UPDATE_BY and rownum=1) AS updateBy,
+        BB.UPDATE_DATE AS updateDate
+        from
+        (select distinct(nvl(p.id,''))as id, nvl(p.name,'')as name,o.dept_id as dept_id,nvl(s.human_type_id,'')as human_type_id,
+        s.state as state,s.CREATE_ORG,s.update_by,s.update_date,s.del_flag,p.CARD_NO,p.SEX
+        from org_staff o,persion_info p,salary_data s
+        where o.persion_id=p.id and p.id = s.person_id and s.person_id = o.persion_id
+        union all
+        select distinct(nvl(p.id,''))as id, nvl(p.name,'')as name,o.dept_id as dept_id,''as human_type_id,'' as state,o.ORG_ID AS CREATE_ORG,
+        '' as update_by,null as update_date,'' as del_flag,p.CARD_NO,p.SEX
+        from org_staff o,persion_info p
+        where o.persion_id=p.id and o.dept_id is not null and o.persion_id not in (select d.person_id from salary_data d)) AA,career_info BB
+        where AA.id=BB.Person_Id and BB.Del_Flag is null AND AA.CREATE_ORG=#{orgId}
+        <if test="personId != null and personId != ''">
+            and (select NAME from PERSION_INFO t where t.ID=AA.ID and rownum=1) like CONCAT('%',CONCAT(#{personId},'%'))
+        </if>
+        <if test="deptId != null and deptId != ''">
+            and ((AA.DEPT_ID = #{deptId})  OR ((select parent_id from DEPT_DICT where id = AA.DEPT_ID)=#{deptId} ))
+        </if>
+        <if test="year != null and year != ''">
+            and (to_char(BB.IN_DATE,'yyyy') = #{year}  or  to_char(BB.OUT_DATE,'yyyy') = #{year})
+        </if>
+        <if test="month != null and month != ''">
+            and (to_char(BB.IN_DATE,'mm') = #{month}  or  to_char(BB.OUT_DATE,'mm') = #{month})
+        </if>
+        <if test="deptIds != null and deptIds != ''">
+            and AA.DEPT_ID in ( ${deptIds} )
+        </if>
+        order by AA.dept_id,BB.In_Date
+    </select>
+    <!--查询职业信息数据(历史)-->
+    <select id="careerListAll" resultType="SalaryData">
+        select a.CAREER_ID AS careerId,a.PERSON_ID AS personId,a.DEPT_ID AS deptId,a.IN_DATE AS inDate,a.OUT_DATE AS outDate,
+        a.DEL_FLAG AS delFlag,a.REMARK as remark,a.CREATE_ORG AS orgId,
+        (select ORG_NAME FROM SYS_COMPANY t where t.ID = a.CREATE_ORG and rownum=1) AS orgName,
+        (select DEPT_NAME from DEPT_DICT t where t.ID=a.DEPT_ID and rownum=1) AS deptName,
+        (select NAME from PERSION_INFO t where t.ID=a.CREATE_BY and rownum=1) AS createBy,
+        a.CREATE_DATE AS createDate,
+        (select NAME from PERSION_INFO t where t.ID=a.UPDATE_BY and rownum=1) AS updateBy,
+        a.UPDATE_DATE AS updateDate FROM CAREER_INFO a
+        <where>
+          a.DEL_FLAG is NULL
+        </where>
+        <if test="personId != null and personId != ''">
+            and a.PERSON_ID=#{personId}
+        </if>
+        ORDER BY a.IN_DATE
+    </select>
+    <!--插入人员之前先删除已存在的-->
+    <delete id="deleteLoop" parameterType="SalaryDataPersonVo">
+        DELETE FROM SALARY_DATA
+        where PERSON_ID = #{SalaryDataPersonVo.userId}
+        AND CREATE_ORG =  #{SalaryDataPersonVo.orgId}
+    </delete>
+    <!--插入人员对类别数据-->
+    <insert id="insertLoop" parameterType="SalaryDataPersonVo">
+        INSERT INTO SALARY_DATA(
+        DATA_ID,
+        STATE,
+        PERSON_ID,
+        HUMAN_TYPE_ID,
+        CREATE_ORG,
+        DEPT_ID
+        ) VALUES (
+        sys_guid(),
+        '0',
+        #{SalaryDataPersonVo.userId},
+        #{SalaryDataPersonVo.typeId},
+        #{SalaryDataPersonVo.orgId},
+        #{SalaryDataPersonVo.depId}
+        )
+    </insert>
+    <!--起薪停薪-->
+    <update id="enableFlag" parameterType="SalaryData" >
+        UPDATE SALARY_DATA SET
+        STATE = #{SalaryData.state}
+        WHERE PERSON_ID = #{SalaryData.personId}
+    </update>
+
+    <!--变更人员之前先删除已存在的-->
+    <delete id="deleteChange" parameterType="SalaryData">
+        DELETE FROM SALARY_DATA
+        where PERSON_ID = #{SalaryData.personId}
+        AND CREATE_ORG =  #{SalaryData.orgId}
+    </delete>
+
+    <insert id="change" parameterType="SalaryData">
+        INSERT INTO SALARY_DATA(
+        DATA_ID,
+        STATE,
+        PERSON_ID,
+        HUMAN_TYPE_ID,
+        CREATE_ORG,
+        CREATE_DEPT,
+        UPDATE_BY,
+        UPDATE_DATE
+        ) VALUES (
+        sys_guid(),
+        '0',
+        #{SalaryData.personId},
+        #{SalaryData.typeId},
+        #{SalaryData.orgId},
+        #{SalaryData.createDept},
+        #{SalaryData.updateBy},
+        sysdate
+        )
+    </insert>
+    <!--变更类别-->
+    <update id="updateLevel" parameterType="SalaryData" >
+        UPDATE PERSION_INFO SET
+        SALARY_LEVEL = #{SalaryData.typeId}
+
+        WHERE ID = #{SalaryData.personId}
+    </update>
+    <!--插入职业信息数据-->
+    <insert id="insertCareer" parameterType="SalaryData">
+        INSERT INTO CAREER_INFO(
+        CAREER_ID,
+        PERSON_ID,
+        DEPT_ID,
+        CREATE_ORG,
+        IN_DATE,
+        OUT_DATE,
+        TITLE,
+        TITLE_LEVEL,
+        REMARK,
+        CREATE_BY,
+        CREATE_DATE
+
+        ) VALUES (
+        sys_guid(),
+        #{SalaryData.personId},
+        #{SalaryData.deptId},
+        #{SalaryData.orgId},
+        to_date(#{SalaryData.inDate},'yyyy-MM-dd'),
+        to_date(#{SalaryData.outDate},'yyyy-MM-dd'),
+        #{SalaryData.title},
+        #{SalaryData.titleLevel},
+        #{SalaryData.remark},
+        #{SalaryData.createBy},
+        sysdate
+        )
+    </insert>
+    <!--修改职业信息数据-->
+    <update id="updateCareer" parameterType="SalaryData">
+        UPDATE CAREER_INFO SET
+        DEPT_ID = #{SalaryData.deptId},
+        IN_DATE = to_date(#{SalaryData.inDate},'yyyy-MM-dd'),
+        OUT_DATE = to_date(#{SalaryData.outDate},'yyyy-MM-dd'),
+        TITLE = #{SalaryData.title},
+        TITLE_LEVEL = #{SalaryData.titleLevel},
+        REMARK = #{SalaryData.remark},
+        UPDATE_BY = #{SalaryData.updateBy},
+        UPDATE_DATE = #{SalaryData.updateDate}
+        WHERE CAREER_ID = #{SalaryData.careerId}
+    </update>
+    <!--删除职业信息数据-->
+    <update id="deleteCareer" parameterType="SalaryData">
+        UPDATE CAREER_INFO SET
+        DEL_FLAG = '1',
+        UPDATE_BY = #{SalaryData.updateBy},
+        UPDATE_DATE = #{SalaryData.updateDate}
+        WHERE CAREER_ID = #{SalaryData.careerId}
+    </update>
+    <!--查询部门-->
+    <select id="findAll" resultType="DeptDict">
+        SELECT * FROM dept_dict WHERE del_flag = '0' and org_id=#{orgId}
+    </select>
+
+</mapper>

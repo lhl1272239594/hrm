@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.StaffVsGroupDao">
+    <sql id="staffVsGroupColumns">
+		a.id AS "id",
+		a.group_code AS "groupCode",
+		a.group_name AS "groupName",
+		a.input_code AS "inputCode",
+		a.dept_code AS "deptCode",
+		a.dept_name AS "deptName",
+		a.group_class_id AS "groupClassId",
+		a.group_manager AS "groupManager",
+	</sql>
+
+    <sql id="staffVsGroupJoins">
+    </sql>
+
+    <select id="findAllListByOrgId" resultType="StaffVsGroupVo">
+       select a.id as group_id,
+       a.group_class as group_name,
+       '' as group_code,
+       '' as pid,
+       a.org_id
+       from staff_group_class_dict a
+       where a.del_flag = '0'and a.org_id=#{orgId}
+       union all
+       select b.id             as group_id,
+       b.group_name,
+       b.group_code,
+       b.group_class_id as pid ,
+       '' as org_id
+      from staff_group_class_dict a, staff_group_dict b
+      where a.id = b.group_class_id
+      and a.del_flag = '0'
+    </select>
+
+
+    <select id="get" resultType="StaffVsGroup">
+        SELECT
+        *
+        FROM staff_vs_group a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findOrgStaff" resultType="StaffVsGroupVo">
+        SELECT
+        o.id as staffId,p.name,d.dept_name,d.input_code
+        FROM persion_info p,dept_dict d ,org_staff o
+        WHERE o.persion_id=p.id AND o.dept_id=d.id
+        AND o.org_id=#{orgId} and p.del_flag='0' and o.del_flag='0'
+    </select>
+
+    <select id="findGroupClass" resultType="StaffVsGroupVo">
+       SELECT s.group_class
+       FROM staff_group_dict d,staff_group_class_dict s
+       WHERE d.group_class_id=s.id AND
+       d.id=#{groupId}
+    </select>
+
+    <select id="findStaffByGroupId" resultType="StaffVsGroupVo">
+        SELECT
+        v.id as id, o.id as staffId,p.name,d.dept_name ,v.group_class ,s.group_name
+        FROM persion_info p,dept_dict d ,org_staff o,staff_vs_group v,staff_group_dict s
+        WHERE o.persion_id=p.id
+        AND o.dept_id=d.id
+        AND o.id=v.staff_id
+        AND s.group_class_id=v.group_class
+        AND v.group_id=#{groupId} AND o.org_id=#{orgId}  AND v.del_flag='0'AND v.group_id=s.id
+    </select>
+
+    <select id="findStaffByStaffId" resultType="StaffVsGroup">
+       SELECT * from staff_vs_group WHERE staff_id=#{staffId} and del_flag='0'
+    </select>
+
+
+    <insert id="insert">
+		INSERT INTO staff_vs_group(
+			id,
+			group_code,
+			group_class,
+			staff_id,
+			group_id,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{groupCode},
+			#{groupClass},
+			#{staffId},
+			#{groupId},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE staff_vs_group SET
+			group_code = #{groupCode},
+			group_class  =  #{groupClass},
+			staff_id = #{staffId},
+			group_id  =   #{groupId},
+			remarks = #{remarks},
+			update_by = #{updateBy},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+    <delete id="delete">
+		delete from  staff_vs_group
+		WHERE id = #{id}
+	</delete>
+
+</mapper>

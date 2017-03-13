@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.fbd.hrm.attendance.dao.FrequencyDao">
+    <select id="findFreList" resultType="Frequency">
+        select
+		fi.frequency_item_id  as "freItemId",
+        fi.frequency_item_description as "freItemDes",
+        fi.DATE_TYPE_ID   as "freTypeId",
+        fi.start_time   as "startTime",
+        fi.end_time   as "endTime",
+        fi.CREATE_BY as "createBy",
+        fi.CREATE_DATE as "createDate"
+        from FREQUENCY_ITEM fi
+        where fi.del_flag='0'
+		and fi.create_org = #{orgId}
+        order by fi.CREATE_DATE DESC
+    </select>
+    <select id="findFreAllList" resultType="Frequency">
+		select
+		fi.frequency_item_id          as "freItemId",
+		fi.frequency_item_description as "freItemdes",
+		fi.DATE_TYPE_ID                  as "freTypeId",
+		fi.CREATE_BY                  as "createBy",
+		fi.CREATE_DATE                as "createDate",
+		fi.status_type                as "statusType"
+		from frequency_item fi
+		where fi.create_org = #{orgId}
+		and fi.del_flag='0'
+	</select>
+
+
+    <select id="findFreBoolean" resultType="Frequency">
+        SELECT count(*) num
+        FROM FREQUENCY_ITEM fi
+        WHERE fi.create_org=#{orgId}
+        and fi.del_flag='0'
+        and fi.FREQUENCY_ITEM_DESCRIPTION=#{freItemDes}
+        <if test="freItemId!='999'">
+            and fi.frequency_item_id!=#{freItemId}
+        </if>
+    </select>
+
+
+    <insert id="insertPrimary">
+		INSERT INTO FREQUENCY_ITEM(
+			FREQUENCY_ITEM_ID,
+			FREQUENCY_ITEM_DESCRIPTION,
+			DATE_TYPE_ID,
+			START_TIME,
+		    END_TIME,
+			CREATE_BY,
+			CREATE_DATE,
+			CREATE_ORG,
+			STATUS_TYPE,
+			DEL_FLAG
+		) VALUES (
+			#{freItemId},
+			#{freItemDes},
+			#{freTypeId},
+			#{startTime},
+		    #{endTime},
+			#{createBy},
+			sysdate,
+			#{orgId},
+			'1',
+			'0'
+		)
+	</insert>
+
+    <update id="updatePrimary">
+		UPDATE FREQUENCY_ITEM SET
+		FREQUENCY_ITEM_DESCRIPTION=#{freItemDes},
+		START_TIME=#{startTime},
+		END_TIME=#{endTime},
+		DATE_TYPE_ID = #{freTypeId},
+		UPDATE_BY = #{updateBy},
+		UPDATE_DATE = sysdate
+		WHERE FREQUENCY_ITEM_ID = #{freItemId}
+	</update>
+    <update id="delPrimary" parameterType="String">
+		UPDATE FREQUENCY_ITEM SET
+		del_flag ='1'
+		WHERE FREQUENCY_ITEM_ID = #{freItemId}
+	</update>
+
+    <!--<update id="delForeign" parameterType="String" >
+        UPDATE FREQUENCY_TIME SET
+        del_flag = '1'
+        WHERE FREQUENCY_TIME_ID = #{freTimeId}
+    </update>-->
+    <!--判断删除是否占用-->
+    <select id="findOccupy" resultType="Integer" parameterType="Frequency">
+		SELECT count(*) num
+		FROM FREQUENCY_RECORD t
+		where t.create_org = #{Frequency.orgId}
+		and t.FREQUENCY_ITEM_ID = #{Frequency.freItemId}
+		and t.del_flag = '0'
+	</select>
+    <!--删除行-->
+    <update id="delForeign" parameterType="Frequency">
+		UPDATE FREQUENCY_TIME SET
+		del_flag = '1'
+		WHERE FREQUENCY_TIME_ID = #{Frequency.freTimeId}
+	</update>
+
+    <!--删除行对应的头-->
+    <update id="delForeign1" parameterType="Frequency">
+		UPDATE FREQUENCY_ITEM t SET
+		t.del_flag = '1'
+		WHERE t.FREQUENCY_ITEM_ID = (select d.FREQUENCY_ITEM_ID from FREQUENCY_TIME d where d.FREQUENCY_ITEM_ID = t.FREQUENCY_ITEM_ID
+		and d.FREQUENCY_TIME_ID = #{Frequency.freTimeId} and rownum = 1)
+	</update>
+
+</mapper>

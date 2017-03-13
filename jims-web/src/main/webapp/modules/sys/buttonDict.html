@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>功能按钮管理</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+
+</head>
+<body>
+    <table id="tt" class="easyui-treegrid" style="width:600px;height:400px">
+    </table>
+
+    <div id="dlg" class="easyui-dialog"
+         closed="true" buttons="#dlg-buttons">
+
+        <form id="fm" method="post" novalidate >
+            <div class="fitem" >
+                <label style=" width: 80px;">功能按钮</label>
+                <input id="menuName" name="menuName" class="easyui-combogrid" required="true" style=" width: 100px;" >
+            </div>
+
+            <div class="fitem" >
+                <label style=" width: 80px;">权限标识</label>
+                <input name="permission" id="permission" class="easyui-textbox" required="true" disabled>
+            </div>
+            <div class="fitem" >
+                <label style=" width: 80px;">父菜单</label>
+                <input name="parentName" id="parentName" class="easyui-textbox" disabled>
+            </div>
+            <div class="fitem" >
+                <label style=" width: 80px;">父菜单ID</label>
+                <input name="pid" id="pid" class="easyui-textbox" disabled>
+            </div>
+
+
+            <div class="fitem" >
+                <input name="id" id="id" type="hidden" style=" width: 100px;">
+                <input name="menuLevel" id="menuLevel" type="hidden">
+                <input name="sort" id="sort"  type="hidden">
+                <input name="target" id="target"  type="hidden" >
+            </div>
+
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" id="saveBtn" class="easyui-linkbutton c6" iconCls="icon-ok"  style="width:90px">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">关闭</a>
+    </div>
+
+
+    <div id="tb">
+        <a  id="addNextLevelBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加功能按钮</a>
+        <a  id="removeBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" >删除功能按钮</a>
+        <a  id="allMenuClose" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true">全部合并</a>
+        <a  id="allMenuOpen" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true">全部展开</a>
+        <!--<a  class="easyui-linkbutton" data-options="iconCls:'icon-help',plain:true">帮助</a>-->
+    </div>
+
+
+
+    <div id="delw" class="easyui-window" title="信息修改" data-options="iconCls:'icon-save'" style="width:260px;height:260px;padding:10px;" closed="true">
+        <table id="t2t" ></table>
+        <div id="tb2" style="height:auto">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" id="delbtn">删除</a>
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/modules/sys/js/buttonDict.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+</body>
+</html>

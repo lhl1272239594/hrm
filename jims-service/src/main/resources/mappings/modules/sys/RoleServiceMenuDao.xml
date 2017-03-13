@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.RoleServiceMenuDao">
+	<sql id="roleServiceMenuColumns">
+		a.id AS "id",
+		a.role_service_id AS "roleServiceId",
+		a.menu_id AS "menuId",
+		a.menu_operate AS "menuOperate",
+		a.create_by AS "createBy",
+		a.remark AS "remark",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="roleServiceMenuJoins">
+	</sql>
+    
+	<select id="get" resultType="RoleServiceMenu">
+		SELECT 
+			<include refid="roleServiceMenuColumns"/>
+		FROM role_service_menu a
+		<include refid="roleServiceMenuJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+    <select id="findRoleServiceId" resultType="RoleServiceMenu">
+        SELECT
+        <include refid="roleServiceMenuColumns"/>
+        FROM role_service_menu a
+        WHERE a.role_service_id = #{roleServiceId} AND a.del_flag = 0
+    </select>
+
+    <select id="findRoleServiceIdAndMenuId" resultType="RoleServiceMenu">
+        SELECT
+        <include refid="roleServiceMenuColumns"/>
+        FROM role_service_menu a
+        WHERE a.role_service_id = #{0} AND a.menu_id = #{1} AND a.del_flag = 0
+    </select>
+
+    <select id="findServiceMenu" resultType="RoleServiceMenu">
+        SELECT
+        <include refid="roleServiceMenuColumns"/>
+        FROM role_service_menu a  WHERE a.role_service_id = #{roleServiceId} AND a.del_flag = 0
+    </select>
+    
+	<select id="findList" resultType="RoleServiceMenu">
+		SELECT 
+			<include refid="roleServiceMenuColumns"/>
+		FROM role_service_menu a
+		<include refid="roleServiceMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RoleServiceMenu">
+		SELECT 
+			<include refid="roleServiceMenuColumns"/>
+		FROM role_service_menu a
+		<include refid="roleServiceMenuJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO role_service_menu(
+			id,
+			role_service_id,
+			menu_id,
+			menu_operate,
+			create_by,
+			remark,
+			update_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{roleServiceId},
+			#{menuId},
+			#{menuOperate},
+			#{createBy},
+			#{remark},
+			#{updateBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="updateService">
+        UPDATE role_service_menu SET
+        menu_operate = #{menuOperate},
+        create_by = #{createBy},
+        remark = #{remark},
+        update_by = #{updateBy},
+        update_date = #{updateDate},
+        create_date = #{createDate}
+        WHERE role_service_id = #{roleServiceId} AND menu_id = #{menuId}
+    </update>
+
+	<update id="update">
+		UPDATE role_service_menu SET 	
+			role_service_id = #{roleServiceId},
+			menu_id = #{menuId},
+			menu_operate = #{menuOperate},
+			create_by = #{createBy},
+			remark = #{remark},
+			update_by = #{updateBy},
+			update_date = #{updateDate},
+			create_date = #{createDate}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE role_service_menu SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+
+    <delete id="deleteService">
+        DELETE
+        FROM role_service_menu
+        WHERE role_service_id = #{roleServiceId}
+    </delete>
+
+    <delete id="deleteServiceIdAndMenuId">
+        DELETE
+        FROM role_service_menu
+        WHERE role_service_id = #{0} AND menu_id #{1}
+    </delete>
+
+</mapper>

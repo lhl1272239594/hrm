@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.OrgStaffDao">
+
+    <sql id="orgStaffColumns">
+		a.id AS "id",
+		a.dept_id AS "deptId",
+		a.org_id AS "orgId",
+		a.title AS "title",
+		a.persion_id AS "persionId",
+		a.remarks AS "remarks",
+		a.update_by AS "updateBy.id",
+		a.create_by AS "createBy.id",
+		a.update_date AS "updateDate",
+		a.del_flag AS "delFlag",
+		a.create_date AS "createDate"
+	</sql>
+	
+	<sql id="orgStaffJoins">
+	</sql>
+    
+
+    <select id="get" resultType="OrgStaff">
+        SELECT
+        *
+        FROM org_staff a
+
+        WHERE a.id = #{id}
+</select>
+
+    <select id="findTitleByPersionId" resultType="OrgStaff">
+        SELECT
+        *
+        FROM org_staff a
+
+        WHERE a.persion_id = #{1}
+    </select>
+
+    <select id="findStaffByPersonIdOrgId" resultType="OrgStaff">
+        SELECT
+        *
+        FROM org_staff a
+
+        WHERE a.persion_id = #{0}
+        AND a.org_id = #{1}
+        AND a.del_flag = '0'
+    </select>
+
+    <select id="findByServiceId" resultType="OrgSelfServiceVsMenu">
+        SELECT sv.id              AS "id",
+       sv.self_service_id AS "selfServiceId",
+       sv.menu_id         AS "menuId",
+       orvs.menu_operate  AS "menuOperate",
+       sv.menu_sort       AS "menuSort",
+       sv.pid             AS "pid",
+       sv.menu_end_date   AS "menuEndDate",
+       sv.create_by       AS "createBy",
+       sv.remarks         AS "remarks",
+       sv.update_by       AS "updateBy.id",
+       sv.update_date     AS "updateDate",
+       sv.del_flag        AS "delFlag",
+       sv.create_date     AS "createDate",
+       md.menu_name,
+       md.href
+       FROM staff_vs_role svr,
+       org_role_vs_service orvs,
+       org_self_service_vs_menu sv,
+       menu_dict md
+     WHERE orvs.service_id = #{0}
+       AND svr.staff_id = #{1}
+       AND orvs.role_id = svr.role_id
+       AND sv.menu_id = orvs.menu_id
+       AND orvs.service_id = sv.self_service_id
+       AND sv.menu_id = md.id
+       AND orvs.menu_id = md.id
+       AND svr.del_flag = '0'
+       AND orvs.del_flag = '0'
+       AND sv.del_flag = '0'
+       AND md.del_flag = '0'
+       AND (orvs.menu_operate = '0' OR orvs.menu_operate = '1')
+    </select>
+
+    <select id="getByPersionId" resultType="OrgStaff">
+        SELECT
+        *
+        FROM org_staff a
+
+        WHERE a.persion_id = #{persionId}
+    </select>
+
+    <select id="findListByPersionId" resultType="OrgStaff">
+        SELECT
+        *
+        FROM org_staff a
+
+        WHERE a.persion_id = #{persionId}
+    </select>
+
+    <select id="findListByVo" resultType="OrgStaffVo">
+		SELECT
+        p.id,p.name,p.sex,p.card_no,p.phone_num,p.email,p.nick_name,p.nation,o.title,o.id as staffId
+		FROM org_staff o,persion_info p
+        WHERE o.persion_id=p.id
+        <if test="deptId != null and deptId != ''">
+            and o.dept_id=#{deptId}
+        </if>
+        and o.org_id=#{orgId}
+        and o.persion_id=p.id and o.del_flag='0' and p.del_flag='0'
+
+	</select>
+
+    <select id="findAllList" resultType="OrgStaff">
+        SELECT
+        <include refid="orgStaffColumns"/>
+        FROM org_staff a
+        <include refid="orgStaffJoins"/>
+        <where>
+            a.del_flag = #{DEL_FLAG_NORMAL}
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+                ORDER BY a.update_date DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        <selectKey keyProperty="id" resultType="java.lang.String" order="BEFORE">
+            select sys_guid() as id from dual
+        </selectKey>
+        INSERT INTO org_staff(
+        id,
+        dept_id,
+        org_id,
+        title,
+        persion_id,
+        remarks,
+        update_by,
+        create_by,
+        update_date,
+        del_flag,
+        create_date
+        ) VALUES (
+        #{id},
+        #{deptId},
+        #{orgId},
+        #{title},
+        #{persionId},
+        #{remarks},
+        #{updateBy},
+        #{createBy},
+        #{updateDate},
+        #{delFlag},
+        #{createDate}
+        )
+    </insert>
+
+    <update id="update">
+		UPDATE org_staff SET 	
+			dept_id = #{deptId},
+			org_id = #{orgId},
+			title = #{title},
+			persion_id=#{persionId},
+			remarks = #{remarks},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			del_flag=#{delFlag}
+		WHERE id = #{id}
+	</update>
+
+    <update id="delete">
+		UPDATE org_staff SET 
+			del_flag ='1'
+		WHERE id = #{id}
+	</update>
+    <!--根据persion_id删除三张表中人员-->
+    <update id="deleteByPid">
+        UPDATE org_staff SET
+        del_flag ='1'
+        WHERE persion_id = #{1}
+    </update>
+    <update id="deleteSysUserByPid">
+        UPDATE SYS_USER SET
+        del_flag ='1'
+        WHERE persion_id = #{1}
+    </update>
+    <update id="deletePersonInfo">
+        UPDATE persion_info SET
+        del_flag ='1'
+        WHERE id = #{1}
+    </update>
+
+
+
+</mapper>

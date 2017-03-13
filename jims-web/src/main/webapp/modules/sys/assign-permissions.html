@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>云his工作平台</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+    <script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="/static/js/head.js"></script>
+    <script type="text/javascript" src="../sys/js/assign-permissions.js"></script>
+</head>
+<body class="easyui-layout">
+<div data-options="region:'south'">
+    <a  id="saveBtn" class="easyui-linkbutton" iconCls="icon-save">保存</a>
+</div>
+<div data-options="region:'west'" title="角色服务" style="width:160px;">
+    <input id="roleId" name="roleId"/>
+
+</div>
+<div data-options="region:'center',title:'服务菜单',iconCls:'icon-ok'">
+    <ul id="dd" class="easyui-tree" checkbox="true" data-options="lines:true" style="height:94%"></ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.oauth.dao.RefreshTokenDao">
+    
+	<sql id="refreshTokenColumns">
+		a.access_token AS "accessToken",
+		a.refresh_token AS "refreshToken",
+		a.create_time AS "createTime",
+		a.expire AS "expire",
+		a.app_key AS "appKey",
+		a.user_id AS "userId",
+		a.scope AS "scope",
+		a.authorization_time AS "authorizationTime",
+		a.grant_type AS "grantType"
+	</sql>
+	
+	<sql id="refreshTokenJoins">
+		LEFT JOIN sys_user u6 ON u6.id = a.user_id
+	</sql>
+    
+	<select id="get" resultType="RefreshToken">
+		SELECT 
+			<include refid="refreshTokenColumns"/>
+		FROM refresh_token a
+		<include refid="refreshTokenJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+    <select id="findUnique" resultType="RefreshToken">
+        SELECT
+        <include refid="refreshTokenColumns"/>
+        FROM refresh_token a
+        WHERE a.app_key =#{0} AND a.user_id = #{1}
+    </select>
+
+	<select id="findList" resultType="RefreshToken">
+		SELECT 
+			<include refid="refreshTokenColumns"/>
+		FROM refresh_token a
+		<include refid="refreshTokenJoins"/>
+		<where>
+			
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="RefreshToken">
+		SELECT 
+			<include refid="refreshTokenColumns"/>
+		FROM refresh_token a
+		<include refid="refreshTokenJoins"/>
+		<where>
+			
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO refresh_token(
+			access_token,
+			refresh_token,
+			create_time,
+			expire,
+			app_key,
+			user_id,
+			scope,
+			authorization_time,
+			grant_type
+		) VALUES (
+			#{accessToken},
+			#{refreshToken},
+			#{createTime},
+			#{expire},
+			#{appKey},
+			#{userId},
+			#{scope},
+			#{authorizationTime},
+			#{grantType}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE refresh_token SET 	
+			access_token = #{accessToken},
+			refresh_token = #{refreshToken},
+			create_time = #{createTime},
+			expire = #{expire},
+			scope = #{scope},
+			authorization_time = #{authorizationTime},
+			grant_type = #{grantType}
+		WHERE app_key = #{appKey} AND user_id = #{userId}
+	</update>
+	
+	<update id="delete">
+		DELETE FROM refresh_token
+		WHERE app_key = #{appKey} AND user_id = #{userId}
+	</update>
+	
+</mapper>

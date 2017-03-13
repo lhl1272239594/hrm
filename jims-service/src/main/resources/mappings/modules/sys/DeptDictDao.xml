@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.DeptDictDao">
+    
+	<sql id="deptDictColumns">
+		a.id AS "id",
+		a.parent_id AS "parentId",
+		a.dept_name AS "deptName",
+		a.dept_code AS "deptCode",
+        a.input_code AS "inputCode"
+	</sql>
+	
+	<sql id="deptDictJoins">
+	</sql>
+    
+	<select id="get" resultType="DeptDict">
+		SELECT 
+			<include refid="deptDictColumns"/>
+		FROM dept_dict a
+		<include refid="deptDictJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+    <select id="getByName" resultType="DeptDict">
+        SELECT
+        <include refid="deptDictColumns"/>
+        FROM dept_dict a
+        <include refid="deptDictJoins"/>
+        WHERE a.dept_name = #{deptName}
+    </select>
+
+    <select id="getByNameOrgId" resultType="DeptDict">
+        SELECT
+        <include refid="deptDictColumns"/>
+        FROM dept_dict a
+        <include refid="deptDictJoins"/>
+        WHERE a.dept_name = #{deptName}
+        AND a.org_id = #{orgId}
+    </select>
+	
+	<select id="findList" resultType="DeptDict">
+		SELECT 
+			<include refid="deptDictColumns"/>,a.dept_code as deptCodes
+		FROM dept_dict a
+		<include refid="deptDictJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+            <if test="orgId != null and orgId != ''">
+                and a.org_id = #{orgId}
+            </if>
+            <if test="q != null and q != ''">
+                and (a.dept_name like #{q}||'%'
+                or a.dept_code like #{q}||'%'
+                or upper(a.input_code) like upper(#{q})||'%')
+            </if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+
+    <select id="getByOrgId" resultType="DeptDict">
+        SELECT
+        *
+        FROM dept_dict a
+        WHERE 1=1
+        <if test="orgId !=null and orgId !=''">
+            AND a.org_id = #{orgId}  and a.dept_propertity !=';;'
+        </if>
+
+    </select>
+
+    <select id="findAll" resultType="DeptDict">
+        SELECT * FROM dept_dict  WHERE del_flag = '0' and org_id=#{orgId}  order by dept_code asc
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO dept_dict(
+			id,
+			parent_id,
+			dept_name,
+			dept_code,
+			dept_propertity,
+			org_id,
+			input_code,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date,
+			clinic_attr,
+            outp_or_inp,
+            internal_or_sergery
+		) VALUES (
+			#{id},
+			#{parentId},
+			#{deptName},
+			#{deptCode},
+			#{deptPropertity},
+			#{orgId},
+			#{inputCode},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate},
+			#{clinicAttr},
+			#{outpOrInp},
+			#{internalOrSergery}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE dept_dict SET 	
+			parent_id = #{parentId},
+			dept_name = #{deptName},
+			dept_code = #{deptCode},
+			dept_propertity = #{deptPropertity},
+			input_code=#{inputCode},
+			remarks = #{remarks},
+			update_by = #{updateBy},
+			update_date = #{updateDate},
+			clinic_attr=#{clinicAttr},
+			outp_or_inp=#{outpOrInp},
+			internal_or_sergery=#{internalOrSergery}
+		WHERE id = #{id}
+	</update>
+
+
+
+
+	<delete id="delete">
+	delete from dept_dict
+		WHERE id = #{id}
+	</delete>
+
+    <select id="findProperty" resultType="DeptDict">
+        SELECT dept_propertity
+        FROM dept_dict
+    </select>
+
+    <select id="findParent" resultType="DeptDict">
+        SELECT id,dept_name
+        FROM dept_dict
+        <where>
+			<if test="deptName !=null and deptName !=''">
+				<if test="deptName ==病区">
+					dept_name like concat('%','病区','%')
+				</if>
+
+			</if>
+		</where>
+    </select>
+
+    <select id="findListParent" resultType="DeptDict">
+        SELECT *
+        FROM dept_dict a
+        <where>
+            a.org_id=#{orgId}  and a.del_flag='0'
+            <if test="q!=null and q!=''">
+                and  a.input_code like concat('%',#{q},'%')
+            </if>
+            <if test="deptCode !=null and deptCode !=''">
+                and a.dept_code =#{deptCode}
+            </if>
+        </where>
+    </select>
+
+	<select id="findListByCode" resultType="DeptDict">
+		SELECT
+		<include refid="deptDictColumns"/>
+		FROM dept_dict a
+		WHERE a.dept_code != #{code} and a.dept_code like concat(#{code},'%')
+	</select>
+
+	<select id="getList" resultType="DeptDict">
+		SELECT *
+		FROM dept_dict where  del_flag='0'
+	</select>
+
+	<select id="getOperation" resultType="DeptDict">
+		select *from dept_dict
+		where dept_name like '%手术%' AND org_id=#{orgId}
+	</select>
+
+    <select id="getDoctorDept" resultType="DeptDict">
+        select sgc.org_id as orgId,sgd.dept_id as id,sgd.dept_code as deptCode,sgd.dept_name as deptName from staff_vs_group sg,staff_group_dict sgd,staff_group_class_dict sgc,org_staff os
+        where sg.group_id = sgd.id and sgd.group_class_id = sgc.id
+        and sg.staff_id =os.id
+        and sgc.org_id = #{orgId}
+        and sgc.group_class = #{doctorGroup}
+        and os.persion_id = #{persionId}
+    </select>
+
+    <select id="getDoctor" resultType="com.jims.common.web.impl.BaseDto">
+       select sd.dept_id,pi.name,pi.id  from staff_vs_group sg,persion_info pi,org_staff os,staff_group_dict sd,staff_group_class_dict sgc
+		where sg.staff_id=os.id and pi.id=os.persion_id and sd.id= sg.group_id
+		and  sd.group_class_id=sgc.id
+		and sg.del_flag='0' and pi.del_flag='0' and os.del_flag='0' and sd.del_flag='0' and sgc.del_flag='0'
+        and sd.dept_id=#{deptId} and sgc.group_class=#{doctorGroup} and os.org_id=#{orgId}
+    </select>
+
+
+
+    <select id="findListOfInpatients"  resultType="DeptDict">
+        select * from dept_dict a
+        <where>
+            a.del_flag='0'
+            <if test="orgId !=null and orgId != ''">
+                and a.org_id=#{orgId}
+            </if>
+            <if test="q !=null and q != ''">
+                and a.input_code like  UPPER ('%'||#{q}||'%')
+            </if>
+            AND a.clinic_attr = '2'
+        </where>
+    </select>
+
+
+    <select id="findByPersonId" resultType="DeptDict">
+        select * FROM  dept_dict a
+       where
+       a.org_id = #{0}
+       AND a.id in
+       (select  b.dept_id
+          from org_staff b
+         where b.persion_id = #{1}
+           )
+    </select>
+
+</mapper>

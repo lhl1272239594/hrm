@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.template.dao.DrugPriceListTemplateDao">
+
+    <sql id="drugPriceListTemplateColumns">
+        a.ID as id,
+        a.DRUG_CODE as drugCode,
+        a.DRUG_SPEC as drugSpec,
+        a.FIRM_ID as firmId,
+        a.UNITS as units,
+        a.TRADE_PRICE as tradePrice,
+        a.RETAIL_PRICE as retailPrice,
+        a.AMOUNT_PER_PACKAGE as amountPerPackage,
+        a.MIN_SPEC as minSpec,
+        a.MIN_UNITS as minUnits,
+        a.START_DATE as startDate,
+        a.STOP_DATE as stopDate,
+        a.MEMOS as memos,
+        a.CLASS_ON_INP_RCPT as classOnInpRcpt,
+        a.CLASS_ON_OUTP_RCPT as classOnOutpRcpt,
+        a.CLASS_ON_RECKONING as classOnReckoning,
+        a.SUBJ_CODE as subjCode,
+        a.CLASS_ON_MR as classOnMr,
+        a.HLIMIT_PRICE as hlimitPrice,
+        a.PRICE_CLASS as priceClass,
+        a.PASS_NO as passNo,
+        a.GMP as gmp,
+        a.MASTER_ID as masterId
+    </sql>
+
+    <select id="get" resultType="DrugPriceListTemplate">
+        SELECT
+        <include refid="drugPriceListTemplateColumns"/>
+        FROM DRUG_PRICE_LIST_TEMPLATE a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="findList" resultType="DrugPriceListTemplate">
+        SELECT
+        <include refid="drugPriceListTemplateColumns"/>,m.area,m.area_name
+        FROM DRUG_PRICE_LIST_TEMPLATE a
+        <where> m.id = a.master_id
+            AND upper(m.TABLE_NAME) = 'DRUG_PRICE_LIST_TEMPLATE'
+            <if test="drugCode!=null and drugCode != ''">
+                AND a.drug_code = #{drugCode}
+            </if>
+            <if test="area!=null and area != ''">
+                AND m.area = #{area}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="sum" resultType="Integer">
+        SELECT
+        count(*)
+        FROM DRUG_PRICE_LIST_TEMPLATE a,template_master m
+        <where> m.id = a.master_id
+            AND upper(m.TABLE_NAME) = 'DRUG_PRICE_LIST_TEMPLATE'
+            AND m.area = #{area}
+        </where>
+    </select>
+
+    <select id="findAllList" resultType="DrugPriceListTemplate">
+        SELECT
+        <include refid="drugPriceListTemplateColumns"/>
+        FROM DRUG_PRICE_LIST_TEMPLATE a
+    </select>
+
+    <insert id="insert">
+        INSERT INTO DRUG_PRICE_LIST_TEMPLATE(
+            ID,
+            DRUG_CODE,
+            DRUG_SPEC,
+            FIRM_ID,
+            UNITS,
+            TRADE_PRICE,
+            RETAIL_PRICE,
+            AMOUNT_PER_PACKAGE,
+            MIN_SPEC,
+            MIN_UNITS,
+            START_DATE,
+            STOP_DATE,
+            MEMOS,
+            CLASS_ON_INP_RCPT,
+            CLASS_ON_OUTP_RCPT,
+            CLASS_ON_RECKONING,
+            SUBJ_CODE,
+            CLASS_ON_MR,
+            HLIMIT_PRICE,
+            PRICE_CLASS,
+            PASS_NO,
+            GMP,
+            MASTER_ID
+        ) VALUES (
+            #{id},
+            #{drugCode},
+            #{drugSpec},
+            #{firmId},
+            #{units},
+            #{tradePrice},
+            #{retailPrice},
+            #{amountPerPackage},
+            #{minSpec},
+            #{minUnits},
+            #{startDate},
+            #{stopDate},
+            #{memos},
+            #{classOnInpRcpt},
+            #{classOnOutpRcpt},
+            #{classOnReckoning},
+            #{subjCode},
+            #{classOnMr},
+            #{hlimitPrice},
+            #{priceClass},
+            #{passNo},
+            #{gmp},
+            #{masterId}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE DRUG_PRICE_LIST_TEMPLATE SET
+            DRUG_CODE = #{drugCode},
+            DRUG_SPEC = #{drugSpec},
+            FIRM_ID = #{firmId},
+            UNITS = #{units},
+            TRADE_PRICE = #{tradePrice},
+            RETAIL_PRICE = #{retailPrice},
+            AMOUNT_PER_PACKAGE = #{amountPerPackage},
+            MIN_SPEC = #{minSpec},
+            MIN_UNITS = #{minUnits},
+            START_DATE = #{startDate},
+            STOP_DATE = #{stopDate},
+            MEMOS = #{memos},
+            CLASS_ON_INP_RCPT = #{classOnInpRcpt},
+            CLASS_ON_OUTP_RCPT = #{classOnOutpRcpt},
+            CLASS_ON_RECKONING = #{classOnReckoning},
+            SUBJ_CODE = #{subjCode},
+            CLASS_ON_MR = #{classOnMr},
+            HLIMIT_PRICE = #{hlimitPrice},
+            PRICE_CLASS = #{priceClass},
+            PASS_NO = #{passNo},
+            GMP = #{gmp},
+            MASTER_ID = #{masterId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM DRUG_PRICE_LIST_TEMPLATE
+        WHERE id = #{id}
+    </delete>
+
+    <insert id="executeInsertSql">
+        ${sql}
+    </insert>
+</mapper>

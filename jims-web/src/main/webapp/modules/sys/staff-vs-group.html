@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>用户分组人员维护</title>
+    <link rel="stylesheet" type="text/css" href="/static/easyui/css/bootstrap/easyui.css">
+
+</head>
+<body class="easyui-layout">
+<style type="text/css" rel="stylesheet">
+    .fitem label {
+        width: 60px;
+    }
+</style>
+<div  data-options="region:'west'" style="padding:1px;background:#eee;width: 200px;">
+    <table id="groupGrid" class="easyui-treegrid">
+
+    </table>
+</div>
+
+<div  data-options="region:'center',fit:true" style="padding:1px;background:#eee;">
+    <table id="staffGrid" class="easyui-datagrid">
+
+    </table>
+</div>
+<div id="ft" style="margin:5px;">
+    <a  id="addBtn" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加人员</a>
+    <a  id="saveBtn" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存人员</a>
+    <a  id="removeBtn" class="easyui-linkbutton" data-options="iconCls:'icon-remove'">删除人员</a>
+</div>
+
+
+
+<script type="text/javascript" src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="/modules/sys/js/staff-vs-group.js"></script>
+<!--<script type="text/javascript" src="/static/js/head.js"></script>-->
+</body>
+</html>

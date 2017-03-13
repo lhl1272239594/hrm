@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jims.sys.dao.StaffGroupClassDictDao">
+    <sql id="staffGroupClassDictColumns">
+		a.id AS "id",
+		a.orgId AS "orgId"
+		a.group_class AS "groupClass",
+
+	</sql>
+
+    <sql id="staffGroupClassDictJoins">
+    </sql>
+
+    <select id="get" resultType="StaffGroupClassDict">
+        SELECT
+        <include refid="staffGroupClassDictColumns"/>
+        FROM staff_group_class_dict a
+        <include refid="staffGroupClassDictJoins"/>
+        WHERE a.id = #{id}
+    </select>
+
+
+    <select id="findAllListByOrgId" resultType="StaffGroupClassDict">
+        SELECT
+        *
+        FROM staff_group_class_dict a
+        WHERE a.org_id = #{orgId}  and del_flag='0'
+        and a.group_class LIKE   '%'||#{q}||'%'
+    </select>
+
+
+    <select id="findList" resultType="StaffGroupClassDict">
+        SELECT
+        <include refid="staffGroupClassDictColumns"/>
+        FROM staff_group_class_dict a
+        <include refid="staffGroupClassDictJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="findAllList" resultType="StaffGroupClassDict">
+        SELECT
+        <include refid="staffGroupClassDictColumns"/>
+        FROM staff_group_class_dict a
+        <include refid="staffGroupClassDictJoins"/>
+        <where>
+
+        </where>
+        <choose>
+            <when test="page !=null and page.orderBy != null and page.orderBy != ''">
+                ORDER BY ${page.orderBy}
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+		INSERT INTO staff_group_class_dict(
+			id,
+			org_id,
+			group_class,
+			remarks,
+			update_by,
+			create_by,
+			update_date,
+			del_flag,
+			create_date
+		) VALUES (
+			#{id},
+			#{orgId},
+			#{groupClass},
+			#{remarks},
+			#{updateBy},
+			#{createBy},
+			#{updateDate},
+			#{delFlag},
+			#{createDate}
+		)
+	</insert>
+
+    <update id="update">
+		UPDATE staff_group_class_dict SET
+			org_id = #{orgId},
+			group_class = #{groupClass},
+			remarks = #{remarks},
+			update_by = #{updateBy},
+			update_date = #{updateDate}
+		WHERE id = #{id}
+	</update>
+
+    <delete id="delete">
+		delete from staff_group_class_dict WHERE id = #{id}
+	</delete>
+
+</mapper>
