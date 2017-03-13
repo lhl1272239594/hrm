@@ -40,7 +40,6 @@
     工资类别：
     <select id="typeId" class="easyui-combobox" panelHeight="auto" data-options="editable:false" style="width:140px">
 
-
     </select>
     <a id="searchBtn" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
     <a id="clearBtn" class="easyui-linkbutton" iconCls="icon-cancel">清空</a>
