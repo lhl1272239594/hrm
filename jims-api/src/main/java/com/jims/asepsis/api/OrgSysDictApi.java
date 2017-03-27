@@ -8,7 +8,7 @@ import com.jims.sys.vo.BeanChangeVo;
 import java.util.List;
 
 /**
-* 包单位维护Api
+* 组织机构的字典数据维护Api
 * @author yangruidong
 * @version 2016-06-28
 */

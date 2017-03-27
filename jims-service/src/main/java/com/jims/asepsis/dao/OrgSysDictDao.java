@@ -7,7 +7,7 @@ import com.jims.common.persistence.annotation.MyBatisDao;
 import java.util.List;
 
 /**
-* 包单位维护Dao
+* 组织机构的字典数据维护Dao
 * @author yangruidong
 * @version 2016-06-28
 */

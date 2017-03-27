@@ -15,7 +15,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 /**
-* 包单位维护rest
+* 组织机构的字典数据维护rest
 * @author yangruidong
 * @version 2016-06-28
 */

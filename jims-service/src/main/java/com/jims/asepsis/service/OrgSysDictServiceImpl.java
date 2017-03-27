@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /**
-* 包单位维护service
+* 组织机构的字典数据维护service
 * @author yangruidong
 * @version 2016-06-28
 */

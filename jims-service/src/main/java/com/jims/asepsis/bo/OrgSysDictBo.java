@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
-* 包单位维护bo
+* 组织机构的字典数据维护bo
 * @author yangruidong
 * @version 2016-06-28
 */
